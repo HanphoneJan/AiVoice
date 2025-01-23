@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">AiVoice</string>
+    <string name="title_home">主页</string>
+    <string name="title_bluetooth">蓝牙控制</string>
+</resources>
