@@ -1,8 +1,11 @@
 package com.example.aivoice.ui.bluetooth;
 
+import static androidx.core.content.ContentProviderCompat.requireContext;
+
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -82,11 +85,13 @@ public class BluetoothViewModel extends ViewModel {
             try {
                 Set<BluetoothDevice> devices = bluetooth.getPairedDevices();
                 pairedDevices.postValue(devices != null ? devices : new HashSet<>());
+
             } catch (Exception e) {
                 postError("Error fetching paired devices: " + e.getMessage());
             }
         });
     }
+
 
     /**
      * Connect to a Bluetooth device.

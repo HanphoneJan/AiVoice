@@ -103,6 +103,7 @@ public class BluetoothFragment extends Fragment {
                 IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
                 requireContext().registerReceiver(bluetoothDeviceReceiver, filter);
                 isReceiverRegistered = true; // 标记接收器已注册
+                Toast.makeText(requireContext(), "蓝牙设备扫描成功", Toast.LENGTH_SHORT).show();
             }
         } catch (SecurityException e) {
             // 如果没有权限来启动蓝牙扫描，捕获 SecurityException 并显示错误信息

@@ -274,7 +274,7 @@ public class HomeFragment extends Fragment {
             if (inputStream != null) {
                 data = getBytes(inputStream); // Use the getBytes() helper function
             } else {
-                throw new IOException("Failed to open input stream for URI: " + uri);
+                throw new IOException("打开输入流失败，URI: " + uri);
             }
         }
         return data;
@@ -286,7 +286,7 @@ public class HomeFragment extends Fragment {
             if (inputStream != null) {
                 data = getBytes(inputStream); // Use the getBytes() helper function
             } else {
-                throw new IOException("Failed to open input stream for URI: " + uri);
+                throw new IOException("打开输入流失败，URI: " + uri);
             }
         }
         return data;
@@ -306,7 +306,7 @@ public class HomeFragment extends Fragment {
 
     private void storeReturnedFile(byte[] data) {
         // Get a file path to store the returned file
-        String fileName = "returned_file_" + System.currentTimeMillis() + ".txt"; // Example file name
+        String fileName = "生成音频文件" + System.currentTimeMillis() + ".mp3"; // Example file name
         File file = new File(requireContext().getFilesDir(), fileName);
 
         try (FileOutputStream outputStream = new FileOutputStream(file)) {
