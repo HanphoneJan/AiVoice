@@ -62,7 +62,6 @@ public class HomeFragment extends Fragment {
     private ActivityResultLauncher<Intent> chooseAudioLauncher;
     private ActivityResultLauncher<Intent> chooseFileLauncher;
 
-
     @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -84,13 +83,11 @@ public class HomeFragment extends Fragment {
                 });
 
         // 录音完成，audioFileUri 已在 startRecording() 中设置
-        // 处理录音文件
         ActivityResultLauncher<Intent> recordAudioLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == getActivity().RESULT_OK) {
                         // 录音完成，audioFileUri 已在 startRecording() 中设置
-                        // 处理录音文件
                         Toast.makeText(getContext(), "录音完成: " + audioFileUri.getPath(), Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(getContext(), "录音失败", Toast.LENGTH_SHORT).show();
@@ -122,6 +119,7 @@ public class HomeFragment extends Fragment {
         return root;
     }
 
+
     // 选择音频文件
     private void chooseAudio() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -134,6 +132,8 @@ public class HomeFragment extends Fragment {
         if (checkRecordAudioPermission()) {
             try {
                 String currentAudioFilePath = createAudioFile().getAbsolutePath();
+                Log.d("HomeFragment", "Audio file path: " + currentAudioFilePath);
+                Toast.makeText(getContext(), "路径"+currentAudioFilePath, Toast.LENGTH_SHORT).show();
                 mediaRecorder = new MediaRecorder();
                 mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
                 mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
@@ -147,6 +147,8 @@ public class HomeFragment extends Fragment {
                 audioFileUri = FileProvider.getUriForFile(requireContext(),
                         requireContext().getPackageName() + ".fileprovider",
                         new File(currentAudioFilePath));
+                binding.tvRecordingTime.setVisibility(View.VISIBLE);
+                startRecordingTimer();
             } catch (IOException e) {
                 Log.e("HomeFragment", "录音失败", e);
                 Toast.makeText(getContext(), "录音失败", Toast.LENGTH_SHORT).show();
@@ -157,11 +159,19 @@ public class HomeFragment extends Fragment {
     // 停止录音
     private void stopRecording() {
         if (mediaRecorder != null) {
-            mediaRecorder.stop();
-            mediaRecorder.release();
-            mediaRecorder = null;
-            isRecording = false;
-            binding.btnRecordAudio.setText("录音");
+            try {
+                mediaRecorder.stop();
+                mediaRecorder.release();
+                mediaRecorder = null;
+                isRecording = false;
+                binding.btnRecordAudio.setText("录音");
+                // 录音完成后更新UI或提示
+                Toast.makeText(getContext(), "录音已停止", Toast.LENGTH_SHORT).show();
+            } catch (RuntimeException e) {
+                // Handle stop failure
+                Log.e("HomeFragment", "停止录音失败", e);
+                Toast.makeText(getContext(), "停止录音失败", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -172,12 +182,16 @@ public class HomeFragment extends Fragment {
         chooseFileLauncher.launch(intent);
     }
 
-    // 创建音频文件
+    // 创建录音文件
     private File createAudioFile() throws IOException {
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
-        String audioFileName = "AUDIO_" + timeStamp + "_";
-        File storageDir = requireContext().getExternalFilesDir(Environment.DIRECTORY_MUSIC);
-        return File.createTempFile(audioFileName, ".3gp", storageDir);
+        File dir = new File(requireContext().getFilesDir(), "Music");
+        if (!dir.exists()) {
+            if (!dir.mkdirs()) {
+                throw new IOException("无法创建录音文件夹");
+            }
+        }
+        String fileName = "录音文件：" + System.currentTimeMillis() + ".mp3"; // 动态命名
+        return new File(dir, fileName);
     }
 
     // 检查录音权限
@@ -190,6 +204,22 @@ public class HomeFragment extends Fragment {
             return false;
         }
         return true;
+    }
+
+    // 可选：计时器更新UI（比如一个录音计时器）
+    private void startRecordingTimer() {
+        new Thread(() -> {
+            long startTime = System.currentTimeMillis();
+            while (isRecording) {
+                try {
+                    Thread.sleep(100);
+                    long elapsedTime = (System.currentTimeMillis() - startTime) / 100;
+                    getActivity().runOnUiThread(() -> binding.tvRecordingTime.setText("录音时间: " + elapsedTime / 10.0 + "秒"));
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     // 检查读取外部存储权限

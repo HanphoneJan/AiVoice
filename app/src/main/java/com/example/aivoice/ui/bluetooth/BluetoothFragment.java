@@ -128,7 +128,7 @@ public class BluetoothFragment extends Fragment {
     private void loadAudioFiles() {
         try {
             // 获取音频文件夹路径
-            File musicDir = new File(requireContext().getExternalFilesDir(Environment.DIRECTORY_MUSIC), "Android/data/com.example.aivoice/files/Music/");
+            File musicDir = new File(requireContext().getFilesDir(),"Music");
 
             // 检查文件夹是否存在，如果不存在则创建
             if (!musicDir.exists()) {
