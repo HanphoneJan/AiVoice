@@ -359,7 +359,17 @@ public class HomeFragment extends Fragment {
     private void storeReturnedFile(byte[] data) {
         // Get a file path to store the returned file
         String fileName = "生成音频文件_" + System.currentTimeMillis() + ".mp3"; // Example file name
-        File file = new File(requireContext().getFilesDir(), fileName);
+        // 获取应用内部的私有存储目录
+        File filesDir = requireContext().getFilesDir();
+
+        // 构建Music子目录的路径
+        File musicDir = new File(filesDir, "Music");
+
+        // 如果Music目录不存在，则创建它
+        if (!musicDir.exists()) {
+            musicDir.mkdirs(); // 创建所有必需的父目录
+        }
+        File file = new File(musicDir, fileName);
 
         try (FileOutputStream outputStream = new FileOutputStream(file)) {
             outputStream.write(data);
