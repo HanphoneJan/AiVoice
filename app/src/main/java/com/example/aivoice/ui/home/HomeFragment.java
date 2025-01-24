@@ -53,7 +53,6 @@ public class HomeFragment extends Fragment {
     private FragmentHomeBinding binding;
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
     private static final int REQUEST_READ_EXTERNAL_STORAGE_PERMISSION = 300;
-    private String currentAudioFilePath;
     private MediaRecorder mediaRecorder;
     private boolean isRecording = false;
     private Uri audioFileUri;
@@ -61,7 +60,6 @@ public class HomeFragment extends Fragment {
 
     //用于处理选择音频文件、录音和选择普通文件的返回结果。
     private ActivityResultLauncher<Intent> chooseAudioLauncher;
-    private ActivityResultLauncher<Intent> recordAudioLauncher;
     private ActivityResultLauncher<Intent> chooseFileLauncher;
 
 
@@ -85,13 +83,17 @@ public class HomeFragment extends Fragment {
                     }
                 });
 
-        recordAudioLauncher = registerForActivityResult(
+        // 录音完成，audioFileUri 已在 startRecording() 中设置
+        // 处理录音文件
+        ActivityResultLauncher<Intent> recordAudioLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == getActivity().RESULT_OK) {
                         // 录音完成，audioFileUri 已在 startRecording() 中设置
                         // 处理录音文件
                         Toast.makeText(getContext(), "录音完成: " + audioFileUri.getPath(), Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(getContext(), "录音失败", Toast.LENGTH_SHORT).show();
                     }
                 });
 
@@ -131,7 +133,7 @@ public class HomeFragment extends Fragment {
     private void startRecording() {
         if (checkRecordAudioPermission()) {
             try {
-                currentAudioFilePath = createAudioFile().getAbsolutePath();
+                String currentAudioFilePath = createAudioFile().getAbsolutePath();
                 mediaRecorder = new MediaRecorder();
                 mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
                 mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
@@ -203,7 +205,6 @@ public class HomeFragment extends Fragment {
     }
 
 
-    // 上传文件
     @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     private void uploadFiles() {
         if (audioFileUri != null && fileUri != null) {
@@ -216,20 +217,32 @@ public class HomeFragment extends Fragment {
                     .setType(MultipartBody.FORM);
 
             try {
-                // Add audio file
-                requestBodyBuilder.addFormDataPart("audio", "audio.3gp",
-                        RequestBody.create(MediaType.parse("audio/3gpp"),
+                // Add audio file (use dynamic file name and MIME type)
+                String audioMimeType = getContext().getContentResolver().getType(audioFileUri);
+                if (audioMimeType == null) {
+                    audioMimeType = "application/octet-stream";  // Default to binary if MIME type is not available
+                }
+                String audioFileName = getFileName(audioFileUri);  // Dynamically get file name
+                requestBodyBuilder.addFormDataPart("audio", audioFileName,
+                        RequestBody.create(MediaType.parse(audioMimeType),
                                 getAudioFileContent(audioFileUri)));
 
-                // Add regular file
-                requestBodyBuilder.addFormDataPart("file", "file.txt",
-                        RequestBody.create(MediaType.parse("text/plain"),
+                // Add regular file (support any file type)
+                String fileMimeType = getContext().getContentResolver().getType(fileUri);
+                if (fileMimeType == null) {
+                    fileMimeType = "application/octet-stream";  // Default to binary if MIME type is not available
+                }
+                String regularFileName = getFileName(fileUri);  // Dynamically get file name
+                requestBodyBuilder.addFormDataPart("file", regularFileName,
+                        RequestBody.create(MediaType.parse(fileMimeType),
                                 getFileContent(fileUri)));
 
                 RequestBody requestBody = requestBodyBuilder.build();
 
+                // Replace with your actual API endpoint URL
+                String url = "https://www.hanphone.top/aivoice/api/upload";
                 Request request = new Request.Builder()
-                        .url("/api/aivoice") // Replace with your actual API endpoint
+                        .url(url)
                         .post(requestBody)
                         .build();
 
@@ -304,9 +317,18 @@ public class HomeFragment extends Fragment {
         return byteBuffer.toByteArray();
     }
 
+    // Helper function to get the file name from the URI
+    private String getFileName(Uri uri) {
+        String fileName = uri.getLastPathSegment();
+        if (fileName != null && fileName.contains("/")) {
+            fileName = fileName.substring(fileName.lastIndexOf("/") + 1);  // Extract file name from URI
+        }
+        return fileName != null ? fileName : "unknown_file";
+    }
+
     private void storeReturnedFile(byte[] data) {
         // Get a file path to store the returned file
-        String fileName = "生成音频文件" + System.currentTimeMillis() + ".mp3"; // Example file name
+        String fileName = "生成音频文件_" + System.currentTimeMillis() + ".mp3"; // Example file name
         File file = new File(requireContext().getFilesDir(), fileName);
 
         try (FileOutputStream outputStream = new FileOutputStream(file)) {
@@ -317,6 +339,7 @@ public class HomeFragment extends Fragment {
             Toast.makeText(requireContext(), "文件保存失败", Toast.LENGTH_SHORT).show();
         }
     }
+
 
 
 
