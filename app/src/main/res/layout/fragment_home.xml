@@ -28,13 +28,14 @@
 
     <!-- 录音计时器 TextView -->
     <TextView
-        android:id="@+id/tv_recording_time"
+        android:id="@+id/recordingTimeTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="录音时间: 0秒"
+        android:text="00:00"
         android:textSize="18sp"
-        android:visibility="gone" />  <!-- 默认隐藏，录音开始时显示 -->
+        android:layout_centerInParent="true"
+        android:layout_marginTop="16dp"/>
+
 
     <TextView
         android:layout_width="wrap_content"

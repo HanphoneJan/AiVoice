@@ -1,9 +1,9 @@
 package com.example.aivoice.ui.bluetooth;
 
-import static androidx.core.content.ContentProviderCompat.requireContext;
-
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -18,34 +18,29 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-
 public class BluetoothViewModel extends ViewModel {
 
     private static final String TAG = "BluetoothViewModel";
 
-    // LiveData fields for UI updates
     private final MutableLiveData<Boolean> isBluetoothEnabled = new MutableLiveData<>();
     private final MutableLiveData<Set<BluetoothDevice>> pairedDevices = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isConnected = new MutableLiveData<>();
     private final MutableLiveData<String> connectionStatus = new MutableLiveData<>();
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
-
-    private final Bluetooth bluetooth;
+    private final MutableLiveData<Boolean> isReceiverRegistered = new MutableLiveData<>(false);
+    private Context context;
+    private  Bluetooth bluetooth = new Bluetooth();
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-    /**
-     * Constructor
-     *
-     * @param context Application context (cannot be null)
-     */
-    public BluetoothViewModel(Context context) {
-        if (context == null) {
-            throw new IllegalArgumentException("Context cannot be null");
-        }
-        bluetooth = new Bluetooth(context);
+    public BluetoothViewModel() {
+        //空
     }
 
-    // Public LiveData getters
+    public void setContext(Context context) {
+        bluetooth.setContext(context);
+        this.context=context;
+    }
+
     public LiveData<Boolean> getIsBluetoothEnabled() {
         return isBluetoothEnabled;
     }
@@ -66,90 +61,69 @@ public class BluetoothViewModel extends ViewModel {
         return errorMessage;
     }
 
-    /**
-     * Check if Bluetooth is enabled and update LiveData.
-     */
+    public LiveData<Boolean> getIsReceiverRegistered() {
+        return isReceiverRegistered;
+    }
+
     public void checkBluetoothStatus() {
         try {
             isBluetoothEnabled.setValue(bluetooth.isBluetoothEnabled());
         } catch (Exception e) {
-            postError("Error checking Bluetooth status: " + e.getMessage());
+            postError("Error 检查蓝牙状态: " + e.getMessage());
         }
     }
 
-    /**
-     * Fetch paired Bluetooth devices and update LiveData.
-     */
     public void fetchPairedDevices() {
         executorService.execute(() -> {
             try {
                 Set<BluetoothDevice> devices = bluetooth.getPairedDevices();
                 pairedDevices.postValue(devices != null ? devices : new HashSet<>());
-
             } catch (Exception e) {
-                postError("Error fetching paired devices: " + e.getMessage());
+                postError("Error 获取蓝牙设备列表: " + e.getMessage());
             }
         });
     }
 
-
-    /**
-     * Connect to a Bluetooth device.
-     *
-     * @param device The target Bluetooth device
-     */
     public void connectToDevice(BluetoothDevice device) {
         if (device == null) {
-            postError("Cannot connect to a null device.");
+            postError("连接设备不能为空.");
             return;
         }
-
-        // 检查权限
         if (!bluetooth.hasBluetoothPermissions()) {
-            postError("Missing BLUETOOTH_CONNECT permission.");
+            postError("蓝牙连接权限未打开");
             return;
         }
-
         executorService.execute(() -> {
             try {
-                // 调用连接方法
                 boolean success = bluetooth.connectToDevice(device);
                 isConnected.postValue(success);
                 connectionStatus.postValue(success ? "Connected to " + device.getName() : "Connection failed");
 
                 if (!success) {
-                    postError("Failed to connect to device: " + device.getName());
+                    postError("连接设备失败: " + device.getName());
                 }
             } catch (SecurityException e) {
-                postError("SecurityException: Missing BLUETOOTH_CONNECT permission.");
+                postError("SecurityException: 蓝牙连接权限未打开");
             } catch (Exception e) {
-                postError("Error connecting to device: " + e.getMessage());
+                postError("连接设备错误: " + e.getMessage());
             }
         });
     }
 
-
-
-    /**
-     * Disconnect from the current Bluetooth device.
-     */
-    public void disconnect() {
-        executorService.execute(() -> {
-            try {
-                bluetooth.disconnect();
-                isConnected.postValue(false);
-                connectionStatus.postValue("Disconnected");
-            } catch (Exception e) {
-                postError("Error disconnecting: " + e.getMessage());
-            }
-        });
+    public void startScanning() {
+        try {
+            bluetooth.startDiscovery();
+            isReceiverRegistered.setValue(true);
+        } catch (Exception e) {
+            postError("扫描蓝牙设备错误 " + e.getMessage());
+        }
     }
 
-    /**
-     * Post an error message to the LiveData and log it.
-     *
-     * @param message The error message to post
-     */
+    public void stopScanning() {
+        bluetooth.stopDiscovery();
+        isReceiverRegistered.setValue(false);
+    }
+
     private void postError(String message) {
         Log.e(TAG, message);
         errorMessage.postValue(message);
@@ -159,10 +133,8 @@ public class BluetoothViewModel extends ViewModel {
     protected void onCleared() {
         super.onCleared();
         try {
-            executorService.shutdownNow(); // Gracefully shut down the executor service
-            if (bluetooth != null) {
-                bluetooth.cleanup(); // Clean up Bluetooth resources
-            }
+            executorService.shutdownNow();
+            bluetooth.cleanup();
         } catch (Exception e) {
             Log.e(TAG, "Error during ViewModel cleanup: " + e.getMessage(), e);
         }

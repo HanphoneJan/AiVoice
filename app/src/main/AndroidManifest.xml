@@ -2,7 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
     <!-- 添加录音权限声明 -->
-
     <uses-permission android:name="android.permission.RECORD_AUDIO"
         tools:ignore="ManifestOrder" />
     <!-- 添加读取和写入外部存储的权限声明 -->

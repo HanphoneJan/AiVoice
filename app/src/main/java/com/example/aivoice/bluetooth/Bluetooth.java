@@ -1,13 +1,19 @@
 package com.example.aivoice.bluetooth;
 
+
 import android.Manifest;
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.util.Log;
+import android.widget.Toast;
 
+import androidx.annotation.RequiresPermission;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import java.io.IOException;
@@ -18,81 +24,105 @@ import java.util.UUID;
 public class Bluetooth {
 
     private static final String TAG = "Bluetooth";
-    private static final UUID DEFAULT_UUID = UUID.randomUUID(); // 替换为实际 UUID
-
-    private final BluetoothAdapter bluetoothAdapter;
-    private final Context context; // 用于权限检查
+    private static final UUID DEFAULT_UUID = UUID.randomUUID(); // Replace with actual UUID
+    private  BluetoothAdapter bluetoothAdapter;
+    private Context context; // For permission checks
     private BluetoothSocket bluetoothSocket;
 
+    public Bluetooth(){
+        //空
+        this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+    }
     public Bluetooth(Context context) {
         this.context = context;
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         if (bluetoothAdapter == null) {
-            throw new UnsupportedOperationException("Bluetooth not supported on this device.");
+            throw new UnsupportedOperationException("该设备不支持蓝牙");
         }
     }
 
-    /**
-     * 检查是否具有指定权限
-     *
-     * @param permission 权限名称
-     * @return 如果授予权限返回 true，否则返回 false。
-     */
+    public void setContext(Context context) {
+        this.context = context;
+    }
+
+    public Boolean isBluetoothEnabled() {
+        if(bluetoothAdapter.isEnabled()){
+            return Boolean.TRUE;
+        }
+        return Boolean.FALSE;
+    }
+
+    // Check if permission is granted
     private boolean hasPermission(String permission) {
         return ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED;
     }
 
-    /**
-     * 检查蓝牙权限是否已授予
-     *
-     * @return 如果所有需要的权限都已授予返回 true，否则返回 false。
-     */
+    // Check if all necessary Bluetooth permissions are granted
     public boolean hasBluetoothPermissions() {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-            return hasPermission(Manifest.permission.BLUETOOTH_CONNECT);
-        } else {
-            return hasPermission(Manifest.permission.BLUETOOTH) && hasPermission(Manifest.permission.BLUETOOTH_ADMIN);
-        }
+        return hasPermission(Manifest.permission.BLUETOOTH)
+                && hasPermission(Manifest.permission.BLUETOOTH_ADMIN)
+                && hasPermission(Manifest.permission.BLUETOOTH_CONNECT)
+                && hasPermission(Manifest.permission.BLUETOOTH_SCAN);
     }
 
-    /**
-     * 检查蓝牙是否启用
-     *
-     * @return 如果蓝牙启用返回 true，否则返回 false。
-     */
-    public boolean isBluetoothEnabled() {
-        if (!hasBluetoothPermissions()) {
-            Log.e(TAG, "Missing Bluetooth permissions.");
-            return false;
+    // Request Bluetooth permissions at runtime
+    public void requestBluetoothPermissions() {
+        if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) context, Manifest.permission.BLUETOOTH)) {
+            // Show rationale if needed
+            Toast.makeText(context, "该功能需要蓝牙权限", Toast.LENGTH_SHORT).show();
         }
-        return bluetoothAdapter.isEnabled();
+        ActivityCompat.requestPermissions((Activity) context, new String[]{
+                Manifest.permission.BLUETOOTH,
+                Manifest.permission.BLUETOOTH_ADMIN,
+                Manifest.permission.BLUETOOTH_CONNECT,
+                Manifest.permission.BLUETOOTH_SCAN
+        }, 1); // 1 is a request code for permissions
     }
 
-    /**
-     * 启用蓝牙
-     */
+
+
+    // Enable Bluetooth (with permission check)
     public void enableBluetooth() {
         try {
             if (!hasBluetoothPermissions()) {
                 Log.e(TAG, "Cannot enable Bluetooth: Missing permissions.");
+                requestBluetoothPermissions();
                 return;
             }
 
             if (!bluetoothAdapter.isEnabled()) {
                 bluetoothAdapter.enable();
+                Log.i(TAG, "Bluetooth enabled.");
+            } else {
+                Log.i(TAG, "Bluetooth already enabled.");
             }
         } catch (SecurityException e) {
             Log.e(TAG, "SecurityException while enabling Bluetooth.", e);
         }
     }
 
+    // Disable Bluetooth (with permission check)
+    public void disableBluetooth() {
+        try {
+            if (!hasBluetoothPermissions()) {
+                Log.e(TAG, "Cannot disable Bluetooth: Missing permissions.");
+                requestBluetoothPermissions();
+                return;
+            }
 
-    /**
-     * 获取已配对设备
-     *
-     * @return 返回已配对设备的集合。如果缺少权限或发生异常，返回空集合。
-     */
+            if (bluetoothAdapter.isEnabled()) {
+                bluetoothAdapter.disable();
+                Log.i(TAG, "Bluetooth disabled.");
+            } else {
+                Log.i(TAG, "Bluetooth is already disabled.");
+            }
+        } catch (SecurityException e) {
+            Log.e(TAG, "SecurityException while disabling Bluetooth.", e);
+        }
+    }
+
+    // Get paired devices (with permission check)
     public Set<BluetoothDevice> getPairedDevices() {
         if (!hasBluetoothPermissions()) {
             Log.e(TAG, "Cannot fetch paired devices: Missing permissions.");
@@ -106,49 +136,100 @@ public class Bluetooth {
             return new HashSet<>();
         }
     }
-    /**
-     * 尝试连接到指定蓝牙设备
-     *
-     * @param device 目标蓝牙设备
-     * @return 成功连接返回 true，失败返回 false。
-     */
+
+    // Start Bluetooth discovery (with permission check)
+    public void startDiscovery() {
+        try {
+            // 检查BLUETOOTH权限
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH)
+                    != PackageManager.PERMISSION_GRANTED) {
+                // 请求BLUETOOTH权限
+                ActivityCompat.requestPermissions((Activity) context,
+                        new String[]{Manifest.permission.BLUETOOTH},
+                        1); // 请求码可以是任意整数
+                return; // 等待用户响应权限请求
+            }
+
+            // 检查BLUETOOTH_ADMIN权限
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_ADMIN)
+                    != PackageManager.PERMISSION_GRANTED) {
+                // 请求BLUETOOTH_ADMIN权限
+                ActivityCompat.requestPermissions((Activity) context,
+                        new String[]{Manifest.permission.BLUETOOTH_ADMIN},
+                        2); // 请求码可以是任意整数
+                return; // 等待用户响应权限请求
+            }
+
+            if (bluetoothAdapter.isDiscovering()) {
+                bluetoothAdapter.cancelDiscovery(); // Cancel any ongoing discovery
+            }
+            bluetoothAdapter.startDiscovery(); // Start discovery for nearby Bluetooth devices
+            Log.i(TAG, "Bluetooth discovery started.");
+        } catch (Exception e) {
+            Log.e(TAG, "Error starting Bluetooth discovery.", e);
+        }
+    }
+
+    // Stop Bluetooth discovery (with permission check)
+    public void stopDiscovery() {
+        // 检查BLUETOOTH权限
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH)
+                != PackageManager.PERMISSION_GRANTED) {
+            // 请求BLUETOOTH权限
+            ActivityCompat.requestPermissions((Activity) context,
+                    new String[]{Manifest.permission.BLUETOOTH},
+                    1); // 请求码可以是任意整数
+            return; // 等待用户响应权限请求
+        }
+
+        // 检查BLUETOOTH_ADMIN权限
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_ADMIN)
+                != PackageManager.PERMISSION_GRANTED) {
+            // 请求BLUETOOTH_ADMIN权限
+            ActivityCompat.requestPermissions((Activity) context,
+                    new String[]{Manifest.permission.BLUETOOTH_ADMIN},
+                    2); // 请求码可以是任意整数
+            return; // 等待用户响应权限请求
+        }
+
+        try {
+            if (bluetoothAdapter.isDiscovering()) {
+                bluetoothAdapter.cancelDiscovery();
+                Log.i(TAG, "Bluetooth discovery stopped.");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error stopping Bluetooth discovery.", e);
+        }
+    }
+
+    // Connect to Bluetooth device (with permission check)
     public boolean connectToDevice(BluetoothDevice device) {
         if (!hasBluetoothPermissions()) {
-            Log.e(TAG, "Cannot connect to device: Missing permissions.");
+            Log.e(TAG, "权限不足，无法连接到设备");
+            requestBluetoothPermissions();
             return false;
         }
 
         try {
             bluetoothSocket = device.createRfcommSocketToServiceRecord(DEFAULT_UUID);
-            bluetoothAdapter.cancelDiscovery(); // 停止设备搜索以加快连接速度
+            bluetoothAdapter.cancelDiscovery(); // Stop discovery to speed up connection
             bluetoothSocket.connect();
-            Log.i(TAG, "Successfully connected to " + device.getName());
+            Log.i(TAG, "成功连接设备：" + device.getName());
             return true;
         } catch (IOException | SecurityException e) {
-            Log.e(TAG, "Error connecting to device: " + device.getName(), e);
-            closeConnection(); // 清理资源
+            Log.e(TAG, "错误连接设备 " + device.getName(), e);
+            closeConnection(); // Clean up resources
             return false;
         }
     }
 
-    /**
-     * 断开当前蓝牙连接
-     */
+    // Disconnect from Bluetooth device (with permission check)
     public void disconnect() {
         closeConnection();
         Log.i(TAG, "Bluetooth connection closed.");
     }
 
-    /**
-     * 清理资源（关闭 BluetoothSocket）
-     */
-    public void cleanup() {
-        closeConnection();
-    }
-
-    /**
-     * 关闭 BluetoothSocket
-     */
+    // Close BluetoothSocket connection
     private void closeConnection() {
         if (bluetoothSocket != null) {
             try {
@@ -160,4 +241,12 @@ public class Bluetooth {
             }
         }
     }
+
+
+    // Cleanup resources
+    public void cleanup() {
+        closeConnection();
+    }
+
+
 }
