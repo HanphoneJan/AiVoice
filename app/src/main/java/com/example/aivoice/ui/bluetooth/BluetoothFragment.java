@@ -44,7 +44,7 @@ public class BluetoothFragment extends Fragment {
     private ListView lvFiles;
     private Spinner spinnerBluetoothDevices;  //下拉列表
 
-    private BluetoothAdapter bluetoothAdapter;
+    private BluetoothAdapter  bluetoothAdapter  = BluetoothAdapter.getDefaultAdapter();
 
 
 
@@ -65,6 +65,11 @@ public class BluetoothFragment extends Fragment {
         // 找到连接蓝牙设备的按钮
         Button btnConnectBluetooth = root.findViewById(R.id.btn_connect_bluetooth);
 
+        //播放按钮
+        Button btnPlay = root.findViewById(R.id.btn_play);
+        Button btnPause = root.findViewById(R.id.btn_pause);
+        Button btnStop = root.findViewById(R.id.btn_stop);
+        btnPlay.setOnClickListener();
         // 找到显示蓝牙连接状态的文本视图
         tvBluetoothStatus = root.findViewById(R.id.tv_bluetooth_status);
 
@@ -149,13 +154,31 @@ public class BluetoothFragment extends Fragment {
         }
     }
 
+    // 根据设备名称查找BluetoothDevice
+    private BluetoothDevice getDeviceByName(String deviceName) {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.BLUETOOTH_ADMIN)
+                == PackageManager.PERMISSION_GRANTED) {
+            for (BluetoothDevice device : bluetoothDeviceList) {
+                if (device.getName() != null && device.getName().equals(deviceName)) {
+                    return device;  // 返回找到的设备
+                }
+            }
+        }
+        return null;  // 如果没有找到，返回null
+    }
     private void connectToBluetoothDevice() {
         String deviceName = (String) spinnerBluetoothDevices.getSelectedItem();
         if (deviceName != null) {
             tvBluetoothStatus.setText("连接到: " + deviceName);
             Toast.makeText(requireContext(), "尝试连接到 " + deviceName, Toast.LENGTH_SHORT).show();
-            BluetoothDevice device = bluetoothAdapter.getRemoteDevice(deviceName);
-            bluetoothViewModel.connectToDevice(device);
+            // 获取BluetoothAdapter并检查是否可用
+            if (bluetoothAdapter == null) {
+                Log.e(TAG, "BluetoothAdapter is not available.");
+                Toast.makeText(requireContext(), "蓝牙适配器不可用", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            BluetoothDevice selectedDevice = getDeviceByName(deviceName);
+            bluetoothViewModel.connectToDevice(selectedDevice);
         } else {
             Toast.makeText(requireContext(), "请先选择一个设备", Toast.LENGTH_SHORT).show();
         }

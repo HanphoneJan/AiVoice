@@ -56,6 +56,8 @@ public class HomeViewModel extends ViewModel {
     private MediaRecorder mediaRecorder;
     private Handler handler = new Handler(Looper.getMainLooper()); // 用于更新UI
     private Runnable updateTimeRunnable;
+    // 初始化并启动计时器
+    private boolean isTimer = true;
     private long startTime; // 录音开始时间
     private long elapsedTime = 0; // 已录音的时间
 
@@ -189,6 +191,8 @@ public class HomeViewModel extends ViewModel {
                 mediaRecorder.release();
                 mediaRecorder = null;
                 isRecording.setValue(false);
+
+                handler.removeCallbacks(updateTimeRunnable);
             } catch (RuntimeException e) {
                 Log.e("HomeViewModel", "停止录音失败", e);
                 errorMessage.setValue("停止录音失败");
