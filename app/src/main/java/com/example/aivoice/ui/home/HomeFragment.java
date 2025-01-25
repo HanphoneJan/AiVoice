@@ -147,6 +147,7 @@ public class HomeFragment extends Fragment {
                 audioFileUri = FileProvider.getUriForFile(requireContext(),
                         requireContext().getPackageName() + ".fileprovider",
                         new File(currentAudioFilePath));
+                //录音计时
                 binding.tvRecordingTime.setVisibility(View.VISIBLE);
                 startRecordingTimer();
             } catch (IOException e) {
