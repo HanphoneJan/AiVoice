@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.MediaPlayer;
 import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
@@ -14,6 +15,8 @@ import androidx.lifecycle.ViewModel;
 
 import com.example.aivoice.bluetooth.Bluetooth;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -36,6 +39,9 @@ public class BluetoothViewModel extends ViewModel {
     private long startTime; // 扫描蓝牙开始时间
     private long elapsedTime = 0; // 已扫描的时间
     private final MutableLiveData<Long> recordingTime = new MutableLiveData<>(0L); // 时间，单位：秒
+
+    private MediaPlayer mediaPlayer;
+
     public BluetoothViewModel() {
         //空
     }
@@ -149,6 +155,45 @@ public class BluetoothViewModel extends ViewModel {
         isReceiverRegistered.setValue(false);
     }
 
+
+    // 检查文件是否为音频文件（可以根据文件扩展名进行检查）
+    private boolean isAudioFile(File file) {
+        String fileName = file.getName().toLowerCase();
+        return fileName.endsWith(".mp3") || fileName.endsWith(".wav") || fileName.endsWith(".m4a");
+    }
+    public void playAudioFile(File file){
+        if (mediaPlayer == null) {
+            mediaPlayer = new MediaPlayer();
+        }
+
+        try {
+            // 如果 MediaPlayer 正在播放，先停止之前的播放
+            if (mediaPlayer.isPlaying()) {
+                mediaPlayer.stop();
+                mediaPlayer.reset();  // 重置播放器，准备重新播放
+            }
+
+            // 设置音频文件的路径
+            mediaPlayer.setDataSource(file.getAbsolutePath());
+            mediaPlayer.prepare();  // 准备播放
+            mediaPlayer.start();  // 开始播放
+
+            Log.i(TAG,"开始播放");
+        } catch (IOException e) {
+//            Toast.makeText(this, "播放文件出错", Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+            postError("播放失败");
+        }
+    }
+
+    public void pauseAudioFile() {
+        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+            mediaPlayer.pause();
+            Log.i(TAG,"暂停播放");
+        }
+
+    }
+
     private void postError(String message) {
         Log.e(TAG, message);
         errorMessage.postValue(message);
@@ -160,6 +205,7 @@ public class BluetoothViewModel extends ViewModel {
         try {
             executorService.shutdownNow();
             bluetooth.cleanup();
+            mediaPlayer.release();
         } catch (Exception e) {
             Log.e(TAG, "Error during ViewModel cleanup: " + e.getMessage(), e);
         }

@@ -10,10 +10,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -42,6 +44,8 @@ public class BluetoothFragment extends Fragment {
     private ArrayList<BluetoothDevice> bluetoothDeviceList = new ArrayList<>();  //存储蓝牙设备
     private TextView tvBluetoothStatus;
     private ListView lvFiles;
+    private ArrayList<String> audioFileList;  // 存储音频文件路径的列表
+    private static String selectedFileName; //当前播放的文件
     private Spinner spinnerBluetoothDevices;  //下拉列表
 
     private BluetoothAdapter  bluetoothAdapter  = BluetoothAdapter.getDefaultAdapter();
@@ -65,16 +69,10 @@ public class BluetoothFragment extends Fragment {
         // 找到连接蓝牙设备的按钮
         Button btnConnectBluetooth = root.findViewById(R.id.btn_connect_bluetooth);
 
-        //播放按钮
-        Button btnPlay = root.findViewById(R.id.btn_play);
-        Button btnPause = root.findViewById(R.id.btn_pause);
-        Button btnStop = root.findViewById(R.id.btn_stop);
-        btnPlay.setOnClickListener();
         // 找到显示蓝牙连接状态的文本视图
         tvBluetoothStatus = root.findViewById(R.id.tv_bluetooth_status);
 
-        // 找到显示文件列表的列表视图（可能用于显示从蓝牙设备接收的文件）
-        lvFiles = root.findViewById(R.id.lv_files);
+
 
         // 创建一个ArrayAdapter来管理下拉列表中的蓝牙设备项
         // 使用requireContext()来获取当前的上下文，android.R.layout.simple_spinner_item作为列表项的布局
@@ -92,8 +90,31 @@ public class BluetoothFragment extends Fragment {
         // 设置连接蓝牙设备的按钮的点击监听器
         btnConnectBluetooth.setOnClickListener(v -> connectToBluetoothDevice()); // 当按钮被点击时，调用connectToBluetoothDevice()方法来尝试连接到选中的蓝牙设备
 
-        loadAudioFiles();
 
+
+        //播放、暂停、停止按钮
+        Button btnPlay = root.findViewById(R.id.btn_play);
+        Button btnPause = root.findViewById(R.id.btn_pause);
+        Button btnStop = root.findViewById(R.id.btn_stop);
+        btnPlay.setOnClickListener((v -> playAudio(selectedFileName)));
+        btnPause.setOnClickListener((v -> pauseAudio()));
+        btnStop.setOnClickListener((v -> stopAudio()));
+        // 找到显示文件列表的列表视图（用于显示从蓝牙设备接收的文件）
+        lvFiles = root.findViewById(R.id.lv_files);
+        audioFileList = new ArrayList<>();  // 初始化音频文件列表
+        // 设置适配器
+        ArrayAdapter<String> audioFileadapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, audioFileList);
+        lvFiles.setAdapter(audioFileadapter);
+        loadAudioFiles();
+        // 设置 ListView 的点击事件监听器
+        lvFiles.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                selectedFileName = audioFileList.get(position);
+                // 调用播放方法
+                playAudio(selectedFileName);
+            }
+        });
         bluetoothViewModel.getPairedDevices().observe(getViewLifecycleOwner(), devices -> {
             // 清除下拉列表（Spinner）的适配器中的现有项
             bluetoothDevicesAdapter.clear();
@@ -198,18 +219,19 @@ public class BluetoothFragment extends Fragment {
                 }
             }
 
-            // 如果是文件夹且存在，加载音频文件
+
             if (!musicDir.isDirectory()) {
                 Toast.makeText(requireContext(), "指定路径不是文件夹", Toast.LENGTH_SHORT).show();
                 return;
             }
-
+            // 如果是文件夹且存在，加载音频文件
             File[] files = musicDir.listFiles();
             ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1);
 
             if (files != null) {
                 for (File file : files) {
                     adapter.add(file.getName());
+                    audioFileList.add(file.getName());
                 }
 
         }
@@ -242,8 +264,25 @@ public class BluetoothFragment extends Fragment {
         return true;
     }
 
+    private void playAudio(String fileName){
+        if(!fileName.isEmpty()){
+            File selectedFile = new File(requireContext().getFilesDir(), "Music/" + selectedFileName);
+            Toast.makeText(requireContext(), "即将播放"+fileName, Toast.LENGTH_SHORT).show();
+            bluetoothViewModel.playAudioFile(selectedFile);
+        }else {
+            Toast.makeText(requireContext(), "请先选择一个文件", Toast.LENGTH_SHORT).show();
+        }
 
+    }
 
+    private void pauseAudio(){
+        bluetoothViewModel.pauseAudioFile();
+    }
+
+    private void stopAudio(){
+        bluetoothViewModel.pauseAudioFile();
+        selectedFileName = null ;
+    }
     @Override
     public void onDestroyView() {
         super.onDestroyView();
