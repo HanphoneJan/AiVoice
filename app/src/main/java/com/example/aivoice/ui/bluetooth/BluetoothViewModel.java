@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -29,9 +30,12 @@ public class BluetoothViewModel extends ViewModel {
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isReceiverRegistered = new MutableLiveData<>(false);
     private Context context;
-    private  Bluetooth bluetooth = new Bluetooth();
+    private final Bluetooth bluetooth = new Bluetooth();
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
+    private long startTime; // 扫描蓝牙开始时间
+    private long elapsedTime = 0; // 已扫描的时间
+    private final MutableLiveData<Long> recordingTime = new MutableLiveData<>(0L); // 时间，单位：秒
     public BluetoothViewModel() {
         //空
     }
@@ -73,6 +77,7 @@ public class BluetoothViewModel extends ViewModel {
         }
     }
 
+    //获取已匹配的蓝牙设备
     public void fetchPairedDevices() {
         executorService.execute(() -> {
             try {
@@ -114,6 +119,26 @@ public class BluetoothViewModel extends ViewModel {
         try {
             bluetooth.startDiscovery();
             isReceiverRegistered.setValue(true);
+            // 初始化并启动计时器
+            startTime = System.currentTimeMillis();
+            elapsedTime = 0; // 重置已录音时间
+            Runnable updateTimeRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    elapsedTime = (System.currentTimeMillis() - startTime) / 1000;
+                    recordingTime.setValue(elapsedTime);
+                }
+            };
+
+            // 延迟60秒后停止设备扫描
+            Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    stopScanning();
+                    Log.i(TAG,"停止扫描");
+                }
+            }, 60000); // 延迟60秒（60000毫秒）后执行
         } catch (Exception e) {
             postError("扫描蓝牙设备错误 " + e.getMessage());
         }

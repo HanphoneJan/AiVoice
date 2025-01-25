@@ -9,12 +9,14 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresPermission;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.MutableLiveData;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -163,8 +165,12 @@ public class Bluetooth {
             if (bluetoothAdapter.isDiscovering()) {
                 bluetoothAdapter.cancelDiscovery(); // Cancel any ongoing discovery
             }
-            bluetoothAdapter.startDiscovery(); // Start discovery for nearby Bluetooth devices
-            Log.i(TAG, "Bluetooth discovery started.");
+            //startDiscovery() 方法会立即返回，而实际的搜索操作将在后台进行
+            //一旦系统发现附近的蓝牙设备，它将通过广播发送一个带有 BluetoothDevice.ACTION_FOUND 动作的 Intent。
+            // 这个 Intent 包含了被发现的蓝牙设备的信息，比如设备的地址和名称
+            bluetoothAdapter.startDiscovery();
+            Log.i(TAG, "蓝牙设备扫描已启动");
+
         } catch (Exception e) {
             Log.e(TAG, "Error starting Bluetooth discovery.", e);
         }
@@ -204,6 +210,10 @@ public class Bluetooth {
 
     // Connect to Bluetooth device (with permission check)
     public boolean connectToDevice(BluetoothDevice device) {
+        if (device == null) {
+            Log.e(TAG, "设备参数为空，无法连接到设备");
+            return false;
+        }
         if (!hasBluetoothPermissions()) {
             Log.e(TAG, "权限不足，无法连接到设备");
             requestBluetoothPermissions();

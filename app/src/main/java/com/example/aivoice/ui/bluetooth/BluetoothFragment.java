@@ -38,36 +38,15 @@ public class BluetoothFragment extends Fragment {
     private static final String TAG = "BluetoothFragment";
 
     private BluetoothViewModel bluetoothViewModel;
-    private ArrayAdapter<String> bluetoothDevicesAdapter;
+    private ArrayAdapter<String> bluetoothDevicesAdapter;//适配器
+    private ArrayList<BluetoothDevice> bluetoothDeviceList = new ArrayList<>();  //存储蓝牙设备
     private TextView tvBluetoothStatus;
     private ListView lvFiles;
-    private Spinner spinnerBluetoothDevices;
+    private Spinner spinnerBluetoothDevices;  //下拉列表
 
     private BluetoothAdapter bluetoothAdapter;
 
-    private final BroadcastReceiver bluetoothReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                // 动态检查蓝牙扫描权限
-                if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_SCAN)
-                        == PackageManager.PERMISSION_GRANTED){
 
-                    // 获取设备
-                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                if (device != null) {
-                    String deviceName = device.getName();
-                    if (deviceName != null && bluetoothDevicesAdapter.getPosition(deviceName) == -1) {
-                        // 更新设备列表
-                        bluetoothDevicesAdapter.add(deviceName);
-                        bluetoothDevicesAdapter.notifyDataSetChanged();
-                    }
-                }
-            }
-            }
-        }
-    };
 
 
     @Override
@@ -77,29 +56,29 @@ public class BluetoothFragment extends Fragment {
         // 使用ViewModelProvider获取BluetoothViewModel的实例
         bluetoothViewModel = new ViewModelProvider(this).get(BluetoothViewModel.class);
         bluetoothViewModel.setContext(requireContext());
-// 从布局文件中找到扫描蓝牙设备的按钮
+        // 从布局文件中找到扫描蓝牙设备的按钮
         Button btnScanBluetooth = root.findViewById(R.id.btn_scan_bluetooth);
 
-// 找到显示可用蓝牙设备的下拉列表（Spinner）
+        // 找到显示可用蓝牙设备的下拉列表（Spinner）
         spinnerBluetoothDevices = root.findViewById(R.id.spinner_bluetooth_devices);
 
-// 找到连接蓝牙设备的按钮
+        // 找到连接蓝牙设备的按钮
         Button btnConnectBluetooth = root.findViewById(R.id.btn_connect_bluetooth);
 
-// 找到显示蓝牙连接状态的文本视图
+        // 找到显示蓝牙连接状态的文本视图
         tvBluetoothStatus = root.findViewById(R.id.tv_bluetooth_status);
 
-// 找到显示文件列表的列表视图（可能用于显示从蓝牙设备接收的文件）
+        // 找到显示文件列表的列表视图（可能用于显示从蓝牙设备接收的文件）
         lvFiles = root.findViewById(R.id.lv_files);
 
-// 创建一个ArrayAdapter来管理下拉列表中的蓝牙设备项
-// 使用requireContext()来获取当前的上下文，android.R.layout.simple_spinner_item作为列表项的布局
+        // 创建一个ArrayAdapter来管理下拉列表中的蓝牙设备项
+        // 使用requireContext()来获取当前的上下文，android.R.layout.simple_spinner_item作为列表项的布局
         bluetoothDevicesAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item);
 
-// 设置下拉列表展开时使用的布局
+        // 设置下拉列表展开时使用的布局
         bluetoothDevicesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-// 将适配器设置到下拉列表（Spinner）上
+        // 将适配器设置到下拉列表（Spinner）上
         spinnerBluetoothDevices.setAdapter(bluetoothDevicesAdapter);
 
         // 设置扫描蓝牙设备的按钮的点击监听器
@@ -131,10 +110,37 @@ public class BluetoothFragment extends Fragment {
         return root;
     }
 
+    private final BroadcastReceiver bluetoothReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                // 动态检查蓝牙扫描权限
+                if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_SCAN)
+                        == PackageManager.PERMISSION_GRANTED){
+                    // 获取设备
+                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                    if (device != null && !bluetoothDeviceList.contains(device)) {
+                        String deviceName = device.getName();
+                        if (deviceName != null && bluetoothDevicesAdapter.getPosition(deviceName) == -1) {
+                            // 更新设备列表
+                            Toast.makeText(requireContext(), "已增加一个蓝牙设备", Toast.LENGTH_SHORT).show();
+                            Log.i(TAG,"增加一个蓝牙设备");
+                            bluetoothDeviceList.add(device);
+                            bluetoothDevicesAdapter.add(deviceName);
+                            bluetoothDevicesAdapter.notifyDataSetChanged();
+                        }
+                    }
+                }
+            }
+        }
+    };
+
+    //开启扫描，注册广播
     private void scanBluetoothDevices() {
         if (checkBluetoothPermissions()) {
             bluetoothViewModel.startScanning();
-            // 注册接收器监听设备发现的广播
+            // 注册接收器监听设备发现的广播，有注册就要有注销
             IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
             requireContext().registerReceiver(bluetoothReceiver, filter);
             Toast.makeText(requireContext(), "蓝牙设备扫描中...", Toast.LENGTH_SHORT).show();
@@ -148,6 +154,8 @@ public class BluetoothFragment extends Fragment {
         if (deviceName != null) {
             tvBluetoothStatus.setText("连接到: " + deviceName);
             Toast.makeText(requireContext(), "尝试连接到 " + deviceName, Toast.LENGTH_SHORT).show();
+            BluetoothDevice device = bluetoothAdapter.getRemoteDevice(deviceName);
+            bluetoothViewModel.connectToDevice(device);
         } else {
             Toast.makeText(requireContext(), "请先选择一个设备", Toast.LENGTH_SHORT).show();
         }
@@ -209,5 +217,20 @@ public class BluetoothFragment extends Fragment {
             return false;
         }
         return true;
+    }
+
+
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // Release resources and unregister receivers here
+        //bluetoothViewModel.stopScanning(); // Stop Bluetooth scanning if it's running
+         // Unregister the Bluetooth receiver
+//        bluetoothViewModel.onCleared(); // Clean up Bluetooth resources
+//        bluetoothViewModel = null; // Release the ViewModel
+//        bluetoothDevicesAdapter = null; // Release the adapter
+//        bluetoothDeviceList.clear(); // Clear the device list
+        // ... release any other resources held by the fragment ...
     }
 }
