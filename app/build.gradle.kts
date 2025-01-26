@@ -32,6 +32,17 @@ android {
     buildFeatures {
         viewBinding = true  //开启数据绑定
     }
+    applicationVariants.all { // 遍历所有应用程序构建变体
+        val variant = this // 获取当前变体
+        variant.outputs // 遍历当前变体的所有输出文件
+            .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl } // 将输出文件转换为具体类型
+            .forEach { output -> // 对每个输出文件进行操作
+                val outputFileName = "AiVoice-${variant.baseName}-${variant.versionName}${variant.versionCode}.apk"
+                // 自定义输出文件名
+                println("OutputFileName: $outputFileName") // 打印输出文件名
+                output.outputFileName = outputFileName // 设置输出文件名
+            }
+    }
 }
 
 dependencies {

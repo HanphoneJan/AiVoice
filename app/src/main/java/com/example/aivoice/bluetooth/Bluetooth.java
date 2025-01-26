@@ -16,6 +16,7 @@ import android.widget.Toast;
 import android.bluetooth.BluetoothGattCallback;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import android.bluetooth.BluetoothGattCharacteristic;
 
 
 import java.io.IOException;
@@ -24,16 +25,23 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+
+
 public class Bluetooth {
 
     private static final String TAG = "Bluetooth";
-    private static final UUID DEFAULT_UUID = UUID.fromString("0000110B-0000-1000-8000-00805F9B34FB");  //识别为蓝牙音频服务，A2DP
 
     private  BluetoothAdapter bluetoothAdapter;
     private Context context; // For permission checks
     private BluetoothSocket bluetoothSocket;
     private BluetoothGatt bluetoothGatt;
-
+    //蓝牙串口服务UUID
+    //蓝牙串口服务UUID
+    private static UUID selectedDeviceUUID=UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+    // 获取到对应的服务和特征值
+    private BluetoothGattCharacteristic playCharacteristic;
+    private BluetoothGattCharacteristic pauseCharacteristic;
+    private BluetoothGattCharacteristic stopCharacteristic;
     public Bluetooth(){
         //空
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -45,6 +53,15 @@ public class Bluetooth {
         if (bluetoothAdapter == null) {
             throw new UnsupportedOperationException("该设备不支持蓝牙");
         }
+    }
+
+
+
+    private BluetoothConnectionListener bluetoothConnectionListener;
+
+    //允许设置回调监听器
+    public void setBluetoothConnectionListener(BluetoothConnectionListener listener) {
+        this.bluetoothConnectionListener = listener;
     }
 
     public void setContext(Context context) {
@@ -224,11 +241,16 @@ public class Bluetooth {
         }
 
         try {
-//            bluetoothSocket = device.createRfcommSocketToServiceRecord(DEFAULT_UUID);
-//            bluetoothAdapter.cancelDiscovery(); // Stop discovery to speed up connection
-//            bluetoothSocket.connect();
             bluetoothGatt = device.connectGatt(context, false, gattCallback); // 第二个参数为 autoConnect，设置为 false 以避免自动连接
             Log.i(TAG, "成功连接设备：" + device.getName());
+            // 调用 discoverServices() 开始发现服务
+//boolean servicesDiscovered = bluetoothGatt.discoverServices();
+//            if (servicesDiscovered) {
+//                Log.i(TAG, "开始服务发现...");
+//            } else {
+//                Log.e(TAG, "服务发现失败");
+//            }
+
             return true;
         } catch (SecurityException e) {
             Log.e(TAG, "错误连接设备 " + device.getName(), e);
@@ -263,6 +285,10 @@ public class Bluetooth {
 
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 Log.i(TAG, "已连接设备：" + gatt.getDevice().getName());
+                // 通知应用层设备已连接
+                if (bluetoothConnectionListener != null) {
+                    bluetoothConnectionListener.onDeviceConnected(gatt.getDevice());
+                }
                 // 开始服务发现
                 boolean servicesDiscovered = gatt.discoverServices();
                 if (servicesDiscovered) {
@@ -272,6 +298,10 @@ public class Bluetooth {
                 }
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 Log.i(TAG, "设备已断开连接");
+                // 通知应用层设备已断开
+                if (bluetoothConnectionListener != null) {
+                    bluetoothConnectionListener.onDeviceDisconnected(gatt.getDevice());
+                }
                 gatt.close();
             }
         }
@@ -281,18 +311,91 @@ public class Bluetooth {
             super.onServicesDiscovered(gatt, status);
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 Log.i(TAG, "服务发现成功");
-
                 // 获取设备的服务
                 List<BluetoothGattService> services = gatt.getServices();
                 for (BluetoothGattService service : services) {
                     Log.i(TAG, "发现服务：" + service.getUuid().toString());
                     // 可以选择对每个服务进行进一步的操作，例如读取或写入特征值
+                    discoverAudioControlCharacteristics(gatt);
                 }
             } else {
                 Log.e(TAG, "服务发现失败，状态码：" + status);
             }
         }
     };
+
+    private void discoverAudioControlCharacteristics(BluetoothGatt gatt) {
+        if (gatt == null) return;
+        // 音频控制服务的 UUID
+        BluetoothGattService service = gatt.getService(selectedDeviceUUID);
+        if (service != null) {
+            playCharacteristic = service.getCharacteristic(selectedDeviceUUID);
+            pauseCharacteristic = service.getCharacteristic(selectedDeviceUUID);
+            stopCharacteristic = service.getCharacteristic(selectedDeviceUUID);
+        }
+    }
+
+
+    // 发送开始播放信号
+    public void sendPlaySignal() {
+        if (bluetoothGatt == null || playCharacteristic == null) {
+            Log.e(TAG, "未连接蓝牙或缺少播放控制特征");
+            return;
+        }
+        // 设置特征值
+        playCharacteristic.setValue(new byte[]{1}); // 表示播放
+        // 检查BLUETOOTH权限
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH)
+                != PackageManager.PERMISSION_GRANTED) {
+            // 请求BLUETOOTH权限
+            ActivityCompat.requestPermissions((Activity) context,
+                    new String[]{Manifest.permission.BLUETOOTH},
+                    1); // 请求码可以是任意整数
+            return; // 等待用户响应权限请求
+        }
+        bluetoothGatt.writeCharacteristic(playCharacteristic);  // 发送指令
+        Log.i(TAG, "已发送开始播放信号");
+    }
+
+    // 发送暂停播放信号
+    public void sendPauseSignal() {
+        if (bluetoothGatt == null || pauseCharacteristic == null) {
+            Log.e(TAG, "未连接蓝牙或缺少暂停控制特征");
+            return;
+        }
+        // 设置特征值
+        pauseCharacteristic.setValue(new byte[]{2});
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH)
+                != PackageManager.PERMISSION_GRANTED) {
+            // 请求BLUETOOTH权限
+            ActivityCompat.requestPermissions((Activity) context,
+                    new String[]{Manifest.permission.BLUETOOTH},
+                    1); // 请求码可以是任意整数
+            return; // 等待用户响应权限请求
+        }
+        bluetoothGatt.writeCharacteristic(pauseCharacteristic);  // 发送指令
+        Log.i(TAG, "已发送暂停播放信号");
+    }
+
+    // 发送停止播放信号
+    public void sendStopSignal() {
+        if (bluetoothGatt == null || stopCharacteristic == null) {
+            Log.e(TAG, "未连接蓝牙或缺少停止控制特征");
+            return;
+        }
+        // 设置特征值
+        stopCharacteristic.setValue(new byte[]{3});  //表示停止
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH)
+                != PackageManager.PERMISSION_GRANTED) {
+            // 请求BLUETOOTH权限
+            ActivityCompat.requestPermissions((Activity) context,
+                    new String[]{Manifest.permission.BLUETOOTH},
+                    1); // 请求码可以是任意整数
+            return; // 等待用户响应权限请求
+        }
+        bluetoothGatt.writeCharacteristic(stopCharacteristic);  // 发送指令
+        Log.i(TAG, "已发送停止播放信号");
+    }
 
     // Disconnect from Bluetooth device (with permission check)
     public void disconnect() {

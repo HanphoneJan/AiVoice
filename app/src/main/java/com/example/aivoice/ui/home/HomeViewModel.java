@@ -227,7 +227,7 @@ public class HomeViewModel extends ViewModel {
                                 getFileContent(fileUri.getValue())));
 
                 RequestBody requestBody = requestBodyBuilder.build();
-                String url = "https://www.hanphone.top/aivoice/api/upload";
+                String url = "https://www.hanphone.top/aivoice/upload";
                 Request request = new Request.Builder()
                         .url(url)
                         .post(requestBody)

@@ -30,9 +30,13 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.aivoice.R;
+import com.example.aivoice.bluetooth.Bluetooth;
+import com.example.aivoice.bluetooth.BluetoothConnectionListener;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Objects;
+
 
 public class BluetoothFragment extends Fragment {
 
@@ -46,9 +50,12 @@ public class BluetoothFragment extends Fragment {
     private ListView lvFiles;
     private ArrayList<String> audioFileList;  // 存储音频文件路径的列表
     private static String selectedFileName; //当前播放的文件
+    private static String connectedDeviceName;//当前连接的设备
     private Spinner spinnerBluetoothDevices;  //下拉列表
 
     private BluetoothAdapter  bluetoothAdapter  = BluetoothAdapter.getDefaultAdapter();
+
+    private Bluetooth bluetooth = new Bluetooth();
 
 
 
@@ -127,6 +134,19 @@ public class BluetoothFragment extends Fragment {
             }
         });
 
+        bluetooth.setBluetoothConnectionListener(new BluetoothConnectionListener() {
+            @Override
+            public void onDeviceConnected(BluetoothDevice device) {
+                // 更新UI或处理连接成功后的逻辑
+
+            }
+            @Override
+            public void onDeviceDisconnected(BluetoothDevice device) {
+                // 更新UI或处理断开连接后的逻辑
+                tvBluetoothStatus.setText("未连接");
+            }
+        });
+
         bluetoothViewModel.getErrorMessage().observe(getViewLifecycleOwner(), errorMessage -> {
             if (errorMessage != null) {
                 Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show();
@@ -146,9 +166,9 @@ public class BluetoothFragment extends Fragment {
                         == PackageManager.PERMISSION_GRANTED){
                     // 获取设备
                     BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                    if (device != null && !bluetoothDeviceList.contains(device)) {
+                    if (device != null ) {
                         String deviceName = device.getName();
-                        if (deviceName != null && bluetoothDevicesAdapter.getPosition(deviceName) == -1) {
+                        if (deviceName != null) {
                             // 更新设备列表
                             Toast.makeText(requireContext(), "已增加一个蓝牙设备", Toast.LENGTH_SHORT).show();
                             Log.i(TAG,"增加一个蓝牙设备");
@@ -189,18 +209,26 @@ public class BluetoothFragment extends Fragment {
     }
     private void connectToBluetoothDevice() {
         String deviceName = (String) spinnerBluetoothDevices.getSelectedItem();
-        if (deviceName != null) {
-            tvBluetoothStatus.setText("连接到: " + deviceName);
+        if(Objects.equals(deviceName, connectedDeviceName)){
+            bluetoothViewModel.disconnectDevice();
+            tvBluetoothStatus.setText("未连接");
+            Toast.makeText(requireContext(), "断开连接" + deviceName, Toast.LENGTH_SHORT).show();
+            connectedDeviceName = null;
+        }
+        else if (deviceName != null) {
             Toast.makeText(requireContext(), "尝试连接到 " + deviceName, Toast.LENGTH_SHORT).show();
             // 获取BluetoothAdapter并检查是否可用
             if (bluetoothAdapter == null) {
-                Log.e(TAG, "BluetoothAdapter is not available.");
+                Log.e(TAG, "蓝牙适配器不可用");
                 Toast.makeText(requireContext(), "蓝牙适配器不可用", Toast.LENGTH_SHORT).show();
                 return;
             }
             BluetoothDevice selectedDevice = getDeviceByName(deviceName);
             bluetoothViewModel.connectToDevice(selectedDevice);
-        } else {
+            tvBluetoothStatus.setText("连接到: " + deviceName);
+            connectedDeviceName = deviceName;
+        }
+        else {
             Toast.makeText(requireContext(), "请先选择一个设备", Toast.LENGTH_SHORT).show();
         }
     }
@@ -218,8 +246,6 @@ public class BluetoothFragment extends Fragment {
                     return;
                 }
             }
-
-
             if (!musicDir.isDirectory()) {
                 Toast.makeText(requireContext(), "指定路径不是文件夹", Toast.LENGTH_SHORT).show();
                 return;
@@ -265,7 +291,11 @@ public class BluetoothFragment extends Fragment {
     }
 
     private void playAudio(String fileName){
-        if(!fileName.isEmpty()){
+        if(!connectedDeviceName.isEmpty()){
+            bluetoothViewModel.playAudioBluetooth();
+            Toast.makeText(requireContext(), "蓝牙播放", Toast.LENGTH_SHORT).show();
+        }
+        else if(!fileName.isEmpty()){
             File selectedFile = new File(requireContext().getFilesDir(), "Music/" + selectedFileName);
             Toast.makeText(requireContext(), "即将播放"+fileName, Toast.LENGTH_SHORT).show();
             bluetoothViewModel.playAudioFile(selectedFile);
@@ -275,14 +305,28 @@ public class BluetoothFragment extends Fragment {
 
     }
 
-    private void pauseAudio(){
-        bluetoothViewModel.pauseAudioFile();
+    private void pauseAudio() {
+        if (!connectedDeviceName.isEmpty()) {
+            bluetoothViewModel.pauseAudioBluetooth();
+            Toast.makeText(requireContext(), "蓝牙暂停播放", Toast.LENGTH_SHORT).show();
+        } else {
+            bluetoothViewModel.pauseAudioFile();
+            Toast.makeText(requireContext(), "已暂停播放", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void stopAudio(){
-        bluetoothViewModel.pauseAudioFile();
+        if (!connectedDeviceName.isEmpty()) {
+            bluetoothViewModel.stopAudioBluetooth();
+            Toast.makeText(requireContext(), "蓝牙暂停播放", Toast.LENGTH_SHORT).show();
+        } else {
+        bluetoothViewModel.stopAudioFile();
         selectedFileName = null ;
+        Toast.makeText(requireContext(), "已停止播放", Toast.LENGTH_SHORT).show();
     }
+    }
+
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();

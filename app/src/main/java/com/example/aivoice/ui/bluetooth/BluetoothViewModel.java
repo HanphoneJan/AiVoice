@@ -1,9 +1,12 @@
 package com.example.aivoice.ui.bluetooth;
 
+import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.util.Log;
@@ -39,6 +42,8 @@ public class BluetoothViewModel extends ViewModel {
     private long startTime; // 扫描蓝牙开始时间
     private long elapsedTime = 0; // 已扫描的时间
     private final MutableLiveData<Long> recordingTime = new MutableLiveData<>(0L); // 时间，单位：秒
+    private BluetoothDevice connectedDevice;
+    private BluetoothA2dp bluetoothA2dp;
 
     private MediaPlayer mediaPlayer;
 
@@ -56,6 +61,7 @@ public class BluetoothViewModel extends ViewModel {
     }
 
     public LiveData<Set<BluetoothDevice>> getPairedDevices() {
+        fetchPairedDevices();
         return pairedDevices;
     }
 
@@ -109,8 +115,10 @@ public class BluetoothViewModel extends ViewModel {
                 boolean success = bluetooth.connectToDevice(device);
                 isConnected.postValue(success);
                 connectionStatus.postValue(success ? "Connected to " + device.getName() : "Connection failed");
+                if (success) {
+                    connectedDevice = device;
 
-                if (!success) {
+                } else {
                     postError("连接设备失败: " + device.getName());
                 }
             } catch (SecurityException e) {
@@ -156,12 +164,24 @@ public class BluetoothViewModel extends ViewModel {
     }
 
 
+    public void disconnectDevice(){
+        bluetooth.disconnect();
+        isConnected.setValue(false);
+        connectionStatus.setValue("Disconnected");
+        Log.i(TAG,"蓝牙设备已断开连接");
+    }
+
     // 检查文件是否为音频文件（可以根据文件扩展名进行检查）
     private boolean isAudioFile(File file) {
         String fileName = file.getName().toLowerCase();
         return fileName.endsWith(".mp3") || fileName.endsWith(".wav") || fileName.endsWith(".m4a");
     }
     public void playAudioFile(File file){
+
+        if(!isAudioFile(file)){
+            postError("文件不是音频文件");
+            return;
+        }
         if (mediaPlayer == null) {
             mediaPlayer = new MediaPlayer();
         }
@@ -172,7 +192,14 @@ public class BluetoothViewModel extends ViewModel {
                 mediaPlayer.stop();
                 mediaPlayer.reset();  // 重置播放器，准备重新播放
             }
+            else{mediaPlayer.reset(); } //默认进行重置，否则再次播放会出问题
+            Log.i(TAG,connectedDevice.toString());
+            // 这里可以选择通过蓝牙音频设备播放音频
+            if (connectedDevice != null) {
+                // 设置蓝牙设备为音频输出目标
 
+                Log.i(TAG,"蓝牙播放");
+            }
             // 设置音频文件的路径
             mediaPlayer.setDataSource(file.getAbsolutePath());
             mediaPlayer.prepare();  // 准备播放
@@ -191,12 +218,32 @@ public class BluetoothViewModel extends ViewModel {
             mediaPlayer.pause();
             Log.i(TAG,"暂停播放");
         }
+    }
 
+    public void stopAudioFile() {
+            pauseAudioFile();
+            mediaPlayer.release();
+            mediaPlayer = null;
+            Log.i(TAG,"停止播放");
+    }
+
+    public void playAudioBluetooth(){
+        bluetooth.sendPlaySignal();
+        Log.i(TAG,"蓝牙开始播放");
+    }
+    public void pauseAudioBluetooth(){
+        bluetooth.sendPauseSignal();
+        Log.i(TAG,"蓝牙暂停播放");
+    }
+    public void stopAudioBluetooth(){
+        bluetooth.sendStopSignal();
+        Log.i(TAG,"蓝牙停止播放");
     }
 
     private void postError(String message) {
         Log.e(TAG, message);
         errorMessage.postValue(message);
+
     }
 
     @Override
