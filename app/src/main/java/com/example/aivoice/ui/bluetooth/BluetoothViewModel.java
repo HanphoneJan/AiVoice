@@ -35,7 +35,6 @@ public class BluetoothViewModel extends ViewModel {
     private final MutableLiveData<String> connectionStatus = new MutableLiveData<>();
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isReceiverRegistered = new MutableLiveData<>(false);
-    private Context context;
     private final Bluetooth bluetooth = new Bluetooth();
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
@@ -45,7 +44,7 @@ public class BluetoothViewModel extends ViewModel {
     private BluetoothDevice connectedDevice;
     private BluetoothA2dp bluetoothA2dp;
 
-    private MediaPlayer mediaPlayer;
+
 
     public BluetoothViewModel() {
         //空
@@ -53,7 +52,6 @@ public class BluetoothViewModel extends ViewModel {
 
     public void setContext(Context context) {
         bluetooth.setContext(context);
-        this.context=context;
     }
 
     public LiveData<Boolean> getIsBluetoothEnabled() {
@@ -176,56 +174,7 @@ public class BluetoothViewModel extends ViewModel {
         String fileName = file.getName().toLowerCase();
         return fileName.endsWith(".mp3") || fileName.endsWith(".wav") || fileName.endsWith(".m4a");
     }
-    public void playAudioFile(File file){
 
-        if(!isAudioFile(file)){
-            postError("文件不是音频文件");
-            return;
-        }
-        if (mediaPlayer == null) {
-            mediaPlayer = new MediaPlayer();
-        }
-
-        try {
-            // 如果 MediaPlayer 正在播放，先停止之前的播放
-            if (mediaPlayer.isPlaying()) {
-                mediaPlayer.stop();
-                mediaPlayer.reset();  // 重置播放器，准备重新播放
-            }
-            else{mediaPlayer.reset(); } //默认进行重置，否则再次播放会出问题
-            Log.i(TAG,connectedDevice.toString());
-            // 这里可以选择通过蓝牙音频设备播放音频
-            if (connectedDevice != null) {
-                // 设置蓝牙设备为音频输出目标
-
-                Log.i(TAG,"蓝牙播放");
-            }
-            // 设置音频文件的路径
-            mediaPlayer.setDataSource(file.getAbsolutePath());
-            mediaPlayer.prepare();  // 准备播放
-            mediaPlayer.start();  // 开始播放
-
-            Log.i(TAG,"开始播放");
-        } catch (IOException e) {
-//            Toast.makeText(this, "播放文件出错", Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
-            postError("播放失败");
-        }
-    }
-
-    public void pauseAudioFile() {
-        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-            mediaPlayer.pause();
-            Log.i(TAG,"暂停播放");
-        }
-    }
-
-    public void stopAudioFile() {
-            pauseAudioFile();
-            mediaPlayer.release();
-            mediaPlayer = null;
-            Log.i(TAG,"停止播放");
-    }
 
     public void playAudioBluetooth(){
         bluetooth.sendPlaySignal();
@@ -252,7 +201,6 @@ public class BluetoothViewModel extends ViewModel {
         try {
             executorService.shutdownNow();
             bluetooth.cleanup();
-            mediaPlayer.release();
         } catch (Exception e) {
             Log.e(TAG, "Error during ViewModel cleanup: " + e.getMessage(), e);
         }

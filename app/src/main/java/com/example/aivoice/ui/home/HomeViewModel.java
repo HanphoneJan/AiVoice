@@ -1,6 +1,7 @@
 package com.example.aivoice.ui.home;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -24,8 +25,6 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.example.aivoice.databinding.FragmentHomeBinding;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -45,7 +44,6 @@ import okhttp3.Response;
 public class HomeViewModel extends ViewModel {
 
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
-    private static final int REQUEST_READ_EXTERNAL_STORAGE_PERMISSION = 300;
     private MutableLiveData<Boolean> isRecording = new MutableLiveData<>(false);
     private MutableLiveData<Uri> audioFileUri = new MutableLiveData<>();
     private MutableLiveData<Uri> fileUri = new MutableLiveData<>();

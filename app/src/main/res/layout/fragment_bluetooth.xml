@@ -15,7 +15,7 @@
         <!-- 音频控制 -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="114dp"
+            android:layout_height="100dp"
             android:gravity="center"
             android:orientation="horizontal">
 
@@ -35,14 +35,14 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="80dp"
             android:gravity="center"
             android:orientation="horizontal">
         <Button
             android:id="@+id/btn_connect_bluetooth"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="连接" />
+            android:text="连接状态" />
 
         <TextView
             android:id="@+id/tv_bluetooth_status"
@@ -50,6 +50,14 @@
             android:layout_height="wrap_content"
             android:text="未连接" />
     </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:text="播放控制"
+            android:textSize="20sp" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="144dp"
@@ -57,49 +65,69 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/btn_play"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="播放" />
-            <!-- 间隔器 -->
-            <View
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp" />
+                android:id="@+id/btn_seekbwd"
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:backgroundTint="@android:color/transparent"
+                android:drawableLeft="@drawable/seekbwd"
+                android:drawablePadding="8dp"
+                android:gravity="center_vertical|start"
+                android:padding="12dp" />
+
             <Button
-                android:id="@+id/btn_pause"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="暂停" />
-            <View
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_marginEnd="8dp"
-                android:layout_marginStart="8dp" />
+                android:id="@+id/btn_audprev"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+
+                android:backgroundTint="@android:color/transparent"
+                android:drawableLeft="@drawable/audprev"
+                android:gravity="center"
+                android:padding="22dp" />
+
             <Button
-                android:id="@+id/btn_stop"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="停止" />
+                android:id="@+id/btn_audplay"
+                android:layout_width="66dp"
+                android:layout_height="66dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:backgroundTint="@android:color/transparent"
+                android:drawableLeft="@drawable/audplay"
+                android:gravity="center"
+                android:padding="26dp" />
+
+            <Button
+                android:id="@+id/btn_audstop"
+                android:layout_width="66dp"
+                android:layout_height="66dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:backgroundTint="@android:color/transparent"
+                android:drawableLeft="@drawable/audstop"
+                android:gravity="center"
+                android:padding="26dp" />
+
+            <Button
+                android:id="@+id/btn_audnext"
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:backgroundTint="@android:color/transparent"
+                android:drawableLeft="@drawable/audnext"
+                android:drawablePadding="8dp"
+                android:gravity="center_vertical|start"
+                android:padding="12dp" />
+
+            <Button
+                android:id="@+id/btn_seekfwd"
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:backgroundTint="@android:color/transparent"
+                android:drawableLeft="@drawable/seekfwd"
+                android:drawablePadding="8dp"
+                android:gravity="center_vertical|start"
+                android:padding="12dp" />
+
         </LinearLayout>
 
     </LinearLayout>
 
-    <!-- 音频文件文字 -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="音频文件"
-        android:layout_gravity="center"
-        android:layout_marginBottom="8dp"
-        android:textSize="18sp"/>
 
-    <!-- 文件显示界面 -->
-    <ListView
-        android:id="@+id/lv_files"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
 
 </LinearLayout>
