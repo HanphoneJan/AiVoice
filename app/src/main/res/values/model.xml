@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="model_options">
+        <item>Model A</item>
+        <item>Model B</item>
+        <item>Model C</item>
+        <item>Model D</item>
+    </string-array>
+</resources>

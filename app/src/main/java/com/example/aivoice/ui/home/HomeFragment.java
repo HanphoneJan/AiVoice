@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,6 +34,29 @@ public class HomeFragment extends Fragment {
 
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
+
+
+        Spinner spinnerModel = root.findViewById(R.id.spinner_model);
+        // Create an ArrayAdapter using the string array and a default spinner layout
+        ArrayAdapter<CharSequence> adapterModel = ArrayAdapter.createFromResource(
+                requireContext(),
+                R.array.model_options,
+                android.R.layout.simple_spinner_item
+        );
+        // Specify the layout to use when the list of choices appears
+        adapterModel.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Apply the adapter to the spinner
+        spinnerModel.setAdapter(adapterModel);
+
+
+        Spinner spinnerEmotion = root.findViewById(R.id.spinner_emotion);
+        ArrayAdapter<CharSequence> adapterEmotion = ArrayAdapter.createFromResource(
+                requireContext(),
+                R.array.emotion_options,
+                android.R.layout.simple_spinner_item
+        );
+        adapterEmotion.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerEmotion.setAdapter(adapterEmotion);
 
         // 初始化 ActivityResultLaunchers
         chooseAudioLauncher = registerForActivityResult(
@@ -62,7 +87,7 @@ public class HomeFragment extends Fragment {
             }
         });
         binding.btnChooseFile.setOnClickListener(v -> homeViewModel.chooseFile(chooseFileLauncher));
-        binding.btnUpload.setOnClickListener(v -> homeViewModel.uploadFiles());
+        binding.btnUpload.setOnClickListener(v -> homeViewModel.uploadFiles(spinnerModel.getSelectedItem().toString(),spinnerEmotion.getSelectedItem().toString()));
 
         // 观察录音状态，更新 UI
         homeViewModel.getIsRecording().observe(getViewLifecycleOwner(), isRecording -> {

@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.widget.Spinner;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -60,6 +61,8 @@ public class HomeViewModel extends ViewModel {
     private boolean isTimer = true;
     private long startTime; // 录音开始时间
     private long elapsedTime = 0; // 已录音的时间
+
+
 
     // 添加一个公共的无参构造函数
     public HomeViewModel() {
@@ -203,29 +206,36 @@ public class HomeViewModel extends ViewModel {
 
     // 上传文件
 
-    public void uploadFiles() {
+    public void uploadFiles(String model, String emotion) {
         if (audioFileUri.getValue() != null && fileUri.getValue() != null) {
             OkHttpClient client = new OkHttpClient();
 
-            // Create request body with multipart form data
+            // 初始化MultipartBody.Builder并设置类型为FORM
             MultipartBody.Builder requestBodyBuilder = new MultipartBody.Builder()
                     .setType(MultipartBody.FORM);
 
             try {
-                // Add audio file (use dynamic file name and MIME type)
+                // 添加音频文件部分
                 String audioMimeType = context.getContentResolver().getType(audioFileUri.getValue());
                 String audioFileName = getFileName(audioFileUri.getValue());
                 requestBodyBuilder.addFormDataPart("audio", audioFileName,
                         RequestBody.create(MediaType.parse(audioMimeType),
                                 getAudioFileContent(audioFileUri.getValue())));
 
-                // Add regular file
+                // 添加常规文件部分
                 String fileMimeType = context.getContentResolver().getType(fileUri.getValue());
                 String regularFileName = getFileName(fileUri.getValue());
                 requestBodyBuilder.addFormDataPart("file", regularFileName,
                         RequestBody.create(MediaType.parse(fileMimeType),
                                 getFileContent(fileUri.getValue())));
 
+                // 添加Model参数部分
+                requestBodyBuilder.addFormDataPart("model", model);
+
+                // 添加Emotion参数部分
+                requestBodyBuilder.addFormDataPart("emotion", emotion);
+
+                // 构建完整的请求体
                 RequestBody requestBody = requestBodyBuilder.build();
                 String url = "https://www.hanphone.top/aivoice/upload";
                 Request request = new Request.Builder()
@@ -233,6 +243,7 @@ public class HomeViewModel extends ViewModel {
                         .post(requestBody)
                         .build();
 
+                // 异步执行请求
                 client.newCall(request).enqueue(new Callback() {
                     @Override
                     public void onFailure(@NonNull Call call, @NonNull IOException e) {
@@ -255,7 +266,7 @@ public class HomeViewModel extends ViewModel {
                 errorMessage.setValue("文件读取错误");
             }
         } else {
-            errorMessage.setValue("请选择音频文件和普通文件");
+            errorMessage.setValue("请选择文件");
         }
     }
 

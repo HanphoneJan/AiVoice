@@ -12,7 +12,6 @@
 
 
         <!-- 蓝牙控制 -->
-
         <!-- 音频控制 -->
         <LinearLayout
             android:layout_width="match_parent"
@@ -33,6 +32,7 @@
                 android:minHeight="48dp" />
 
         </LinearLayout>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

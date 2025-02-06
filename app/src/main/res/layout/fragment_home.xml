@@ -3,12 +3,54 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:gravity="center">
+    android:gravity="center_horizontal"
+    >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="84dp"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_model"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="选择模型" />
+
+        <Spinner
+            android:id="@+id/spinner_model"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="84dp"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_emotion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="选择情绪" />
+
+        <Spinner
+            android:id="@+id/spinner_emotion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp" />
+
+    </LinearLayout>
+
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:text="选择音频文件："
         android:textSize="18sp" />
 
@@ -16,6 +58,7 @@
         android:id="@+id/btn_choose_audio"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:text="选择文件"
         android:textSize="18sp" />
 
