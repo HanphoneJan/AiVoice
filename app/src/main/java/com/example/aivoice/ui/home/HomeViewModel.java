@@ -192,7 +192,6 @@ public class HomeViewModel extends ViewModel {
                 mediaRecorder.release();
                 mediaRecorder = null;
                 isRecording.setValue(false);
-
                 handler.removeCallbacks(updateTimeRunnable);
             } catch (RuntimeException e) {
                 Log.e("HomeViewModel", "停止录音失败", e);
@@ -204,7 +203,7 @@ public class HomeViewModel extends ViewModel {
 
     // 上传文件
 
-    public void uploadFiles(String model, String emotion) {
+    public void uploadFiles(String model, String emotion,String speed) {
         if (audioFileUri.getValue() != null && fileUri.getValue() != null) {
             OkHttpClient client = new OkHttpClient();
 
@@ -232,6 +231,8 @@ public class HomeViewModel extends ViewModel {
 
                 // 添加Emotion参数部分
                 requestBodyBuilder.addFormDataPart("emotion", emotion);
+
+                requestBodyBuilder.addFormDataPart("speed", speed);
 
                 // 构建完整的请求体
                 RequestBody requestBody = requestBodyBuilder.build();

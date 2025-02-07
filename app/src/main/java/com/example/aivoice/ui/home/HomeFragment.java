@@ -23,6 +23,8 @@ public class HomeFragment extends Fragment {
     private FragmentHomeBinding binding;
     private HomeViewModel homeViewModel;
     private TextView recordingTimeTextView;
+    private TextView audioFileTextView;
+    private TextView textFileTextView;
     private ActivityResultLauncher<Intent> chooseAudioLauncher;
     private ActivityResultLauncher<Intent> chooseFileLauncher;
 
@@ -35,17 +37,14 @@ public class HomeFragment extends Fragment {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-
+        //ModelSpinner
         Spinner spinnerModel = root.findViewById(R.id.spinner_model);
-        // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<CharSequence> adapterModel = ArrayAdapter.createFromResource(
                 requireContext(),
                 R.array.model_options,
                 android.R.layout.simple_spinner_item
         );
-        // Specify the layout to use when the list of choices appears
         adapterModel.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        // Apply the adapter to the spinner
         spinnerModel.setAdapter(adapterModel);
 
 
@@ -58,13 +57,25 @@ public class HomeFragment extends Fragment {
         adapterEmotion.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerEmotion.setAdapter(adapterEmotion);
 
+        Spinner spinnerSpeed = root.findViewById(R.id.spinner_speed);
+        ArrayAdapter<CharSequence> adapterSpeed = ArrayAdapter.createFromResource(
+                requireContext(),
+                R.array.speed_options,
+                android.R.layout.simple_spinner_item
+        );
+        adapterSpeed.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerSpeed.setAdapter(adapterSpeed);
+
+        audioFileTextView = root.findViewById(R.id.audioFileTextView_status);
+        textFileTextView = root.findViewById(R.id.textFileTextView_status);
+
         // 初始化 ActivityResultLaunchers
         chooseAudioLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == getActivity().RESULT_OK) {
                         homeViewModel.updateAudioFileUri(result.getData().getData());
-                        Toast.makeText(getContext(), "已选择音频文件", Toast.LENGTH_SHORT).show();
+                        audioFileTextView.setText("已选择");
                     }
                 });
 
@@ -73,9 +84,11 @@ public class HomeFragment extends Fragment {
                 result -> {
                     if (result.getResultCode() == getActivity().RESULT_OK) {
                         homeViewModel.updateFileUri(result.getData().getData());
-                        Toast.makeText(getContext(), "已选择文件", Toast.LENGTH_SHORT).show();
+                        textFileTextView.setText("已选择");
                     }
                 });
+
+
 
         // 设置按钮点击事件
         binding.btnChooseAudio.setOnClickListener(v -> homeViewModel.chooseAudio(chooseAudioLauncher));
@@ -87,7 +100,9 @@ public class HomeFragment extends Fragment {
             }
         });
         binding.btnChooseFile.setOnClickListener(v -> homeViewModel.chooseFile(chooseFileLauncher));
-        binding.btnUpload.setOnClickListener(v -> homeViewModel.uploadFiles(spinnerModel.getSelectedItem().toString(),spinnerEmotion.getSelectedItem().toString()));
+        binding.btnUpload.setOnClickListener(v -> homeViewModel.uploadFiles(
+                spinnerModel.getSelectedItem().toString(),spinnerEmotion.getSelectedItem().toString(),
+                spinnerSpeed.getSelectedItem().toString()));
 
         // 观察录音状态，更新 UI
         homeViewModel.getIsRecording().observe(getViewLifecycleOwner(), isRecording -> {
@@ -97,7 +112,6 @@ public class HomeFragment extends Fragment {
                 binding.btnRecordAudio.setText("开始录音");
             }
         });
-
 
         // 找到UI上的TextView
         recordingTimeTextView = root.findViewById(R.id.recordingTimeTextView);
@@ -110,6 +124,8 @@ public class HomeFragment extends Fragment {
             String timeFormatted = String.format("录音时长：%02d:%02d", minutes, seconds);
             recordingTimeTextView.setText(timeFormatted);
         });
+
+
 
         // 观察上传状态
         homeViewModel.getIsFileUploaded().observe(getViewLifecycleOwner(), isUploaded -> {

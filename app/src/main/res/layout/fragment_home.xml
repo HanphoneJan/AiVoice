@@ -10,13 +10,14 @@
         android:layout_width="match_parent"
         android:layout_height="84dp"
         android:gravity="center"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp">
 
         <Button
             android:id="@+id/btn_model"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="选择模型" />
+            android:text="模型" />
 
         <Spinner
             android:id="@+id/spinner_model"
@@ -36,7 +37,7 @@
             android:id="@+id/btn_emotion"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="选择情绪" />
+            android:text="情绪" />
 
         <Spinner
             android:id="@+id/spinner_emotion"
@@ -46,20 +47,53 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="84dp"
+        android:gravity="center"
+        android:orientation="horizontal">
 
-    <TextView
+        <Button
+            android:id="@+id/btn_speed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="语速" />
+
+        <Spinner
+            android:id="@+id/spinner_speed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="选择音频文件："
-        android:textSize="18sp" />
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="音频文件："
+            android:textSize="18sp" />
+        <TextView
+            android:id="@+id/audioFileTextView_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="未选择"
+            android:textSize="18sp" />
+    </LinearLayout>
+
 
     <Button
         android:id="@+id/btn_choose_audio"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="选择文件"
+        android:text="选择音频文件"
         android:textSize="18sp" />
 
     <Button
@@ -77,21 +111,34 @@
         android:text="00:00"
         android:textSize="18sp"
         android:layout_centerInParent="true"
-        android:layout_marginTop="16dp"/>
+        android:layout_margin="16dp"/>
 
-
-    <TextView
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="选择文件："
-        android:textSize="18sp" />
+        android:gravity="center"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="文本文件："
+            android:textSize="18sp" />
+        <TextView
+            android:id="@+id/textFileTextView_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="未选择"
+            android:textSize="18sp" />
+    </LinearLayout>
+
 
     <Button
         android:id="@+id/btn_choose_file"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="选择文件"
+        android:text="选择文本文件"
         android:textSize="18sp" />
 
     <Button

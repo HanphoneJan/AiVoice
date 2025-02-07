@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="speed_options">
+        <item>x1.0</item>
+        <item>x0.8</item>
+        <item>x0.9</item>
+        <item>x1.1</item>
+        <item>x1.2</item>
+    </string-array>
+</resources>

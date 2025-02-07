@@ -115,7 +115,6 @@ public class BluetoothFragment extends Fragment {
             @Override
             public void onDeviceConnected(BluetoothDevice device) {
                 // 更新UI或处理连接成功后的逻辑
-
             }
             @Override
             public void onDeviceDisconnected(BluetoothDevice device) {

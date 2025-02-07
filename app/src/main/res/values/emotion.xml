@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="emotion_options">
-        <item>Emotion A</item>
-        <item>Emoiton B</item>
-        <item>Emotion C</item>
-        <item>Emotion D</item>
+        <item>自然</item>
+        <item>情感</item>
+        <item>生气</item>
+        <item>高兴</item>
     </string-array>
 </resources>

@@ -1,5 +1,8 @@
 package com.example.aivoice.ui.files;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -7,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -19,10 +23,12 @@ import com.example.aivoice.R;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class FilesFragment extends Fragment {
 
     private static final String TAG = "FilesFragment";
+    private static final int REQUEST_CODE_OPEN_DIRECTORY = 1001;
     private FilesViewModel filesViewModel;
     private ListView lvFiles;
     private ArrayList<String> audioFileList;  // 存储音频文件路径的列表
@@ -33,6 +39,11 @@ public class FilesFragment extends Fragment {
         // 使用ViewModelProvider获取BluetoothViewModel的实例
         filesViewModel = new ViewModelProvider(this).get(FilesViewModel.class);
         filesViewModel.setContext(requireContext());
+        //
+        Button fileButton = root.findViewById(R.id.btn_files);
+        fileButton.setOnClickListener(v -> filesViewModel.jumpToFolder(requireActivity(), REQUEST_CODE_OPEN_DIRECTORY));
+
+
         // 找到显示文件列表的列表视图
         lvFiles = root.findViewById(R.id.lv_files);
         audioFileList = new ArrayList<>();  // 初始化音频文件列表
@@ -44,9 +55,15 @@ public class FilesFragment extends Fragment {
         lvFiles.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                selectedFileName = audioFileList.get(position);
-                // 调用播放方法
-                playAudio(selectedFileName);
+                String newSelectedFileName = audioFileList.get(position);
+                if(Objects.equals(newSelectedFileName, selectedFileName)){
+                    filesViewModel.stopAudioFile();
+                    Toast.makeText(requireContext(),"已停止播放",Toast.LENGTH_SHORT).show();
+                }else {
+                    selectedFileName = newSelectedFileName;
+                    // 调用播放方法
+                    playAudio(selectedFileName);
+                }
             }
         });
         return root;
@@ -92,5 +109,23 @@ public class FilesFragment extends Fragment {
             Toast.makeText(requireContext(), "即将播放"+fileName, Toast.LENGTH_SHORT).show();
             filesViewModel.playAudioFile(selectedFile);
     }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_CODE_OPEN_DIRECTORY && resultCode == Activity.RESULT_OK) {
+            Uri uri = data.getData();
+            if (uri != null) {
+                requireActivity().getContentResolver().takePersistableUriPermission(
+                        uri,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                );
+
+                Toast.makeText(getContext(), "已选择目录：" + uri.toString(), Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
 
 }
