@@ -13,21 +13,21 @@
             android:gravity="center"
             android:orientation="horizontal">
             <!-- 音频文件文字 -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="音频文件"
-                android:textSize="24sp" />
             <Button
                 android:id="@+id/btn_files"
                 android:layout_width="46dp"
                 android:layout_height="46dp"
                 android:backgroundTint="@android:color/transparent"
-                android:drawableLeft="@drawable/audlist"
+                android:drawableLeft="@drawable/document"
                 android:drawablePadding="8dp"
                 android:gravity="center_vertical|start"
                 android:padding="12dp" />
-            <!-- 用于填充空间的View -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="音频文件"
+                android:textSize="24sp" />
+
         </LinearLayout>
 
 

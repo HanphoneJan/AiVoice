@@ -108,6 +108,7 @@ public class HomeFragment extends Fragment {
         homeViewModel.getIsRecording().observe(getViewLifecycleOwner(), isRecording -> {
             if (isRecording) {
                 binding.btnRecordAudio.setText("停止录音");
+                audioFileTextView.setText("已选择");
             } else {
                 binding.btnRecordAudio.setText("开始录音");
             }
