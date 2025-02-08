@@ -1,5 +1,7 @@
 package com.example.aivoice.ui.home;
 
+import static androidx.core.content.ContentProviderCompat.requireContext;
+
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
@@ -158,7 +160,7 @@ public class HomeViewModel extends ViewModel {
                 Log.d(TAG, "Music URI: " + musicUri);
 
                 if (musicUri != null) {
-                    // 使用 SAF 创建新录音文件
+                    // 使用 SAF 目录存储录音文件
                     DocumentFile pickedDir = DocumentFile.fromTreeUri(context, musicUri);
                     if (pickedDir != null && pickedDir.exists() && pickedDir.isDirectory()) {
                         String fileName = "录音_" + System.currentTimeMillis() + ".mp3";
@@ -167,6 +169,15 @@ public class HomeViewModel extends ViewModel {
                         if (audioFileDoc != null) {
                             outputUri = audioFileDoc.getUri();
                             pfd = context.getContentResolver().openFileDescriptor(outputUri, "rw");
+                            mediaRecorder = new MediaRecorder();
+                            mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+                            mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+                            mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+                            mediaRecorder.setOutputFile(pfd.getFileDescriptor()); // 兼容 SAF 和本地文件
+                            mediaRecorder.prepare();
+                            mediaRecorder.start();
+                            isRecording.setValue(true);
+                            audioFileUri.setValue(outputUri);
                         } else {
                             Toast.makeText(context, "无法创建音频文件", Toast.LENGTH_SHORT).show();
                             return;
@@ -176,35 +187,22 @@ public class HomeViewModel extends ViewModel {
                         return;
                     }
                 } else {
-                    // 2. 使用默认存储路径
-                    File audioFile = createAudioFile();
-                    outputUri = FileProvider.getUriForFile(
-                            context,
+                    String currentAudioFilePath = createAudioFile().getAbsolutePath();
+                    mediaRecorder = new MediaRecorder();
+                    mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+                    mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+                    mediaRecorder.setOutputFile(currentAudioFilePath);
+                    mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+                    mediaRecorder.prepare();
+                    mediaRecorder.start();
+                    isRecording.setValue(true);
+                    Uri uri = FileProvider.getUriForFile(context,
                             context.getPackageName() + ".fileprovider",
-                            audioFile
-                    );
-                    pfd = ParcelFileDescriptor.open(audioFile, ParcelFileDescriptor.MODE_READ_WRITE);
+                            new File(currentAudioFilePath));
+                    audioFileUri.setValue(uri);
                 }
 
-                if (pfd == null || outputUri == null) {
-                    Toast.makeText(context, "录音存储路径错误", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                // 3. 开始录音
-                mediaRecorder = new MediaRecorder();
-                mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-                mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-                mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-                mediaRecorder.setOutputFile(pfd.getFileDescriptor()); // 兼容 SAF
-                mediaRecorder.prepare();
-                mediaRecorder.start();
-                isRecording.setValue(true);
-
-                // 4. 记录文件 URI，方便后续访问
-                audioFileUri.setValue(outputUri);
-
-                // 5. 启动计时器
+                // 6. 启动计时器
                 startTime = System.currentTimeMillis();
                 elapsedTime = 0; // 重置已录音时间
                 updateTimeRunnable = new Runnable() {
@@ -223,6 +221,7 @@ public class HomeViewModel extends ViewModel {
             }
         }
     }
+
 
 
 
