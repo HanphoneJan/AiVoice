@@ -17,6 +17,7 @@
                 android:id="@+id/btn_files"
                 android:layout_width="46dp"
                 android:layout_height="46dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:backgroundTint="@android:color/transparent"
                 android:drawableLeft="@drawable/document"
                 android:drawablePadding="8dp"

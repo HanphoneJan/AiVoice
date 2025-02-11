@@ -44,11 +44,9 @@ public class BluetoothFragment extends Fragment {
 
     private BluetoothViewModel bluetoothViewModel;
     private ArrayAdapter<String> bluetoothDevicesAdapter;//适配器
-    private ArrayList<BluetoothDevice> bluetoothDeviceList = new ArrayList<>();  //存储蓝牙设备
+
     private TextView tvBluetoothStatus;
 
-
-    private static String connectedDeviceName;//当前连接的设备
     private Spinner spinnerBluetoothDevices;  //下拉列表
 
     private BluetoothAdapter  bluetoothAdapter  = BluetoothAdapter.getDefaultAdapter();
@@ -93,11 +91,57 @@ public class BluetoothFragment extends Fragment {
         // 设置连接蓝牙设备的按钮的点击监听器
         btnConnectBluetooth.setOnClickListener(v -> connectToBluetoothDevice()); // 当按钮被点击时，调用connectToBluetoothDevice()方法来尝试连接到选中的蓝牙设备
 
-        //播放、暂停、停止按钮
-        Button btnPlay = root.findViewById(R.id.btn_audplay);
-        Button btnStop = root.findViewById(R.id.btn_audstop);
-        btnPlay.setOnClickListener((v -> playAudio()));
-        btnStop.setOnClickListener((v -> stopAudio()));
+        //按钮
+        Button btnAudPlay = root.findViewById(R.id.btn_audplay);
+        Button btnAudStop = root.findViewById(R.id.btn_audstop);
+        Button btnAudList = root.findViewById(R.id.btn_audlist);
+        Button btnNext = root.findViewById(R.id.btn_audnext);
+        Button btnPrev = root.findViewById(R.id.btn_audprev);
+        Button btnDirBack = root.findViewById(R.id.btn_dirback);
+        Button btnDispName = root.findViewById(R.id.btn_dispname);
+
+        Button btnPausresu = root.findViewById(R.id.btn_pausresu);
+        Button btnSeekBwd = root.findViewById(R.id.btn_seekbwd);
+        Button btnFwd = root.findViewById(R.id.btn_seekfwd);
+        Button btnVoludec =root.findViewById(R.id.btn_voludec);
+        Button btnVoluinc =root.findViewById(R.id.btn_voluinc);
+
+        // 按钮对应的功能绑定
+        btnAudPlay.setOnClickListener(v -> bluetoothViewModel.playAudio());
+        btnAudStop.setOnClickListener(v -> bluetoothViewModel.stopAudio());
+        btnAudList.setOnClickListener(v -> bluetoothViewModel.showAudioList());
+        btnNext.setOnClickListener(v -> bluetoothViewModel.playNextTrack());
+        btnPrev.setOnClickListener(v -> bluetoothViewModel.playPreviousTrack());
+        btnDirBack.setOnClickListener(v -> bluetoothViewModel.goBackDirectory());
+        btnDispName.setOnClickListener(v -> bluetoothViewModel.displayTrackName());
+
+        btnPausresu.setOnClickListener(v -> bluetoothViewModel.pauseResumeAudio());
+        btnSeekBwd.setOnClickListener(v -> bluetoothViewModel.seekBackward());
+        btnFwd.setOnClickListener(v -> bluetoothViewModel.seekForward());
+        btnVoludec.setOnClickListener(v -> bluetoothViewModel.decreaseVolume());
+        btnVoluinc.setOnClickListener(v -> bluetoothViewModel.increaseVolume());
+
+        //切换播放模式按钮
+        Button btnMode = root.findViewById(R.id.btn_mode);
+        // 定义三个图标的资源 ID
+        int[] iconModeResources = {
+                R.drawable.modeoneloop, // 第一个图标
+                R.drawable.modeoneloop, // 第二个图标
+                R.drawable.modelistloop  // 第三个图标
+        };
+        // 计数器，用于记录当前显示的图标索引
+        int[] currentIconIndex = {0}; // 使用数组以便在 Lambda 表达式中修改
+        // 初始化按钮图标
+        btnMode.setCompoundDrawablesWithIntrinsicBounds(iconModeResources[currentIconIndex[0]], 0, 0, 0);
+        btnMode.setOnClickListener(v -> {
+            // 切换播放模式
+            bluetoothViewModel.togglePlaybackMode();
+            // 更新图标索引
+            currentIconIndex[0] = (currentIconIndex[0] + 1) % iconModeResources.length;
+            // 设置新的图标
+            btnMode.setCompoundDrawablesWithIntrinsicBounds(iconModeResources[currentIconIndex[0]], 0, 0, 0);
+        });
+
 
         bluetoothViewModel.getPairedDevices().observe(getViewLifecycleOwner(), devices -> {
             // 清除下拉列表（Spinner）的适配器中的现有项
@@ -148,7 +192,7 @@ public class BluetoothFragment extends Fragment {
                             // 更新设备列表
                             Toast.makeText(requireContext(), "已增加一个蓝牙设备", Toast.LENGTH_SHORT).show();
                             Log.i(TAG,"增加一个蓝牙设备");
-                            bluetoothDeviceList.add(device);
+                            bluetooth.bluetoothDeviceList.add(device);
                             bluetoothDevicesAdapter.add(deviceName);
                             bluetoothDevicesAdapter.notifyDataSetChanged();
                         }
@@ -175,7 +219,7 @@ public class BluetoothFragment extends Fragment {
     private BluetoothDevice getDeviceByName(String deviceName) {
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.BLUETOOTH_ADMIN)
                 == PackageManager.PERMISSION_GRANTED) {
-            for (BluetoothDevice device : bluetoothDeviceList) {
+            for (BluetoothDevice device : bluetooth.bluetoothDeviceList) {
                 if (device.getName() != null && device.getName().equals(deviceName)) {
                     return device;  // 返回找到的设备
                 }
@@ -185,11 +229,12 @@ public class BluetoothFragment extends Fragment {
     }
     private void connectToBluetoothDevice() {
         String deviceName = (String) spinnerBluetoothDevices.getSelectedItem();
+        String connectedDeviceName = bluetooth.getConnectedDeviceName();
         if(Objects.equals(deviceName, connectedDeviceName)){
             bluetoothViewModel.disconnectDevice();
             tvBluetoothStatus.setText("未连接");
             Toast.makeText(requireContext(), "断开连接" + deviceName, Toast.LENGTH_SHORT).show();
-            connectedDeviceName = null;
+            bluetooth.setConnectedDeviceName(null);
         }
         else if (deviceName != null) {
             Toast.makeText(requireContext(), "尝试连接到 " + deviceName, Toast.LENGTH_SHORT).show();
@@ -208,8 +253,6 @@ public class BluetoothFragment extends Fragment {
             Toast.makeText(requireContext(), "请先选择一个设备", Toast.LENGTH_SHORT).show();
         }
     }
-
-
 
     private boolean checkBluetoothPermissions() {
         String[] permissions = {
@@ -233,38 +276,9 @@ public class BluetoothFragment extends Fragment {
         return true;
     }
 
-    private void playAudio(){
-        if(!connectedDeviceName.isEmpty()){
-            bluetoothViewModel.playAudioBluetooth();
-            Toast.makeText(requireContext(), "蓝牙播放", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void pauseAudio() {
-        if (!connectedDeviceName.isEmpty()) {
-            bluetoothViewModel.pauseAudioBluetooth();
-            Toast.makeText(requireContext(), "蓝牙暂停播放", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void stopAudio(){
-        if (!connectedDeviceName.isEmpty()) {
-            bluetoothViewModel.stopAudioBluetooth();
-            Toast.makeText(requireContext(), "蓝牙暂停播放", Toast.LENGTH_SHORT).show();
-        }
-    }
-
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        // Release resources and unregister receivers here
-        //bluetoothViewModel.stopScanning(); // Stop Bluetooth scanning if it's running
-         // Unregister the Bluetooth receiver
-//        bluetoothViewModel.onCleared(); // Clean up Bluetooth resources
-//        bluetoothViewModel = null; // Release the ViewModel
-//        bluetoothDevicesAdapter = null; // Release the adapter
-//        bluetoothDeviceList.clear(); // Clear the device list
-        // ... release any other resources held by the fragment ...
     }
 }

@@ -1,19 +1,18 @@
 package com.example.aivoice.ui.home;
 
-import static androidx.core.content.ContentProviderCompat.requireContext;
 
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
+
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
-import android.provider.MediaStore;
+
 import android.util.Log;
 import android.widget.Toast;
 
@@ -35,6 +34,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.concurrent.TimeUnit;
 
 
 import okhttp3.Call;
@@ -61,7 +61,6 @@ public class HomeViewModel extends ViewModel {
     private Handler handler = new Handler(Looper.getMainLooper()); // 用于更新UI
     private Runnable updateTimeRunnable;
     // 初始化并启动计时器
-    private boolean isTimer = true;
     private long startTime; // 录音开始时间
     private long elapsedTime = 0; // 已录音的时间
 
@@ -243,10 +242,14 @@ public class HomeViewModel extends ViewModel {
 
 
     // 上传文件
-
-    public void uploadFiles(String model, String emotion,String speed) {
+    public void uploadFiles(String model, String emotion, String speed) {
         if (audioFileUri.getValue() != null && fileUri.getValue() != null) {
-            OkHttpClient client = new OkHttpClient();
+            // 设置超时时间
+            OkHttpClient client = new OkHttpClient.Builder()
+                    .connectTimeout(2, TimeUnit.MINUTES) // 连接超时
+                    .readTimeout(3, TimeUnit.MINUTES)    // 读取超时
+                    .writeTimeout(3, TimeUnit.MINUTES)   // 写入超时
+                    .build();
 
             // 初始化MultipartBody.Builder并设置类型为FORM
             MultipartBody.Builder requestBodyBuilder = new MultipartBody.Builder()
@@ -273,11 +276,12 @@ public class HomeViewModel extends ViewModel {
                 // 添加Emotion参数部分
                 requestBodyBuilder.addFormDataPart("emotion", emotion);
 
+                // 添加Speed参数部分
                 requestBodyBuilder.addFormDataPart("speed", speed);
 
                 // 构建完整的请求体
                 RequestBody requestBody = requestBodyBuilder.build();
-                String url = "https://www.hanphone.top/aivoice/upload";
+                String url = "https://www.hanphone.top/aivoice/";
                 Request request = new Request.Builder()
                         .url(url)
                         .post(requestBody)
@@ -292,12 +296,16 @@ public class HomeViewModel extends ViewModel {
 
                     @Override
                     public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                        if (response.isSuccessful()) {
-                            byte[] responseBody = response.body().bytes();
-                            storeReturnedFile(responseBody);
-                            isFileUploaded.setValue(true);
-                        } else {
-                            errorMessage.setValue("上传失败: " + response.code());
+                        try {
+                            if (response.isSuccessful()) {
+                                byte[] responseBody = response.body().bytes();
+                                storeReturnedFile(responseBody);
+                                isFileUploaded.setValue(true);
+                            } else {
+                                errorMessage.setValue("上传失败: " + response.code());
+                            }
+                        } finally {
+                            response.close(); // 确保资源释放
                         }
                     }
                 });
@@ -343,8 +351,7 @@ public class HomeViewModel extends ViewModel {
 
     private void storeReturnedFile(byte[] data) {
         String fileName = "生成音频文件_" + System.currentTimeMillis() + ".mp3";
-
-
+        musicUri = UriManager.getUri();
         if (musicUri != null) {
             // 如果 uri 不为空，使用用户选择的目录
             DocumentFile pickedDir = DocumentFile.fromTreeUri(context, musicUri);
@@ -368,8 +375,7 @@ public class HomeViewModel extends ViewModel {
             }
         } else {
             // 默认目录路径
-            File filesDir = context.getFilesDir();
-            File musicDir = new File(filesDir, "Music");
+            File musicDir = new File(context.getFilesDir(), "Music");
             if (!musicDir.exists()) {
                 musicDir.mkdirs();
             }

@@ -2,7 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:layout_marginTop="32dp">
 
     <!-- 控制界面 -->
     <LinearLayout
@@ -11,7 +12,26 @@
         android:orientation="vertical">
 
         <!-- 蓝牙控制 -->
-        <!-- 音频控制 -->
+
+<!--        连接状态-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+            <Button
+                android:id="@+id/btn_connect_bluetooth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="蓝牙连接状态" />
+
+            <TextView
+                android:id="@+id/tv_bluetooth_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="未连接" />
+        </LinearLayout>
+<!--        扫描蓝牙-->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="100dp"
@@ -22,7 +42,7 @@
                 android:id="@+id/btn_scan_bluetooth"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="扫描蓝牙" />
+                android:text="扫描蓝牙设备" />
 
             <Spinner
                 android:id="@+id/spinner_bluetooth_devices"
@@ -32,30 +52,61 @@
 
         </LinearLayout>
 
+
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="80dp"
+            android:layout_height="100dp"
             android:gravity="center"
             android:orientation="horizontal">
-        <Button
-            android:id="@+id/btn_connect_bluetooth"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="连接状态" />
 
-        <TextView
-            android:id="@+id/tv_bluetooth_status"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="未连接" />
-    </LinearLayout>
+            <Button
+                android:id="@+id/btn_audlist"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="显示文件列表" />
+
+            <Spinner
+                android:id="@+id/spinner_dispname"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp" />
+            <Button
+                android:id="@+id/btn_dirback"
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:backgroundTint="@android:color/transparent"
+                android:drawableLeft="@drawable/dirback"
+                android:drawablePadding="8dp"
+                android:gravity="center_vertical|start"
+                android:padding="12dp" />
+        </LinearLayout>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="40dp"
             android:layout_gravity="center"
             android:text="播放控制"
-            android:textSize="20sp" />
+            android:textSize="20sp"
+            android:layout_marginTop="24dp"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:layout_marginTop="12dp">
+            <Button
+                android:id="@+id/btn_dispname"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="当前播放文件" />
+
+            <TextView
+                android:id="@+id/dispname"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="无" />
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -67,6 +118,7 @@
                 android:id="@+id/btn_seekbwd"
                 android:layout_width="46dp"
                 android:layout_height="46dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:backgroundTint="@android:color/transparent"
                 android:drawableLeft="@drawable/seekbwd"
                 android:drawablePadding="8dp"
@@ -77,11 +129,11 @@
                 android:id="@+id/btn_audprev"
                 android:layout_width="56dp"
                 android:layout_height="56dp"
-
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:backgroundTint="@android:color/transparent"
                 android:drawableLeft="@drawable/audprev"
                 android:gravity="center"
-                android:padding="22dp" />
+                android:padding="17dp" />
 
             <Button
                 android:id="@+id/btn_audplay"
@@ -91,7 +143,7 @@
                 android:backgroundTint="@android:color/transparent"
                 android:drawableLeft="@drawable/audplay"
                 android:gravity="center"
-                android:padding="26dp" />
+                android:padding="21dp" />
 
             <Button
                 android:id="@+id/btn_audstop"
@@ -101,22 +153,24 @@
                 android:backgroundTint="@android:color/transparent"
                 android:drawableLeft="@drawable/audstop"
                 android:gravity="center"
-                android:padding="26dp" />
+                android:padding="21dp" />
 
             <Button
                 android:id="@+id/btn_audnext"
-                android:layout_width="46dp"
-                android:layout_height="46dp"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:backgroundTint="@android:color/transparent"
                 android:drawableLeft="@drawable/audnext"
                 android:drawablePadding="8dp"
                 android:gravity="center_vertical|start"
-                android:padding="12dp" />
+                android:padding="17dp" />
 
             <Button
                 android:id="@+id/btn_seekfwd"
                 android:layout_width="46dp"
                 android:layout_height="46dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:backgroundTint="@android:color/transparent"
                 android:drawableLeft="@drawable/seekfwd"
                 android:drawablePadding="8dp"
@@ -124,7 +178,50 @@
                 android:padding="12dp" />
 
         </LinearLayout>
-
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="84dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+            <Button
+                android:id="@+id/btn_voludec"
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:backgroundTint="@android:color/transparent"
+                android:drawableLeft="@drawable/voludec"
+                android:drawablePadding="8dp"
+                android:gravity="center_vertical|start"
+                android:padding="12dp" />
+            <Button
+                android:id="@+id/btn_mode"
+                android:layout_width="66dp"
+                android:layout_height="66dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:backgroundTint="@android:color/transparent"
+                android:drawableLeft="@drawable/modeoneplay"
+                android:gravity="center"
+                android:padding="15dp" />
+            <Button
+                android:id="@+id/btn_pausresu"
+                android:layout_width="66dp"
+                android:layout_height="66dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:backgroundTint="@android:color/transparent"
+                android:drawableLeft="@drawable/pausresu"
+                android:gravity="center"
+                android:padding="19dp" />
+            <Button
+                android:id="@+id/btn_voluinc"
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:backgroundTint="@android:color/transparent"
+                android:drawableLeft="@drawable/voluinc"
+                android:drawablePadding="8dp"
+                android:gravity="center_vertical|start"
+                android:padding="12dp" />
+        </LinearLayout>
     </LinearLayout>
 
 

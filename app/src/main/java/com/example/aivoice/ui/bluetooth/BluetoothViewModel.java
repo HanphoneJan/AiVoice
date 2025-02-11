@@ -1,16 +1,10 @@
 package com.example.aivoice.ui.bluetooth;
 
-import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothManager;
+
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.os.Handler;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -18,8 +12,6 @@ import androidx.lifecycle.ViewModel;
 
 import com.example.aivoice.bluetooth.Bluetooth;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -42,7 +34,6 @@ public class BluetoothViewModel extends ViewModel {
     private long elapsedTime = 0; // 已扫描的时间
     private final MutableLiveData<Long> recordingTime = new MutableLiveData<>(0L); // 时间，单位：秒
     private BluetoothDevice connectedDevice;
-    private BluetoothA2dp bluetoothA2dp;
 
 
 
@@ -77,14 +68,6 @@ public class BluetoothViewModel extends ViewModel {
 
     public LiveData<Boolean> getIsReceiverRegistered() {
         return isReceiverRegistered;
-    }
-
-    public void checkBluetoothStatus() {
-        try {
-            isBluetoothEnabled.setValue(bluetooth.isBluetoothEnabled());
-        } catch (Exception e) {
-            postError("Error 检查蓝牙状态: " + e.getMessage());
-        }
     }
 
     //获取已匹配的蓝牙设备
@@ -128,39 +111,41 @@ public class BluetoothViewModel extends ViewModel {
     }
 
     public void startScanning() {
+        if (bluetooth.isDiscovering()) {
+            Log.i(TAG, "蓝牙扫描已在进行中，跳过重复启动");
+            return;
+        }
+
         try {
             bluetooth.startDiscovery();
             isReceiverRegistered.setValue(true);
-            // 初始化并启动计时器
             startTime = System.currentTimeMillis();
-            elapsedTime = 0; // 重置已录音时间
+            elapsedTime = 0; // 重置扫描时间
+            recordingTime.setValue(elapsedTime);
+
+            Handler handler = new Handler();
             Runnable updateTimeRunnable = new Runnable() {
                 @Override
                 public void run() {
-                    elapsedTime = (System.currentTimeMillis() - startTime) / 1000;
-                    recordingTime.setValue(elapsedTime);
+                    long newElapsedTime = (System.currentTimeMillis() - startTime) / 1000;
+                    recordingTime.postValue(newElapsedTime);
+                    handler.postDelayed(this, 1000); // 每秒更新一次
                 }
             };
+            handler.post(updateTimeRunnable);
 
-            // 延迟60秒后停止设备扫描
-            Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    stopScanning();
-                    Log.i(TAG,"停止扫描");
-                }
-            }, 60000); // 延迟60秒（60000毫秒）后执行
+            // 60 秒后自动停止扫描
+            handler.postDelayed(() -> {
+                bluetooth.stopScanning();
+                isReceiverRegistered.setValue(false);
+                Log.i(TAG, "蓝牙扫描已自动停止");
+            }, 60000);
+
         } catch (Exception e) {
-            postError("扫描蓝牙设备错误 " + e.getMessage());
+            postError("蓝牙扫描失败: " + e.getMessage());
+            Log.e(TAG, "蓝牙扫描异常", e);
         }
     }
-
-    public void stopScanning() {
-        bluetooth.stopDiscovery();
-        isReceiverRegistered.setValue(false);
-    }
-
 
     public void disconnectDevice(){
         bluetooth.disconnect();
@@ -168,27 +153,7 @@ public class BluetoothViewModel extends ViewModel {
         connectionStatus.setValue("Disconnected");
         Log.i(TAG,"蓝牙设备已断开连接");
     }
-
-    // 检查文件是否为音频文件（可以根据文件扩展名进行检查）
-    private boolean isAudioFile(File file) {
-        String fileName = file.getName().toLowerCase();
-        return fileName.endsWith(".mp3") || fileName.endsWith(".wav") || fileName.endsWith(".m4a");
-    }
-
-
-    public void playAudioBluetooth(){
-        bluetooth.sendPlaySignal();
-        Log.i(TAG,"蓝牙开始播放");
-    }
-    public void pauseAudioBluetooth(){
-        bluetooth.sendPauseSignal();
-        Log.i(TAG,"蓝牙暂停播放");
-    }
-    public void stopAudioBluetooth(){
-        bluetooth.sendStopSignal();
-        Log.i(TAG,"蓝牙停止播放");
-    }
-
+    
     private void postError(String message) {
         Log.e(TAG, message);
         errorMessage.postValue(message);
@@ -200,9 +165,61 @@ public class BluetoothViewModel extends ViewModel {
         super.onCleared();
         try {
             executorService.shutdownNow();
-            bluetooth.cleanup();
         } catch (Exception e) {
             Log.e(TAG, "Error during ViewModel cleanup: " + e.getMessage(), e);
         }
+    }
+
+    public void playAudio() {
+        bluetooth.sendSignal("audplay");
+    }
+    public void stopAudio() {
+        bluetooth.sendSignal("audstop");
+    }
+
+    public void showAudioList() {
+        bluetooth.sendSignal("audlist");
+    }
+
+    public void playNextTrack() {
+        bluetooth.sendSignal("audnext");
+    }
+
+    public void playPreviousTrack() {
+        bluetooth.sendSignal("audprev");
+    }
+
+    public void goBackDirectory() {
+        bluetooth.sendSignal("dirback");
+    }
+
+    public void displayTrackName() {
+        bluetooth.sendSignal("dispname");
+    }
+
+    public void togglePlaybackMode() {
+        bluetooth.sendSignal("modechg");
+    }
+
+    public void pauseResumeAudio() {
+        bluetooth.sendSignal("pausresu");
+
+    }
+
+    public void seekBackward() {
+        bluetooth.sendSignal("seekbwd");
+    }
+
+    public void seekForward() {
+        bluetooth.sendSignal("seekfwd");
+
+    }
+
+    public void decreaseVolume() {
+        bluetooth.sendSignal("voludec");
+    }
+
+    public void increaseVolume() {
+        bluetooth.sendSignal("voluinc");
     }
 }
