@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="model_options">
-        <item>Model A</item>
-        <item>Model B</item>
-        <item>Model C</item>
-        <item>Model D</item>
+        <item>克隆音色</item>
+        <item>标准女声</item>
+        <item>多情感女声</item>
+        <item>多情感男声</item>
+        <item>多情感英文</item>
+        <item>河南话</item>
+        <item>四川话</item>
+        <item>粤语</item>
+        <item>卡通男声</item>
+        <item>卡通女声</item>
     </string-array>
 </resources>

@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 
 import android.util.Log;
@@ -35,6 +36,7 @@ import com.example.aivoice.bluetooth.BluetoothConnectionListener;
 
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.Set;
 
 
 public class BluetoothFragment extends Fragment {
@@ -43,13 +45,16 @@ public class BluetoothFragment extends Fragment {
     private static final String TAG = "BluetoothFragment";
 
     private BluetoothViewModel bluetoothViewModel;
-    private ArrayAdapter<String> bluetoothDevicesAdapter;//适配器
+    private ArrayAdapter<String> bluetoothDevicesAdapter;//蓝牙设备列表适配器
+    private ArrayAdapter<String> fileNameListAdapter;
 
     private TextView tvBluetoothStatus;
+    private TextView nowAudioFile;
 
-    private Spinner spinnerBluetoothDevices;  //下拉列表
+    private Spinner spinnerBluetoothDevices;  //蓝牙设备下拉列表
+    private Spinner spinnerFileNameList; //歌曲文件列表
 
-    private BluetoothAdapter  bluetoothAdapter  = BluetoothAdapter.getDefaultAdapter();
+    private BluetoothAdapter  bluetoothAdapter  = BluetoothAdapter.getDefaultAdapter(); //连接设备适配器
 
     private  Bluetooth bluetooth = new Bluetooth();
 
@@ -68,13 +73,13 @@ public class BluetoothFragment extends Fragment {
 
         // 找到显示可用蓝牙设备的下拉列表（Spinner）
         spinnerBluetoothDevices = root.findViewById(R.id.spinner_bluetooth_devices);
-
+        spinnerFileNameList = root.findViewById(R.id.spinner_dispname);
         // 找到连接蓝牙设备的按钮
         Button btnConnectBluetooth = root.findViewById(R.id.btn_connect_bluetooth);
 
         // 找到显示蓝牙连接状态的文本视图
         tvBluetoothStatus = root.findViewById(R.id.tv_bluetooth_status);
-
+        nowAudioFile = root.findViewById(R.id.dispname);
         // 创建一个ArrayAdapter来管理下拉列表中的蓝牙设备项
         // 使用requireContext()来获取当前的上下文，android.R.layout.simple_spinner_item作为列表项的布局
         bluetoothDevicesAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item);
@@ -84,6 +89,11 @@ public class BluetoothFragment extends Fragment {
 
         // 将适配器设置到下拉列表（Spinner）上
         spinnerBluetoothDevices.setAdapter(bluetoothDevicesAdapter);
+
+        fileNameListAdapter = new ArrayAdapter<>(requireContext(),android.R.layout.simple_spinner_item);
+        fileNameListAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerFileNameList.setAdapter(fileNameListAdapter);
+
 
         // 设置扫描蓝牙设备的按钮的点击监听器
         btnScanBluetooth.setOnClickListener(v -> scanBluetoothDevices()); // 当按钮被点击时，调用scanBluetoothDevices()方法来扫描蓝牙设备
@@ -125,7 +135,7 @@ public class BluetoothFragment extends Fragment {
         Button btnMode = root.findViewById(R.id.btn_mode);
         // 定义三个图标的资源 ID
         int[] iconModeResources = {
-                R.drawable.modeoneloop, // 第一个图标
+                R.drawable.modeoneplay, // 第一个图标
                 R.drawable.modeoneloop, // 第二个图标
                 R.drawable.modelistloop  // 第三个图标
         };
@@ -135,18 +145,18 @@ public class BluetoothFragment extends Fragment {
         btnMode.setCompoundDrawablesWithIntrinsicBounds(iconModeResources[currentIconIndex[0]], 0, 0, 0);
         btnMode.setOnClickListener(v -> {
             // 切换播放模式
-            bluetoothViewModel.togglePlaybackMode();
-            // 更新图标索引
-            currentIconIndex[0] = (currentIconIndex[0] + 1) % iconModeResources.length;
-            // 设置新的图标
-            btnMode.setCompoundDrawablesWithIntrinsicBounds(iconModeResources[currentIconIndex[0]], 0, 0, 0);
+            if( bluetoothViewModel.togglePlaybackMode()){
+                // 更新图标索引
+                currentIconIndex[0] = (currentIconIndex[0] + 1) % iconModeResources.length;
+                // 设置新的图标
+                btnMode.setCompoundDrawablesWithIntrinsicBounds(iconModeResources[currentIconIndex[0]], 0, 0, 0);
+            }
         });
 
 
         bluetoothViewModel.getPairedDevices().observe(getViewLifecycleOwner(), devices -> {
             // 清除下拉列表（Spinner）的适配器中的现有项
             bluetoothDevicesAdapter.clear();
-
             if (ContextCompat.checkSelfPermission( requireContext(), Manifest.permission.BLUETOOTH_SCAN)
                     == PackageManager.PERMISSION_GRANTED) {
                 for (BluetoothDevice device : devices) {
@@ -154,11 +164,14 @@ public class BluetoothFragment extends Fragment {
                 }
             }
         });
-
+        //音频文件列表
+        bluetoothViewModel.getAudList().observe(getViewLifecycleOwner(), this::onChangedFileList);
+        bluetoothViewModel.getNowPlayAudioFile().observe(getViewLifecycleOwner(),this::onChangedFile);
         bluetooth.setBluetoothConnectionListener(new BluetoothConnectionListener() {
             @Override
             public void onDeviceConnected(BluetoothDevice device) {
                 // 更新UI或处理连接成功后的逻辑
+                tvBluetoothStatus.setText(bluetooth.getConnectedDeviceName());
             }
             @Override
             public void onDeviceDisconnected(BluetoothDevice device) {
@@ -246,8 +259,7 @@ public class BluetoothFragment extends Fragment {
             }
             BluetoothDevice selectedDevice = getDeviceByName(deviceName);
             bluetoothViewModel.connectToDevice(selectedDevice);
-            tvBluetoothStatus.setText("连接到: " + deviceName);
-            connectedDeviceName = deviceName;
+
         }
         else {
             Toast.makeText(requireContext(), "请先选择一个设备", Toast.LENGTH_SHORT).show();
@@ -255,10 +267,13 @@ public class BluetoothFragment extends Fragment {
     }
 
     private boolean checkBluetoothPermissions() {
-        String[] permissions = {
-                Manifest.permission.BLUETOOTH_SCAN,
-                Manifest.permission.BLUETOOTH_CONNECT
-        };
+        String[] permissions = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            permissions = new String[]{
+                    Manifest.permission.BLUETOOTH_SCAN,
+                    Manifest.permission.BLUETOOTH_CONNECT
+            };
+        }
 
         ArrayList<String> missingPermissions = new ArrayList<>();
         for (String permission : permissions) {
@@ -280,5 +295,15 @@ public class BluetoothFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+    }
+
+    private void onChangedFileList(Set<String> audioFileList) {
+        fileNameListAdapter.clear();
+        for (String audioFile : audioFileList) {
+            fileNameListAdapter.add(audioFile.toString());
+        }
+    }
+    private void onChangedFile(String nowPlayAudioFile){
+        nowAudioFile.setText(nowPlayAudioFile);
     }
 }

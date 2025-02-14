@@ -3,7 +3,9 @@
     <string-array name="emotion_options">
         <item>自然</item>
         <item>情感</item>
-        <item>生气</item>
         <item>高兴</item>
+        <item>悲伤</item>
+        <item>生气</item>
+        <item>惊讶</item>
     </string-array>
 </resources>

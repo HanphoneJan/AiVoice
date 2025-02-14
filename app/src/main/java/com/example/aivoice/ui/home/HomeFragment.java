@@ -126,15 +126,6 @@ public class HomeFragment extends Fragment {
             recordingTimeTextView.setText(timeFormatted);
         });
 
-
-
-        // 观察上传状态
-        homeViewModel.getIsFileUploaded().observe(getViewLifecycleOwner(), isUploaded -> {
-            if (isUploaded) {
-                Toast.makeText(getContext(), "文件上传成功", Toast.LENGTH_SHORT).show();
-            }
-        });
-
         // 观察错误信息
         homeViewModel.getErrorMessage().observe(getViewLifecycleOwner(), errorMessage -> {
             if (errorMessage != null && !errorMessage.isEmpty()) {

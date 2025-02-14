@@ -9,6 +9,8 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.util.Log;
+import android.widget.Toast;
+
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import java.io.IOException;
@@ -22,6 +24,7 @@ import java.util.UUID;
 public class Bluetooth {
     private static final String TAG = "Bluetooth";
     private static String connectedDeviceName;
+
     public ArrayList<BluetoothDevice> bluetoothDeviceList = new ArrayList<>();
     private BluetoothAdapter bluetoothAdapter;
     private Context context;
@@ -30,6 +33,16 @@ public class Bluetooth {
     private InputStream inputStream;
     private static final UUID SERIAL_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private BluetoothConnectionListener bluetoothConnectionListener;
+
+    //蓝牙数据监听回调
+    private BluetoothDataListener dataListener; // 用于存储回调对象
+
+    public void setDataListener(BluetoothDataListener listener) {
+        this.dataListener = listener;
+    }
+    public interface DataListener {
+        void onDataReceived(String data);
+    }
 
     public Bluetooth(){
         //空
@@ -45,6 +58,9 @@ public class Bluetooth {
         if (bluetoothAdapter == null) {
             throw new UnsupportedOperationException("该设备不支持蓝牙");
         }
+    }
+    public interface BluetoothDataListener {
+        void onDataReceived(String data);
     }
 
     public String getConnectedDeviceName() {
@@ -119,12 +135,12 @@ public class Bluetooth {
             bluetoothSocket.connect();
             outputStream = bluetoothSocket.getOutputStream();
             inputStream = bluetoothSocket.getInputStream();
-            connectedDeviceName = device.getName();
-            Log.i(TAG, "成功连接设备: " + connectedDeviceName);
             if (bluetoothConnectionListener != null) {
                 bluetoothConnectionListener.onDeviceConnected(device);
             }
             startListening();
+            connectedDeviceName = device.getName();
+            Log.i(TAG, "成功连接设备: " + connectedDeviceName);
             return true;
         } catch (IOException e) {
             Log.e(TAG, "连接失败", e);
@@ -133,15 +149,23 @@ public class Bluetooth {
         }
     }
 
-    private void startListening() {
+    public void startListening() {
         new Thread(() -> {
             byte[] buffer = new byte[1024];
             int bytes;
             try {
                 while (true) {
                     bytes = inputStream.read(buffer);
+                    if (bytes == -1) {
+                        break; // 输入流结束，退出循环
+                    }
                     String receivedData = new String(buffer, 0, bytes, "GBK");
                     Log.i(TAG, "接收到的数据: " + receivedData);
+
+                    // 通过回调传递数据
+                    if (dataListener != null) {
+                        dataListener.onDataReceived(receivedData);
+                    }
                 }
             } catch (IOException e) {
                 Log.e(TAG, "读取数据错误", e);
@@ -150,17 +174,23 @@ public class Bluetooth {
         }).start();
     }
 
-    public void sendSignal(String order) {
+
+    public boolean sendSignal(String order) {
         if (outputStream == null) {
             Log.e(TAG, "未连接蓝牙");
-            return;
+            Toast.makeText(context, "未连接设备", Toast.LENGTH_SHORT).show();
+            return false;
         }
         try {
             byte[] command = order.getBytes("GBK");
             outputStream.write(command);
             Log.i(TAG, "已发送数据: " + order);
+            Toast.makeText(context, "已发送信号", Toast.LENGTH_SHORT).show();
+            return  true;
         } catch (IOException e) {
             Log.e(TAG, "发送失败", e);
+            Toast.makeText(context, "发送失败", Toast.LENGTH_SHORT).show();
+            return false;
         }
     }
 
@@ -190,7 +220,9 @@ public class Bluetooth {
             return new HashSet<>();
         }
         try {
-            return bluetoothAdapter.getBondedDevices();
+            Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
+            bluetoothDeviceList.addAll(pairedDevices);
+            return pairedDevices;
         } catch (SecurityException e) {
             Log.e(TAG, "SecurityException while fetching paired devices.", e);
             return new HashSet<>();

@@ -112,7 +112,7 @@ public class HomeViewModel extends ViewModel {
     // 选择音频文件
     public void chooseAudio(ActivityResultLauncher<Intent> chooseAudioLauncher) {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("audio/*");
+        intent.setType("audio/wav");
         chooseAudioLauncher.launch(intent);
     }
 
@@ -120,6 +120,8 @@ public class HomeViewModel extends ViewModel {
     public void chooseFile(ActivityResultLauncher<Intent> chooseFileLauncher) {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("*/*");
+        String[] mimeTypes = {"text/plain", "application/vnd.openxmlformats-officedocument.presentationml.presentation"};
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
         chooseFileLauncher.launch(intent);
     }
 
@@ -131,7 +133,7 @@ public class HomeViewModel extends ViewModel {
                 throw new IOException("无法创建录音文件夹");
             }
         }
-        String fileName = "录音文件：" + System.currentTimeMillis() + ".mp3"; // 动态命名
+        String fileName = "录音文件：" + System.currentTimeMillis() + ".wav"; // 动态命名
         return new File(dir, fileName);
     }
 
@@ -162,8 +164,8 @@ public class HomeViewModel extends ViewModel {
                     // 使用 SAF 目录存储录音文件
                     DocumentFile pickedDir = DocumentFile.fromTreeUri(context, musicUri);
                     if (pickedDir != null && pickedDir.exists() && pickedDir.isDirectory()) {
-                        String fileName = "录音_" + System.currentTimeMillis() + ".mp3";
-                        DocumentFile audioFileDoc = pickedDir.createFile("audio/mp3", fileName);
+                        String fileName = "录音_" + System.currentTimeMillis() + ".wav";
+                        DocumentFile audioFileDoc = pickedDir.createFile("audio/wav", fileName);
 
                         if (audioFileDoc != null) {
                             outputUri = audioFileDoc.getUri();
@@ -281,7 +283,7 @@ public class HomeViewModel extends ViewModel {
 
                 // 构建完整的请求体
                 RequestBody requestBody = requestBodyBuilder.build();
-                String url = "https://www.hanphone.top/aivoice/";
+                String url = "https://640b4e7c.r34.cpolar.top/aivoice/upload";
                 Request request = new Request.Builder()
                         .url(url)
                         .post(requestBody)
@@ -291,7 +293,8 @@ public class HomeViewModel extends ViewModel {
                 client.newCall(request).enqueue(new Callback() {
                     @Override
                     public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                        errorMessage.setValue("上传失败: " + e.getMessage());
+                        //setValue用于主线程，postValue用于后台线程
+                        errorMessage.postValue("上传失败: " + e.getMessage());
                     }
 
                     @Override
@@ -300,9 +303,10 @@ public class HomeViewModel extends ViewModel {
                             if (response.isSuccessful()) {
                                 byte[] responseBody = response.body().bytes();
                                 storeReturnedFile(responseBody);
-                                isFileUploaded.setValue(true);
+                                isFileUploaded.postValue(true);
+                                Toast.makeText(context, "文件上传成功", Toast.LENGTH_SHORT).show();
                             } else {
-                                errorMessage.setValue("上传失败: " + response.code());
+                                errorMessage.postValue("上传失败: " + response.code());
                             }
                         } finally {
                             response.close(); // 确保资源释放
@@ -320,12 +324,14 @@ public class HomeViewModel extends ViewModel {
 
     private byte[] getAudioFileContent(Uri uri) throws IOException {
         try (InputStream inputStream = context.getContentResolver().openInputStream(uri)) {
+            Log.i(TAG,"获取本地音频成功");
             return getBytes(inputStream);
         }
     }
 
     private byte[] getFileContent(Uri uri) throws IOException {
         try (InputStream inputStream = context.getContentResolver().openInputStream(uri)) {
+            Log.i(TAG,"获取本地文件成功");
             return getBytes(inputStream);
         }
     }
@@ -350,18 +356,19 @@ public class HomeViewModel extends ViewModel {
     }
 
     private void storeReturnedFile(byte[] data) {
-        String fileName = "生成音频文件_" + System.currentTimeMillis() + ".mp3";
+        String fileName = "生成音频文件_" + System.currentTimeMillis() + ".wav";
         musicUri = UriManager.getUri();
         if (musicUri != null) {
             // 如果 uri 不为空，使用用户选择的目录
             DocumentFile pickedDir = DocumentFile.fromTreeUri(context, musicUri);
             if (pickedDir != null && pickedDir.exists() && pickedDir.isDirectory()) {
                 // SAF 目录下创建文件
-                DocumentFile newFile = pickedDir.createFile("audio/mp3", fileName);
+                DocumentFile newFile = pickedDir.createFile("audio/wav", fileName);
                 if (newFile != null) {
                     try (OutputStream outputStream = context.getContentResolver().openOutputStream(newFile.getUri())) {
                         if (outputStream != null) {
                             outputStream.write(data);
+                            Toast.makeText(context, "保存成功", Toast.LENGTH_SHORT).show();
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
