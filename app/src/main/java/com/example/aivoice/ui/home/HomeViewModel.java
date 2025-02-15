@@ -25,15 +25,13 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.documentfile.provider.DocumentFile;
-import androidx.lifecycle.AndroidViewModel;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.aivoice.files.UriManager;
-import com.example.aivoice.R;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -41,11 +39,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
 import java.util.concurrent.TimeUnit;
 
 
@@ -58,11 +52,8 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class HomeViewModel extends AndroidViewModel {
+public class HomeViewModel extends ViewModel {
     private static final String TAG = "HomeViewModel";
-    private static final String KEY_MODEL_OPTIONS = "model_options";
-    private static final String KEY_EMOTION_OPTIONS = "emotion_options";
-    private static final String KEY_SPEED_OPTIONS = "speed_options";
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
     private MutableLiveData<Boolean> isRecording = new MutableLiveData<>(false);
     private MutableLiveData<Uri> audioFileUri = new MutableLiveData<>();
@@ -78,18 +69,10 @@ public class HomeViewModel extends AndroidViewModel {
     // 初始化并启动计时器
     private static long startTime; // 录音开始时间
     private static long elapsedTime = 0; // 已录音的时间
-    private MutableLiveData<List<String>> modelOptions = new MutableLiveData<>();
-    private MutableLiveData<List<String>> emotionOptions = new MutableLiveData<>();
-    private MutableLiveData<List<String>> speedOptions = new MutableLiveData<>();
-
-    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
-    private final SharedPreferences sharedPreferences;
 
     // 添加一个公共的无参构造函数
-    public HomeViewModel(Application application) {
-        super(application);
-        // 空构造函数
-        sharedPreferences = application.getSharedPreferences("shared_prefs", Context.MODE_PRIVATE);
+    public HomeViewModel() {
+
     }
 
     public void setContext(Context context) {
@@ -101,77 +84,6 @@ public class HomeViewModel extends AndroidViewModel {
     public LiveData<Boolean> getIsRecording() {
         return isRecording;
     }
-
-
-
-    public void loadOptions() {
-        executorService.submit(() -> {
-            List<String> data = loadCachedData(KEY_MODEL_OPTIONS);
-            if (data == null) {
-                data = loadDataFromResource(R.array.model_options); // 从资源文件加载数据
-                saveCachedData(KEY_MODEL_OPTIONS, data); // 缓存数据
-            }
-            if (modelOptions.getValue() == null || !modelOptions.getValue().equals(data)) {
-                modelOptions.postValue(data); // 仅在数据变化时才更新 LiveData
-            }
-
-            data = loadCachedData(KEY_EMOTION_OPTIONS);
-            if (data == null) {
-                data = loadDataFromResource(R.array.emotion_options); // 从资源文件加载数据
-                saveCachedData(KEY_EMOTION_OPTIONS, data); // 缓存数据
-            }
-            if (emotionOptions.getValue() == null || !emotionOptions.getValue().equals(data)) {
-                emotionOptions.postValue(data); // 仅在数据变化时才更新 LiveData
-            }
-
-            data = loadCachedData(KEY_SPEED_OPTIONS);
-            if (data == null) {
-                data = loadDataFromResource(R.array.speed_options); // 从资源文件加载数据
-                saveCachedData(KEY_SPEED_OPTIONS, data); // 缓存数据
-            }
-            if (speedOptions.getValue() == null || !speedOptions.getValue().equals(data)) {
-                speedOptions.postValue(data); // 仅在数据变化时才更新 LiveData
-            }
-        });
-    }
-
-    // 从 SharedPreferences 加载缓存数据
-    private List<String> loadCachedData(String key) {
-        String json = sharedPreferences.getString(key, null);
-        if (json != null) {
-            Gson gson = new Gson();
-            Type type = new TypeToken<List<String>>() {}.getType();
-            return gson.fromJson(json, type);
-        }
-        return null;
-    }
-
-    // 将数据保存到 SharedPreferences
-    private void saveCachedData(String key, List<String> data) {
-        Gson gson = new Gson();
-        String json = gson.toJson(data);
-        sharedPreferences.edit().putString(key, json).apply();
-    }
-
-    // 辅助方法，从资源文件中加载数据
-    private List<String> loadDataFromResource(int arrayResId) {
-        String[] array = getApplication().getResources().getStringArray(arrayResId);
-        return Arrays.asList(array);
-    }
-
-
-    public LiveData<List<String>> getModelOptions() {
-        return modelOptions;
-    }
-
-    public LiveData<List<String>> getEmotionOptions() {
-        return emotionOptions;
-    }
-
-    public LiveData<List<String>> getSpeedOptions() {
-        return speedOptions;
-    }
-
 
     public LiveData<Long> getRecordingTime() {
         return recordingTime; // 用于更新UI的录音时间
@@ -521,6 +433,5 @@ public class HomeViewModel extends AndroidViewModel {
     @Override
     protected void onCleared() {
         super.onCleared();
-        executorService.shutdown(); // 关闭线程池
     }
 }

@@ -6,11 +6,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
+
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -38,7 +39,6 @@ public class HomeFragment extends Fragment {
     private ActivityResultLauncher<Intent> chooseAudioLauncher;
     private ActivityResultLauncher<Intent> chooseFileLauncher;
 
-    private ExecutorService executorService = Executors.newSingleThreadExecutor(); // 创建一个线程池
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -51,33 +51,30 @@ public class HomeFragment extends Fragment {
         spinnerModel = root.findViewById(R.id.spinner_model);
         spinnerEmotion = root.findViewById(R.id.spinner_emotion);
         spinnerSpeed = root.findViewById(R.id.spinner_speed);
+        // 创建ArrayAdapter并设置到Spinner中
+        ArrayAdapter<CharSequence> modelAdapter = ArrayAdapter.createFromResource(
+                requireContext(),
+                R.array.model_options,
+                android.R.layout.simple_spinner_item
+        );
+        modelAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerModel.setAdapter(modelAdapter);
 
-        // 观察并更新 model spinner
-        homeViewModel.getModelOptions().observe(getViewLifecycleOwner(), options -> {
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
-                    android.R.layout.simple_spinner_item, options);
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            spinnerModel.setAdapter(adapter);
-        });
+        ArrayAdapter<CharSequence> emotionAdapter = ArrayAdapter.createFromResource(
+                requireContext(),
+                R.array.emotion_options,
+                android.R.layout.simple_spinner_item
+        );
+        emotionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerEmotion.setAdapter(emotionAdapter);
 
-        // 观察并更新 emotion spinner
-        homeViewModel.getEmotionOptions().observe(getViewLifecycleOwner(), options -> {
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
-                    android.R.layout.simple_spinner_item, options);
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            spinnerEmotion.setAdapter(adapter);
-        });
-
-        // 观察并更新 speed spinner
-        homeViewModel.getSpeedOptions().observe(getViewLifecycleOwner(), options -> {
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
-                    android.R.layout.simple_spinner_item, options);
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            spinnerSpeed.setAdapter(adapter);
-        });
-
-        // 异步加载选项数据
-        homeViewModel.loadOptions();
+        ArrayAdapter<CharSequence> speedAdapter = ArrayAdapter.createFromResource(
+                requireContext(),
+                R.array.speed_options,
+                android.R.layout.simple_spinner_item
+        );
+        speedAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerSpeed.setAdapter(speedAdapter);
 
         audioFileTextView = root.findViewById(R.id.audioFileTextView_status);
         textFileTextView = root.findViewById(R.id.textFileTextView_status);
