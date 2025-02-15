@@ -57,10 +57,6 @@ public class MusicViewModel extends ViewModel implements Bluetooth.BluetoothData
         return bluetooth.sendSignal("audprev");
     }
 
-    public boolean goBackDirectory() {
-        return bluetooth.sendSignal("dirback");
-    }
-
     public boolean displayTrackName() {
         return bluetooth.sendSignal("dispname");
     }

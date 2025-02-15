@@ -4,6 +4,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+
+    <ImageView
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:src="@drawable/music"/>
+
     <!-- 控制界面 -->
     <LinearLayout
         android:layout_width="match_parent"
@@ -13,38 +19,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- 第一行控件 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:gravity="center"
-            android:orientation="horizontal"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
-
-            <Button
-                android:id="@+id/btn_audlist"
-                android:layout_width="46dp"
-                android:layout_height="wrap_content"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:backgroundTint="@android:color/transparent"
-                android:drawableLeft="@drawable/audlist" />
-
-
-            <Button
-                android:id="@+id/btn_dirback"
-                android:layout_width="46dp"
-                android:layout_height="46dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:backgroundTint="@android:color/transparent"
-                android:drawableLeft="@drawable/dirback"
-                android:drawablePadding="8dp"
-                android:gravity="center_vertical|start"
-                android:padding="12dp" />
-        </LinearLayout>
-
-        <!-- 当前播放文件 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="60dp"
@@ -128,6 +102,8 @@
                 android:drawablePadding="8dp"
                 android:gravity="center_vertical|start"
                 android:padding="12dp" />
+
+
         </LinearLayout>
 
         <!-- 音量控制和播放模式 -->
@@ -172,6 +148,14 @@
                 android:gravity="center_vertical|start"
                 android:padding="12dp" />
         </LinearLayout>
+
+        <Button
+            android:id="@+id/btn_audlist"
+            android:layout_width="46dp"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:backgroundTint="@android:color/transparent"
+            android:drawableLeft="@drawable/audlist" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

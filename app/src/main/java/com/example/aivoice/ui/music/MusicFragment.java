@@ -40,7 +40,6 @@ public class MusicFragment extends Fragment {
         Button btnAudList = root.findViewById(R.id.btn_audlist);
         Button btnNext = root.findViewById(R.id.btn_audnext);
         Button btnPrev = root.findViewById(R.id.btn_audprev);
-        Button btnDirBack = root.findViewById(R.id.btn_dirback);
         Button btnDispName = root.findViewById(R.id.btn_dispname);
 
         Button btnSeekBwd = root.findViewById(R.id.btn_seekbwd);
@@ -72,7 +71,6 @@ public class MusicFragment extends Fragment {
         btnAudList.setOnClickListener(v -> musicViewModel.showAudioList());
         btnNext.setOnClickListener(v -> musicViewModel.playNextTrack());
         btnPrev.setOnClickListener(v -> musicViewModel.playPreviousTrack());
-        btnDirBack.setOnClickListener(v -> musicViewModel.goBackDirectory());
         btnDispName.setOnClickListener(v -> musicViewModel.displayTrackName());
 
         btnSeekBwd.setOnClickListener(v -> musicViewModel.seekBackward());
