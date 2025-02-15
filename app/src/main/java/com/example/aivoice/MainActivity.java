@@ -27,7 +27,6 @@ import com.example.aivoice.databinding.ActivityMainBinding;
 public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_PERMISSIONS = 1;
-    private EditText editText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,20 +47,6 @@ public class MainActivity extends AppCompatActivity {
         // Request permissions
         requestPermissionsIfNeeded();
 
-        editText = findViewById(R.id.inputText);
-
-        // 设置焦点变化监听器
-        editText.setOnFocusChangeListener((view, hasFocus) -> {
-            if (hasFocus) {
-                // 获取焦点时，将 EditText 高度设置为填满屏幕
-                editText.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
-                editText.requestLayout();
-            } else {
-                // 失去焦点时，恢复为默认高度
-                editText.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
-                editText.requestLayout();
-            }
-        });
     }
 
     private void requestPermissionsIfNeeded() {
