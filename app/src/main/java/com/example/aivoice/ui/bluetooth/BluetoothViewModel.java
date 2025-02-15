@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.os.Handler;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -27,11 +28,10 @@ public class BluetoothViewModel extends ViewModel {
     private final MutableLiveData<Set<BluetoothDevice>> bluetoothDevicesList = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isConnected = new MutableLiveData<>();
     private final MutableLiveData<String> connectionStatus = new MutableLiveData<>();
-    private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isReceiverRegistered = new MutableLiveData<>(false);
     private final Bluetooth bluetooth = new Bluetooth();
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
-
+    private Context context;
     private long startTime; // 扫描蓝牙开始时间
     private long elapsedTime = 0; // 已扫描的时间
     private final MutableLiveData<Long> recordingTime = new MutableLiveData<>(0L); // 时间，单位：秒
@@ -39,10 +39,9 @@ public class BluetoothViewModel extends ViewModel {
 
 
     public void setContext(Context context) {
+        this.context=context;
         bluetooth.setContext(context);
     }
-
-
 
     public LiveData<Boolean> getIsBluetoothEnabled() {
         return isBluetoothEnabled;
@@ -64,13 +63,7 @@ public class BluetoothViewModel extends ViewModel {
         return connectionStatus;
     }
 
-    // 设置错误信息的方法
-    public void setErrorMessage(String message) {
-            errorMessage.setValue(message);
-    }
-    public LiveData<String> getErrorMessage() {
-        return errorMessage;
-    }
+
 
 
     public LiveData<Boolean> getIsReceiverRegistered() {
@@ -84,7 +77,7 @@ public class BluetoothViewModel extends ViewModel {
                 Set<BluetoothDevice> devices = bluetooth.getPairedDevices();
                 pairedDevices.postValue(devices != null ? devices : new HashSet<>());
             } catch (Exception e) {
-                postError("Error 获取蓝牙设备列表: " + e.getMessage());
+                 Toast.makeText(context, "获取已配对蓝牙设备失败", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -92,11 +85,11 @@ public class BluetoothViewModel extends ViewModel {
     //连接蓝牙的过程是异步的
     public void connectToDevice(BluetoothDevice device) {
         if (device == null) {
-            postError("连接设备不能为空.");
+            Toast.makeText(context, "蓝牙设备不能为空", Toast.LENGTH_SHORT).show();
             return;
         }
         if (!bluetooth.hasBluetoothPermissions()) {
-            postError("蓝牙连接权限未打开");
+            Toast.makeText(context, "蓝牙连接权限未打开", Toast.LENGTH_SHORT).show();
             return;
         }
         executorService.execute(() -> {
@@ -107,12 +100,12 @@ public class BluetoothViewModel extends ViewModel {
                 if (success) {
                     connectedDevice = device;
                 } else {
-                    postError("连接设备失败: " + device.getName());
+                    Toast.makeText(context, "连接设备失败", Toast.LENGTH_SHORT).show();
                 }
             } catch (SecurityException e) {
-                postError("SecurityException: 蓝牙连接权限未打开");
+                Toast.makeText(context, "蓝牙连接权限未打开", Toast.LENGTH_SHORT).show();
             } catch (Exception e) {
-                postError("连接设备错误: " + e.getMessage());
+                Toast.makeText(context, "连接蓝牙错误", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -149,7 +142,7 @@ public class BluetoothViewModel extends ViewModel {
             }, 60000);
 
         } catch (Exception e) {
-            postError("蓝牙扫描失败: " + e.getMessage());
+            Toast.makeText(context, "扫描蓝牙失败", Toast.LENGTH_SHORT).show();
             Log.e(TAG, "蓝牙扫描异常", e);
         }
     }
@@ -161,11 +154,6 @@ public class BluetoothViewModel extends ViewModel {
         Log.i(TAG,"蓝牙设备已断开连接");
     }
     
-    private void postError(String message) {
-        Log.e(TAG, message);
-        errorMessage.postValue(message);
-
-    }
 
     @Override
     protected void onCleared() {
@@ -173,7 +161,7 @@ public class BluetoothViewModel extends ViewModel {
         try {
             executorService.shutdownNow();
         } catch (Exception e) {
-            Log.e(TAG, "Error during ViewModel cleanup: " + e.getMessage(), e);
+            Log.e(TAG, "Error 清除viewModel错误: " + e.getMessage(), e);
         }
     }
 

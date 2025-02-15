@@ -59,7 +59,7 @@ public class HomeViewModel extends ViewModel {
     private MutableLiveData<Uri> audioFileUri = new MutableLiveData<>();
     private MutableLiveData<Uri> fileUri = new MutableLiveData<>();
     private MutableLiveData<Boolean> isFileUploaded = new MutableLiveData<>(false);
-    private MutableLiveData<String> errorMessage = new MutableLiveData<>();
+
     private MutableLiveData<Long> recordingTime = new MutableLiveData<>(0L); // 录音时间，单位：秒
     private static Uri musicUri = UriManager.getUri();
     private Context context;
@@ -206,7 +206,7 @@ public class HomeViewModel extends ViewModel {
 
             } catch (IOException e) {
                 Log.e(TAG, "录音失败", e);
-                errorMessage.setValue("录音失败");
+                Toast.makeText(context, "录音失败", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -225,7 +225,7 @@ public class HomeViewModel extends ViewModel {
                 handler.removeCallbacks(updateTimeRunnable);
             } catch (RuntimeException e) {
                 Log.e("HomeViewModel", "停止录音失败", e);
-                errorMessage.setValue("停止录音失败");
+                Toast.makeText(context, "停止录音失败", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -306,8 +306,7 @@ public class HomeViewModel extends ViewModel {
                 client.newCall(request).enqueue(new Callback() {
                     @Override
                     public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                        //setValue用于主线程，postValue用于后台线程
-                        errorMessage.postValue("上传失败: " + e.getMessage());
+                        Toast.makeText(context, "上传失败", Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
@@ -317,9 +316,9 @@ public class HomeViewModel extends ViewModel {
                                 byte[] responseBody = response.body().bytes();
                                 storeReturnedFile(responseBody);
                                 isFileUploaded.postValue(true);
-                                Toast.makeText(context, "文件上传成功", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(context, "上传成功", Toast.LENGTH_SHORT).show();
                             } else {
-                                errorMessage.postValue("上传失败: " + response.code());
+                                Toast.makeText(context, "上传失败", Toast.LENGTH_SHORT).show();
                             }
                         } finally {
                             response.close(); // 确保资源释放
@@ -328,10 +327,10 @@ public class HomeViewModel extends ViewModel {
                 });
             } catch (IOException e) {
                 e.printStackTrace();
-                errorMessage.setValue("文件读取错误");
+                Toast.makeText(context, "文件读取错误", Toast.LENGTH_SHORT).show();
             }
         } else {
-            errorMessage.setValue("请选择文件");
+            Toast.makeText(context, "请选择文件", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -365,7 +364,7 @@ public class HomeViewModel extends ViewModel {
         if (fileName != null && fileName.contains("/")) {
             fileName = fileName.substring(fileName.lastIndexOf("/") + 1);
         }
-        return fileName != null ? fileName : "unknown_file";
+        return fileName != null ? fileName : "未命名文件";
     }
 
 

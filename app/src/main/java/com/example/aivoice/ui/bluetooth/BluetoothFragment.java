@@ -57,8 +57,7 @@ public class BluetoothFragment extends Fragment {
         // 使用ViewModelProvider获取BluetoothViewModel的实例
         bluetoothViewModel = new ViewModelProvider(this).get(BluetoothViewModel.class);
         bluetoothViewModel.setContext(requireContext());
-        // 设置初始错误为空或默认值
-        bluetoothViewModel.setErrorMessage(""); // 清空错误信息，或者设置为默认空值
+
         // 初始化视图
         tvBluetoothStatus = root.findViewById(R.id.tv_bluetooth_status);
         lvBluetoothDevices = root.findViewById(R.id.lv_bluetooth);

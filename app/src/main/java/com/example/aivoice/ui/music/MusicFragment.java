@@ -6,7 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -15,8 +14,6 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.aivoice.R;
-import com.example.aivoice.bluetooth.Bluetooth;
-import com.example.aivoice.ui.bluetooth.BluetoothViewModel;
 
 import java.util.Set;
 
@@ -24,7 +21,7 @@ public class MusicFragment extends Fragment {
 
     private static final String TAG = "MusicFragment";
     private TextView nowAudioFile;
-    private Spinner spinnerFileNameList; //歌曲文件列表
+
     private ArrayAdapter<String> fileNameListAdapter;
     private MusicViewModel musicViewModel;
     @Override
@@ -34,22 +31,18 @@ public class MusicFragment extends Fragment {
         musicViewModel.setContext(requireContext());
 
 
-        spinnerFileNameList = root.findViewById(R.id.spinner_dispname);
         nowAudioFile = root.findViewById(R.id.dispname);
         fileNameListAdapter = new ArrayAdapter<>(requireContext(),android.R.layout.simple_spinner_item);
         fileNameListAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerFileNameList.setAdapter(fileNameListAdapter);
 
         //按钮
         Button btnAudPlay = root.findViewById(R.id.btn_audplay);
-        Button btnAudStop = root.findViewById(R.id.btn_audstop);
         Button btnAudList = root.findViewById(R.id.btn_audlist);
         Button btnNext = root.findViewById(R.id.btn_audnext);
         Button btnPrev = root.findViewById(R.id.btn_audprev);
         Button btnDirBack = root.findViewById(R.id.btn_dirback);
         Button btnDispName = root.findViewById(R.id.btn_dispname);
 
-        Button btnPausresu = root.findViewById(R.id.btn_pausresu);
         Button btnSeekBwd = root.findViewById(R.id.btn_seekbwd);
         Button btnFwd = root.findViewById(R.id.btn_seekfwd);
         Button btnVoludec =root.findViewById(R.id.btn_voludec);
@@ -58,15 +51,30 @@ public class MusicFragment extends Fragment {
 
 
         // 按钮对应的功能绑定
-        btnAudPlay.setOnClickListener(v -> musicViewModel.playAudio());
-        btnAudStop.setOnClickListener(v -> musicViewModel.stopAudio());
+
+        int[] iconPlayMusic = {
+                R.drawable.audplay, // 第一个图标
+                R.drawable.audstop, // 第二个图标
+        };
+        btnAudPlay.setOnClickListener(v -> {
+            // 切换播放模式
+            if( musicViewModel.playAudio()){
+                if(musicViewModel.getIsPlay()){
+                    // 设置新的图标
+                    btnAudPlay.setCompoundDrawablesWithIntrinsicBounds(iconPlayMusic[1], 0, 0, 0);
+                }else {
+                    btnAudPlay.setCompoundDrawablesWithIntrinsicBounds(iconPlayMusic[0], 0, 0, 0);
+                }
+
+            }
+        });
+
         btnAudList.setOnClickListener(v -> musicViewModel.showAudioList());
         btnNext.setOnClickListener(v -> musicViewModel.playNextTrack());
         btnPrev.setOnClickListener(v -> musicViewModel.playPreviousTrack());
         btnDirBack.setOnClickListener(v -> musicViewModel.goBackDirectory());
         btnDispName.setOnClickListener(v -> musicViewModel.displayTrackName());
 
-        btnPausresu.setOnClickListener(v -> musicViewModel.pauseResumeAudio());
         btnSeekBwd.setOnClickListener(v -> musicViewModel.seekBackward());
         btnFwd.setOnClickListener(v -> musicViewModel.seekForward());
         btnVoludec.setOnClickListener(v -> musicViewModel.decreaseVolume());
@@ -103,7 +111,7 @@ public class MusicFragment extends Fragment {
     private void onChangedFileList(Set<String> audioFileList) {
         fileNameListAdapter.clear();
         for (String audioFile : audioFileList) {
-            fileNameListAdapter.add(audioFile.toString());
+            fileNameListAdapter.add(audioFile);
         }
     }
     private void onChangedFile(String nowPlayAudioFile){

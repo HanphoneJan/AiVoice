@@ -16,7 +16,7 @@ public class MusicViewModel extends ViewModel implements Bluetooth.BluetoothData
     private final MutableLiveData<Set<String>> audList = new MutableLiveData<>() ;
     private final MutableLiveData<String> nowPlayAudioFile = new MutableLiveData<>();
     private final Bluetooth bluetooth = new Bluetooth();
-
+    private static boolean isPlay = false;
     public MusicViewModel() {
         bluetooth.setDataListener(this);
         //空
@@ -32,12 +32,17 @@ public class MusicViewModel extends ViewModel implements Bluetooth.BluetoothData
         return audList;
     }
 
+    public boolean getIsPlay(){
+        return isPlay;
+    }
 
     public boolean playAudio() {
-        return bluetooth.sendSignal("audplay");
-    }
-    public boolean stopAudio() {
-        return bluetooth.sendSignal("audstop");
+        if(isPlay){
+            isPlay = !bluetooth.sendSignal("pausresu");
+            return isPlay;
+        }
+        isPlay = bluetooth.sendSignal("audplay");
+        return isPlay;
     }
 
     public boolean showAudioList() {
@@ -64,9 +69,6 @@ public class MusicViewModel extends ViewModel implements Bluetooth.BluetoothData
         return bluetooth.sendSignal("modechg");
     }
 
-    public boolean pauseResumeAudio() {
-        return bluetooth.sendSignal("pausresu");
-    }
 
     public boolean seekBackward() {
         return bluetooth.sendSignal("seekbwd");
