@@ -1,154 +1,182 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center_horizontal"
-    >
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="84dp"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:layout_marginTop="24dp">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
 
+        <!-- 模型 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:gravity="left|center_vertical"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp"
+            android:paddingLeft="110dp">
+
+            <Button
+                android:id="@+id/btn_model"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="模型" />
+
+            <Spinner
+                android:id="@+id/spinner_model"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp" />
+        </LinearLayout>
+
+        <!-- 情感 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:gravity="left|center_vertical"
+            android:orientation="horizontal"
+            android:paddingLeft="110dp">
+
+            <Button
+                android:id="@+id/btn_emotion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="情绪" />
+
+            <Spinner
+                android:id="@+id/spinner_emotion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp" />
+        </LinearLayout>
+
+        <!-- 语速 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:gravity="left|center_vertical"
+            android:orientation="horizontal"
+            android:paddingLeft="110dp">
+
+            <Button
+                android:id="@+id/btn_speed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="语速" />
+
+            <Spinner
+                android:id="@+id/spinner_speed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp" />
+        </LinearLayout>
+
+        <!-- 音频文件 -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_marginTop="12dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="音频文件："
+                android:textSize="18sp" />
+            <TextView
+                android:id="@+id/audioFileTextView_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="未选择"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <!-- 选择音频文件按钮 -->
         <Button
-            android:id="@+id/btn_model"
+            android:id="@+id/btn_choose_audio"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="模型" />
+            android:gravity="center"
+            android:text="选择音频文件"
+            android:textSize="18sp" />
 
-        <Spinner
-            android:id="@+id/spinner_model"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minHeight="48dp" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="84dp"
-        android:gravity="center"
-        android:orientation="horizontal">
-
+        <!-- 录音按钮 -->
         <Button
-            android:id="@+id/btn_emotion"
+            android:id="@+id/btn_record_audio"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="情绪" />
+            android:text="录音"
+            android:textSize="18sp" />
 
-        <Spinner
-            android:id="@+id/spinner_emotion"
+        <!-- 录音计时器 -->
+        <TextView
+            android:id="@+id/recordingTimeTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:minHeight="48dp" />
+            android:text="00:00"
+            android:textSize="18sp"
+            android:layout_centerInParent="true"
+            android:layout_margin="16dp"/>
 
-    </LinearLayout>
+        <!-- 文本文件 -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_marginTop="12dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="文本文件："
+                android:textSize="18sp" />
+            <TextView
+                android:id="@+id/textFileTextView_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="未选择"
+                android:textSize="18sp" />
+        </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="84dp"
-        android:gravity="center"
-        android:orientation="horizontal">
-
+        <!-- 选择文本文件按钮 -->
         <Button
-            android:id="@+id/btn_speed"
+            android:id="@+id/btn_choose_file"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="语速" />
-
-        <Spinner
-            android:id="@+id/spinner_speed"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minHeight="48dp" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:layout_marginTop="12dp"
-        >
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="音频文件："
+            android:text="选择文本文件"
             android:textSize="18sp" />
-        <TextView
-            android:id="@+id/audioFileTextView_status"
+
+        <!-- 输入框 -->
+        <EditText
+            android:id="@+id/inputText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxHeight="216dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:hint="请输入文本"
+            android:textSize="18sp"
+            android:padding="12dp"
+            android:background="@android:drawable/editbox_background"
+            android:scrollbars="vertical"
+            android:inputType="textMultiLine"
+            android:maxLines="3"
+            android:gravity="top|start" />
+
+        <!-- 上传按钮 -->
+        <Button
+            android:id="@+id/btn_upload"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="未选择"
-            android:textSize="18sp" />
-    </LinearLayout>
-
-
-    <Button
-        android:id="@+id/btn_choose_audio"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="选择音频文件"
-        android:textSize="18sp" />
-
-    <Button
-        android:id="@+id/btn_record_audio"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="录音"
-        android:textSize="18sp" />
-
-    <!-- 录音计时器 TextView -->
-    <TextView
-        android:id="@+id/recordingTimeTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="00:00"
-        android:textSize="18sp"
-        android:layout_centerInParent="true"
-        android:layout_margin="16dp"/>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:layout_marginTop="12dp"
-        >
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="文本文件："
-            android:textSize="18sp" />
-        <TextView
-            android:id="@+id/textFileTextView_status"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="未选择"
+            android:layout_marginTop="16dp"
+            android:text="上传"
             android:textSize="18sp" />
     </LinearLayout>
-
-
-    <Button
-        android:id="@+id/btn_choose_file"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="选择文本文件"
-        android:textSize="18sp" />
-
-    <Button
-        android:id="@+id/btn_upload"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="上传"
-        android:textSize="18sp" />
-
-</LinearLayout>
+</ScrollView>

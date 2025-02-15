@@ -10,6 +10,11 @@
         android:id="@+id/navigation_bluetooth"
         android:icon="@drawable/bluetooth"
         android:title="@string/title_bluetooth" />
+
+    <item
+        android:id="@+id/navigation_music"
+        android:icon="@drawable/music"
+        android:title="@string/title_music" />
     <item
         android:id="@+id/navigation_files"
         android:icon="@drawable/files"

@@ -55,16 +55,14 @@ public class HomeViewModel extends ViewModel {
     private MutableLiveData<Boolean> isFileUploaded = new MutableLiveData<>(false);
     private MutableLiveData<String> errorMessage = new MutableLiveData<>();
     private MutableLiveData<Long> recordingTime = new MutableLiveData<>(0L); // 录音时间，单位：秒
-    private Uri musicUri = UriManager.getUri();
+    private static Uri musicUri = UriManager.getUri();
     private Context context;
     private MediaRecorder mediaRecorder;
     private Handler handler = new Handler(Looper.getMainLooper()); // 用于更新UI
     private Runnable updateTimeRunnable;
     // 初始化并启动计时器
-    private long startTime; // 录音开始时间
-    private long elapsedTime = 0; // 已录音的时间
-
-
+    private static long startTime; // 录音开始时间
+    private static long elapsedTime = 0; // 已录音的时间
 
     // 添加一个公共的无参构造函数
     public HomeViewModel() {
@@ -244,7 +242,7 @@ public class HomeViewModel extends ViewModel {
 
 
     // 上传文件
-    public void uploadFiles(String model, String emotion, String speed) {
+    public void uploadFiles(String model, String emotion, String speed,String userInput) {
         if (audioFileUri.getValue() != null && fileUri.getValue() != null) {
             // 设置超时时间
             OkHttpClient client = new OkHttpClient.Builder()
@@ -258,20 +256,6 @@ public class HomeViewModel extends ViewModel {
                     .setType(MultipartBody.FORM);
 
             try {
-                // 添加音频文件部分
-                String audioMimeType = context.getContentResolver().getType(audioFileUri.getValue());
-                String audioFileName = getFileName(audioFileUri.getValue());
-                requestBodyBuilder.addFormDataPart("audio", audioFileName,
-                        RequestBody.create(MediaType.parse(audioMimeType),
-                                getAudioFileContent(audioFileUri.getValue())));
-
-                // 添加常规文件部分
-                String fileMimeType = context.getContentResolver().getType(fileUri.getValue());
-                String regularFileName = getFileName(fileUri.getValue());
-                requestBodyBuilder.addFormDataPart("file", regularFileName,
-                        RequestBody.create(MediaType.parse(fileMimeType),
-                                getFileContent(fileUri.getValue())));
-
                 // 添加Model参数部分
                 requestBodyBuilder.addFormDataPart("model", model);
 
@@ -281,6 +265,45 @@ public class HomeViewModel extends ViewModel {
                 // 添加Speed参数部分
                 requestBodyBuilder.addFormDataPart("speed", speed);
 
+                if(model.equals("克隆音色")){
+                    // 添加音频文件部分
+                    String audioMimeType = context.getContentResolver().getType(audioFileUri.getValue());
+                    String audioFileName = getFileName(audioFileUri.getValue());
+                    requestBodyBuilder.addFormDataPart("audio", audioFileName,
+                            RequestBody.create(MediaType.parse(audioMimeType),
+                                    getAudioFileContent(audioFileUri.getValue())));
+                }
+                // 添加常规文件部分
+                if (userInput.isEmpty()) {
+                    // 如果 userInput 为空，使用 fileUri 中的文件
+                    if (fileUri.getValue() != null) {
+                        String fileMimeType = context.getContentResolver().getType(fileUri.getValue());
+                        String regularFileName = getFileName(fileUri.getValue());
+                        requestBodyBuilder.addFormDataPart("file", regularFileName,
+                                RequestBody.create(MediaType.parse(fileMimeType),
+                                        getFileContent(fileUri.getValue())));
+                    } else {
+                        // 如果 fileUri 也为空，提示用户选择文件或输入文本
+                        Toast.makeText(context, "请选择文件或输入文本", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                } else {
+                    // 如果 userInput 不为空
+                    if (fileUri.getValue() != null) {
+                        Toast.makeText(context, "请勿同时选择文本和输入文本", Toast.LENGTH_SHORT).show();
+                        return;
+                    } else {
+                        // 如果 fileUri 为空，将 userInput 保存为文件并构建 RequestBody
+                        File textFile = saveTextAsFile(userInput); // 保存文本为文件
+                        if (textFile != null) {
+                            requestBodyBuilder.addFormDataPart("file", textFile.getName(),
+                                    RequestBody.create(MediaType.parse("text/plain"), textFile));
+                        } else {
+                            Toast.makeText(context, "保存文本文件失败", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                    }
+                }
                 // 构建完整的请求体
                 RequestBody requestBody = requestBodyBuilder.build();
                 String url = "https://640b4e7c.r34.cpolar.top/aivoice/upload";
@@ -355,6 +378,7 @@ public class HomeViewModel extends ViewModel {
         return fileName != null ? fileName : "unknown_file";
     }
 
+
     private void storeReturnedFile(byte[] data) {
         String fileName = "生成音频文件_" + System.currentTimeMillis() + ".wav";
         musicUri = UriManager.getUri();
@@ -396,5 +420,24 @@ public class HomeViewModel extends ViewModel {
         }
     }
 
+    private File saveTextAsFile(String text) {
+        // 使用时间戳生成唯一的文件名
+        String fileName = "text_file_" + System.currentTimeMillis() + ".txt";
+
+        // 保存到应用的默认目录
+        File textDir = new File(context.getFilesDir(), "TextFiles");
+        if (!textDir.exists()) {
+            textDir.mkdirs();
+        }
+
+        File file = new File(textDir, fileName);
+        try (FileOutputStream outputStream = new FileOutputStream(file)) {
+            outputStream.write(text.getBytes());
+            return file; // 返回保存的文件对象
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null; // 保存失败，返回 null
+        }
+    }
 
 }

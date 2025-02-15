@@ -5,7 +5,6 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.os.Handler;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -18,14 +17,14 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 //观察类
-public class BluetoothViewModel extends ViewModel implements Bluetooth.BluetoothDataListener {
+public class BluetoothViewModel extends ViewModel {
 
     private static final String TAG = "BluetoothViewModel";
     //    MutableLiveData 和 LiveData 在 UI 和数据层之间传递数据，LiveData只读对外暴露， MutableLiveData则用于修改
     private final MutableLiveData<Boolean> isBluetoothEnabled = new MutableLiveData<>();
-    private final MutableLiveData<String> nowPlayAudioFile = new MutableLiveData<>();
-    private final MutableLiveData<Set<String>> audList = new MutableLiveData<>() ;
+
     private final MutableLiveData<Set<BluetoothDevice>> pairedDevices = new MutableLiveData<>();
+    private final MutableLiveData<Set<BluetoothDevice>> bluetoothDevicesList = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isConnected = new MutableLiveData<>();
     private final MutableLiveData<String> connectionStatus = new MutableLiveData<>();
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
@@ -39,23 +38,11 @@ public class BluetoothViewModel extends ViewModel implements Bluetooth.Bluetooth
     private static BluetoothDevice connectedDevice;
 
 
-
-    public BluetoothViewModel() {
-        bluetooth.setDataListener(this);
-        //空
-    }
-
     public void setContext(Context context) {
         bluetooth.setContext(context);
     }
 
-    public LiveData<String> getNowPlayAudioFile() {
-        return nowPlayAudioFile;
-    }
 
-    public LiveData<Set<String>> getAudList() {
-        return audList;
-    }
 
     public LiveData<Boolean> getIsBluetoothEnabled() {
         return isBluetoothEnabled;
@@ -66,6 +53,9 @@ public class BluetoothViewModel extends ViewModel implements Bluetooth.Bluetooth
         return pairedDevices;
     }
 
+    public LiveData<Set<BluetoothDevice>> getBluetoothDevicesList() {
+        return bluetoothDevicesList;
+    }
     public LiveData<Boolean> getIsConnected() {
         return isConnected;
     }
@@ -183,72 +173,5 @@ public class BluetoothViewModel extends ViewModel implements Bluetooth.Bluetooth
         }
     }
 
-    public boolean playAudio() {
-        return bluetooth.sendSignal("audplay");
-    }
-    public boolean stopAudio() {
-        return bluetooth.sendSignal("audstop");
-    }
 
-    public boolean showAudioList() {
-       return bluetooth.sendSignal("audlist");
-    }
-
-    public boolean playNextTrack() {
-        return bluetooth.sendSignal("audnext");
-    }
-
-    public boolean playPreviousTrack() {
-        return bluetooth.sendSignal("audprev");
-    }
-
-    public boolean goBackDirectory() {
-       return bluetooth.sendSignal("dirback");
-    }
-
-    public boolean displayTrackName() {
-        return bluetooth.sendSignal("dispname");
-    }
-
-    public boolean togglePlaybackMode() {
-        return bluetooth.sendSignal("modechg");
-    }
-
-    public boolean pauseResumeAudio() {
-        return bluetooth.sendSignal("pausresu");
-    }
-
-    public boolean seekBackward() {
-        return bluetooth.sendSignal("seekbwd");
-    }
-
-    public boolean seekForward() {
-        return bluetooth.sendSignal("seekfwd");
-    }
-
-    public boolean decreaseVolume() {
-       return bluetooth.sendSignal("voludec");
-    }
-
-    public boolean increaseVolume() {
-        return bluetooth.sendSignal("voluinc");
-    }
-
-    // 实现 onDataReceived 回调
-    @Override
-    public void onDataReceived(String data) {
-        if (data.startsWith("dispname ")) {
-            nowPlayAudioFile.postValue(data.replace("dispname ", ""));
-        } else if (data.startsWith("audlist ")) {
-            // 解析音频列表
-            String audios = data.replace("audlist ", "");
-            Set<String> audioSet = new HashSet<>();
-            // 假设返回的数据是用逗号分隔的音频文件名
-            String[] audioArray = audios.split(",");
-            for (String audio : audioArray) {
-                audioSet.add(audio.trim()); // 去除空格并添加到Set
-            }
-            audList.postValue(audioSet); // 更新LiveData
-        }
-    }
 }

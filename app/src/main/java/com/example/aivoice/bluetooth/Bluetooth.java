@@ -23,9 +23,10 @@ import java.util.UUID;
 
 public class Bluetooth {
     private static final String TAG = "Bluetooth";
-    private static String connectedDeviceName;
+    //static，生命周期与应用程序相同
+    private static BluetoothDevice connectedDevice;
 
-    public ArrayList<BluetoothDevice> bluetoothDeviceList = new ArrayList<>();
+    public static ArrayList<BluetoothDevice> bluetoothDeviceList = new ArrayList<>();
     private BluetoothAdapter bluetoothAdapter;
     private Context context;
     private BluetoothSocket bluetoothSocket;
@@ -63,12 +64,33 @@ public class Bluetooth {
         void onDataReceived(String data);
     }
 
-    public String getConnectedDeviceName() {
-        return connectedDeviceName;
+    public static BluetoothDevice getConnectedDevice() {
+        return connectedDevice;
     }
 
-    public void setConnectedDeviceName(String newConnectedDeviceName) {
-        connectedDeviceName = newConnectedDeviceName;
+    public String getConnectedDeviceName(){
+        // 检查BLUETOOTH权限
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH)
+                != PackageManager.PERMISSION_GRANTED) {
+            // 请求BLUETOOTH权限
+            ActivityCompat.requestPermissions((Activity) context,
+                    new String[]{Manifest.permission.BLUETOOTH},
+                    1); // 请求码可以是任意整数
+        }
+
+        // 检查BLUETOOTH_ADMIN权限
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_ADMIN)
+                != PackageManager.PERMISSION_GRANTED) {
+            // 请求BLUETOOTH_ADMIN权限
+            ActivityCompat.requestPermissions((Activity) context,
+                    new String[]{Manifest.permission.BLUETOOTH_ADMIN},
+                    2); // 请求码可以是任意整数
+        }
+        return connectedDevice.getName();
+    }
+
+    public void setConnectedDeviceName(BluetoothDevice newConnectedDevice) {
+        connectedDevice = newConnectedDevice;
     }
 
     public boolean hasBluetoothPermissions() {
@@ -139,8 +161,8 @@ public class Bluetooth {
                 bluetoothConnectionListener.onDeviceConnected(device);
             }
             startListening();
-            connectedDeviceName = device.getName();
-            Log.i(TAG, "成功连接设备: " + connectedDeviceName);
+            connectedDevice = device;
+            Log.i(TAG, "成功连接设备: " + connectedDevice.getName());
             return true;
         } catch (IOException e) {
             Log.e(TAG, "连接失败", e);

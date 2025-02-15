@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,6 +26,7 @@ public class HomeFragment extends Fragment {
     private TextView recordingTimeTextView;
     private TextView audioFileTextView;
     private TextView textFileTextView;
+
     private ActivityResultLauncher<Intent> chooseAudioLauncher;
     private ActivityResultLauncher<Intent> chooseFileLauncher;
 
@@ -37,7 +39,6 @@ public class HomeFragment extends Fragment {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        //ModelSpinner
         Spinner spinnerModel = root.findViewById(R.id.spinner_model);
         ArrayAdapter<CharSequence> adapterModel = ArrayAdapter.createFromResource(
                 requireContext(),
@@ -69,6 +70,9 @@ public class HomeFragment extends Fragment {
         audioFileTextView = root.findViewById(R.id.audioFileTextView_status);
         textFileTextView = root.findViewById(R.id.textFileTextView_status);
 
+        EditText inputText = root.findViewById(R.id.inputText);
+        String userInput = inputText.getText().toString();
+
         // 初始化 ActivityResultLaunchers
         chooseAudioLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -88,8 +92,6 @@ public class HomeFragment extends Fragment {
                     }
                 });
 
-
-
         // 设置按钮点击事件
         binding.btnChooseAudio.setOnClickListener(v -> homeViewModel.chooseAudio(chooseAudioLauncher));
         binding.btnRecordAudio.setOnClickListener(v -> {
@@ -100,9 +102,11 @@ public class HomeFragment extends Fragment {
             }
         });
         binding.btnChooseFile.setOnClickListener(v -> homeViewModel.chooseFile(chooseFileLauncher));
+
+
         binding.btnUpload.setOnClickListener(v -> homeViewModel.uploadFiles(
                 spinnerModel.getSelectedItem().toString(),spinnerEmotion.getSelectedItem().toString(),
-                spinnerSpeed.getSelectedItem().toString()));
+                spinnerSpeed.getSelectedItem().toString(),userInput));
 
         // 观察录音状态，更新 UI
         homeViewModel.getIsRecording().observe(getViewLifecycleOwner(), isRecording -> {

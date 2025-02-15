@@ -16,6 +16,12 @@
         android:name="com.example.aivoice.ui.bluetooth.BluetoothFragment"
         android:label="@string/title_bluetooth"
         tools:layout="@layout/fragment_bluetooth" />
+
+    <fragment
+        android:id="@+id/navigation_music"
+        android:name="com.example.aivoice.ui.music.MusicFragment"
+        android:label="@string/title_music"
+        tools:layout="@layout/fragment_music" />
     <fragment
         android:id="@+id/navigation_files"
         android:name="com.example.aivoice.ui.files.FilesFragment"
