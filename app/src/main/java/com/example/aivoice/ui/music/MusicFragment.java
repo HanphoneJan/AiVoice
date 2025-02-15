@@ -32,6 +32,8 @@ public class MusicFragment extends Fragment {
         View root = inflater.inflate(R.layout.fragment_music, container, false);
         musicViewModel = new ViewModelProvider(this).get(MusicViewModel.class);
         musicViewModel.setContext(requireContext());
+
+
         spinnerFileNameList = root.findViewById(R.id.spinner_dispname);
         nowAudioFile = root.findViewById(R.id.dispname);
         fileNameListAdapter = new ArrayAdapter<>(requireContext(),android.R.layout.simple_spinner_item);
@@ -94,15 +96,9 @@ public class MusicFragment extends Fragment {
         //音频文件列表
         musicViewModel.getAudList().observe(getViewLifecycleOwner(), this::onChangedFileList);
         musicViewModel.getNowPlayAudioFile().observe(getViewLifecycleOwner(),this::onChangedFile);
-        musicViewModel.getErrorMessage().observe(getViewLifecycleOwner(), errorMessage -> {
-            if (errorMessage != null && !errorMessage.isEmpty()) {
-                Toast.makeText(getContext(), errorMessage, Toast.LENGTH_SHORT).show();
-            }
-        });
+
         return root;
     }
-
-
 
     private void onChangedFileList(Set<String> audioFileList) {
         fileNameListAdapter.clear();
@@ -112,5 +108,11 @@ public class MusicFragment extends Fragment {
     }
     private void onChangedFile(String nowPlayAudioFile){
         nowAudioFile.setText(nowPlayAudioFile);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
     }
 }

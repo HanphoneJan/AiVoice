@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -13,11 +14,15 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.aivoice.R;
 import com.example.aivoice.databinding.FragmentHomeBinding;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class HomeFragment extends Fragment {
 
@@ -26,46 +31,53 @@ public class HomeFragment extends Fragment {
     private TextView recordingTimeTextView;
     private TextView audioFileTextView;
     private TextView textFileTextView;
+    private Spinner spinnerModel;
+    private Spinner spinnerEmotion;
+    private Spinner spinnerSpeed;
 
     private ActivityResultLauncher<Intent> chooseAudioLauncher;
     private ActivityResultLauncher<Intent> chooseFileLauncher;
 
+    private ExecutorService executorService = Executors.newSingleThreadExecutor(); // 创建一个线程池
+
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
         homeViewModel.setContext(requireContext()); // 设置Context
-
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        Spinner spinnerModel = root.findViewById(R.id.spinner_model);
-        ArrayAdapter<CharSequence> adapterModel = ArrayAdapter.createFromResource(
-                requireContext(),
-                R.array.model_options,
-                android.R.layout.simple_spinner_item
-        );
-        adapterModel.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerModel.setAdapter(adapterModel);
+        spinnerModel = root.findViewById(R.id.spinner_model);
+        spinnerEmotion = root.findViewById(R.id.spinner_emotion);
+        spinnerSpeed = root.findViewById(R.id.spinner_speed);
 
+        // 观察并更新 model spinner
+        homeViewModel.getModelOptions().observe(getViewLifecycleOwner(), options -> {
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
+                    android.R.layout.simple_spinner_item, options);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            spinnerModel.setAdapter(adapter);
+        });
 
-        Spinner spinnerEmotion = root.findViewById(R.id.spinner_emotion);
-        ArrayAdapter<CharSequence> adapterEmotion = ArrayAdapter.createFromResource(
-                requireContext(),
-                R.array.emotion_options,
-                android.R.layout.simple_spinner_item
-        );
-        adapterEmotion.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerEmotion.setAdapter(adapterEmotion);
+        // 观察并更新 emotion spinner
+        homeViewModel.getEmotionOptions().observe(getViewLifecycleOwner(), options -> {
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
+                    android.R.layout.simple_spinner_item, options);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            spinnerEmotion.setAdapter(adapter);
+        });
 
-        Spinner spinnerSpeed = root.findViewById(R.id.spinner_speed);
-        ArrayAdapter<CharSequence> adapterSpeed = ArrayAdapter.createFromResource(
-                requireContext(),
-                R.array.speed_options,
-                android.R.layout.simple_spinner_item
-        );
-        adapterSpeed.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerSpeed.setAdapter(adapterSpeed);
+        // 观察并更新 speed spinner
+        homeViewModel.getSpeedOptions().observe(getViewLifecycleOwner(), options -> {
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
+                    android.R.layout.simple_spinner_item, options);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            spinnerSpeed.setAdapter(adapter);
+        });
+
+        // 异步加载选项数据
+        homeViewModel.loadOptions();
 
         audioFileTextView = root.findViewById(R.id.audioFileTextView_status);
         textFileTextView = root.findViewById(R.id.textFileTextView_status);
@@ -78,6 +90,7 @@ public class HomeFragment extends Fragment {
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == getActivity().RESULT_OK) {
+                        assert result.getData() != null;
                         homeViewModel.updateAudioFileUri(result.getData().getData());
                         audioFileTextView.setText("已选择");
                     }
@@ -87,6 +100,7 @@ public class HomeFragment extends Fragment {
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == getActivity().RESULT_OK) {
+                        assert result.getData() != null;
                         homeViewModel.updateFileUri(result.getData().getData());
                         textFileTextView.setText("已选择");
                     }
@@ -103,10 +117,11 @@ public class HomeFragment extends Fragment {
         });
         binding.btnChooseFile.setOnClickListener(v -> homeViewModel.chooseFile(chooseFileLauncher));
 
-
         binding.btnUpload.setOnClickListener(v -> homeViewModel.uploadFiles(
-                spinnerModel.getSelectedItem().toString(),spinnerEmotion.getSelectedItem().toString(),
-                spinnerSpeed.getSelectedItem().toString(),userInput));
+                ((Spinner) root.findViewById(R.id.spinner_model)).getSelectedItem().toString(),
+                ((Spinner) root.findViewById(R.id.spinner_emotion)).getSelectedItem().toString(),
+                ((Spinner) root.findViewById(R.id.spinner_speed)).getSelectedItem().toString(),
+                userInput));
 
         // 观察录音状态，更新 UI
         homeViewModel.getIsRecording().observe(getViewLifecycleOwner(), isRecording -> {
@@ -130,14 +145,20 @@ public class HomeFragment extends Fragment {
             recordingTimeTextView.setText(timeFormatted);
         });
 
-        // 观察错误信息
-        homeViewModel.getErrorMessage().observe(getViewLifecycleOwner(), errorMessage -> {
-            if (errorMessage != null && !errorMessage.isEmpty()) {
-                Toast.makeText(getContext(), errorMessage, Toast.LENGTH_SHORT).show();
+        return root;
+    }
+
+    private void setupSpinnerActions(Spinner spinner) {
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                // 处理 spinner 选项选择事件
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+                // 处理没有选项的事件
             }
         });
-
-        return root;
     }
 
     @Override
@@ -146,3 +167,5 @@ public class HomeFragment extends Fragment {
         binding = null;
     }
 }
+
+

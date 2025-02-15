@@ -16,7 +16,6 @@ public class MusicViewModel extends ViewModel implements Bluetooth.BluetoothData
     private final MutableLiveData<Set<String>> audList = new MutableLiveData<>() ;
     private final MutableLiveData<String> nowPlayAudioFile = new MutableLiveData<>();
     private final Bluetooth bluetooth = new Bluetooth();
-    private MutableLiveData<String> errorMessage = new MutableLiveData<>();
 
     public MusicViewModel() {
         bluetooth.setDataListener(this);
@@ -31,9 +30,6 @@ public class MusicViewModel extends ViewModel implements Bluetooth.BluetoothData
 
     public LiveData<Set<String>> getAudList() {
         return audList;
-    }
-    public LiveData<String> getErrorMessage() {
-        return errorMessage;
     }
 
 

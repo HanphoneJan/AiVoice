@@ -64,6 +64,10 @@ public class BluetoothViewModel extends ViewModel {
         return connectionStatus;
     }
 
+    // 设置错误信息的方法
+    public void setErrorMessage(String message) {
+            errorMessage.setValue(message);
+    }
     public LiveData<String> getErrorMessage() {
         return errorMessage;
     }
