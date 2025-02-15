@@ -6,9 +6,6 @@
     android:layout_height="match_parent">
 
     <!-- 居中显示的 ImageView -->
-
-    <!-- 控制界面 -->
-
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="269dp"
@@ -20,6 +17,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.117" />
 
+    <!-- 播放列表按钮 -->
     <Button
         android:id="@+id/btn_audlist"
         android:layout_width="46dp"
@@ -33,11 +31,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.023" />
 
-
-    <!-- 播放控制按钮 -->
-
-    <!-- 音量控制和播放模式 -->
-
+    <!-- 当前播放文件信息 -->
     <Button
         android:id="@+id/btn_dispname"
         android:layout_width="wrap_content"
@@ -63,6 +57,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.582" />
 
+    <!-- 播放控制按钮 -->
     <LinearLayout
         android:id="@+id/linear_play"
         android:layout_width="match_parent"
@@ -71,7 +66,6 @@
         android:gravity="center"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btn_dispname">
 
@@ -92,8 +86,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:backgroundTint="@android:color/transparent"
             android:drawableLeft="@drawable/audprev"
-            android:gravity="center"
-           />
+            android:gravity="center" />
 
         <Button
             android:id="@+id/btn_audplay"
@@ -113,8 +106,7 @@
             android:backgroundTint="@android:color/transparent"
             android:drawableRight="@drawable/audnext"
             android:drawablePadding="8dp"
-            android:gravity="center_vertical|start"
-            />
+            android:gravity="center_vertical|start" />
 
         <Button
             android:id="@+id/btn_seekfwd"
@@ -124,56 +116,52 @@
             android:backgroundTint="@android:color/transparent"
             android:drawableRight="@drawable/seekfwd"
             android:drawablePadding="8dp"
-            android:gravity="center_vertical|start"
-     />
-
+            android:gravity="center_vertical|start" />
     </LinearLayout>
 
-
-    <Button
-        android:id="@+id/btn_voludec"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="328dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:backgroundTint="@android:color/transparent"
-        android:drawableLeft="@drawable/voludec"
+    <!-- 音量控制和播放模式 -->
+    <LinearLayout
+        android:id="@+id/linear_volume_mode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
         android:gravity="center"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/linear_play"
-        app:layout_constraintVertical_bias="0.34" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/linear_play">
 
-    <Button
-        android:id="@+id/btn_mode"
-        android:layout_width="45dp"
-        android:layout_height="0dp"
-        android:layout_marginTop="96dp"
-        android:layout_marginEnd="168dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:backgroundTint="@android:color/transparent"
-        android:drawableLeft="@drawable/modeoneplay"
-        android:gravity="center"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/linear_play"
-        app:layout_constraintVertical_bias="0.0" />
+        <!-- 音量减 -->
+        <ImageButton
+            android:id="@+id/btn_voludec"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:scaleType="centerInside"
+            android:src="@drawable/voludec"
+            android:contentDescription="@string/voluinc"/>
 
-    <Button
-        android:id="@+id/btn_voluinc"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="44dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:backgroundTint="@android:color/transparent"
-        android:drawableRight="@drawable/voluinc"
-        android:gravity="center"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/linear_play"
-        app:layout_constraintVertical_bias="0.454" />
+        <!-- 播放模式 -->
+        <ImageButton
+            android:id="@+id/imgBtn_mode"
+            android:layout_width="70dp"
+            android:layout_height="56dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:scaleType="centerInside"
+            android:src="@drawable/modeoneplay"
+            android:contentDescription="@string/mode"
+        />
 
+        <!-- 音量加 -->
+        <ImageButton
+            android:id="@+id/btn_voluinc"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:scaleType="centerInside"
+            android:src="@drawable/voluinc"
+            android:contentDescription="@string/voluinc"
+           />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

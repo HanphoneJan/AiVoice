@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,8 +45,8 @@ public class MusicFragment extends Fragment {
 
         Button btnSeekBwd = root.findViewById(R.id.btn_seekbwd);
         Button btnFwd = root.findViewById(R.id.btn_seekfwd);
-        Button btnVoludec =root.findViewById(R.id.btn_voludec);
-        Button btnVoluinc =root.findViewById(R.id.btn_voluinc);
+        ImageButton btnVoludec =root.findViewById(R.id.btn_voludec);
+        ImageButton btnVoluinc =root.findViewById(R.id.btn_voluinc);
 
 
 
@@ -78,26 +79,31 @@ public class MusicFragment extends Fragment {
         btnVoludec.setOnClickListener(v -> musicViewModel.decreaseVolume());
         btnVoluinc.setOnClickListener(v -> musicViewModel.increaseVolume());
 
-        //切换播放模式按钮
-        Button btnMode = root.findViewById(R.id.btn_mode);
+        // 切换播放模式按钮
+        ImageButton imgBtnMode = root.findViewById(R.id.imgBtn_mode);
+
         // 定义三个图标的资源 ID
         int[] iconModeResources = {
-                R.drawable.modeoneplay, // 第一个图标
-                R.drawable.modeoneloop, // 第二个图标
-                R.drawable.modelistloop  // 第三个图标
+                R.drawable.modeoneplay, // 第一个图标：顺序播放
+                R.drawable.modeoneloop, // 第二个图标：单曲循环
+                R.drawable.modelistloop // 第三个图标：列表循环
         };
+
         // 计数器，用于记录当前显示的图标索引
-        int[] currentIconIndex = {0}; // 使用数组以便在 Lambda 表达式中修改
+        int[] currentIconIndex = {0}; // 使用数组以便在 Lambda 表达式中修改，直接用整数是不行的
+
         // 初始化按钮图标
-        btnMode.setCompoundDrawablesWithIntrinsicBounds(iconModeResources[currentIconIndex[0]], 0, 0, 0);
-        btnMode.setOnClickListener(v -> {
+        imgBtnMode.setImageResource(iconModeResources[currentIconIndex[0]]);
+
+        imgBtnMode.setOnClickListener(v -> {
             // 切换播放模式
-            if( musicViewModel.togglePlaybackMode()){
+            if (musicViewModel.togglePlaybackMode()) {
                 // 更新图标索引
                 currentIconIndex[0] = (currentIconIndex[0] + 1) % iconModeResources.length;
                 // 设置新的图标
-                btnMode.setCompoundDrawablesWithIntrinsicBounds(iconModeResources[currentIconIndex[0]], 0, 0, 0);
+                imgBtnMode.setImageResource(iconModeResources[currentIconIndex[0]]);
             }
+            // 注意：这里可能还需要处理播放模式切换后的其他逻辑，比如更新 UI 或通知用户
         });
         //音频文件列表
         musicViewModel.getAudList().observe(getViewLifecycleOwner(), this::onChangedFileList);

@@ -42,6 +42,9 @@ public class MusicViewModel extends ViewModel implements Bluetooth.BluetoothData
             return isPlay;
         }
         isPlay = bluetooth.sendSignal("audplay");
+        if(isPlay){
+            displayTrackName();
+        }
         return isPlay;
     }
 
