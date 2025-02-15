@@ -1,47 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-
-    <ImageView
-        android:layout_width="150dp"
-        android:layout_height="150dp"
-        android:src="@drawable/music"/>
+    <!-- 居中显示的 ImageView -->
 
     <!-- 控制界面 -->
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="269dp"
+        android:layout_height="332dp"
+        android:src="@drawable/music"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.117" />
+
+    <Button
+        android:id="@+id/btn_audlist"
+        android:layout_width="46dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:backgroundTint="@android:color/transparent"
+        android:drawableLeft="@drawable/audlist"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.023" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/imageView"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:gravity="center"
-            android:orientation="horizontal"
-            android:layout_marginTop="12dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
 
             <Button
                 android:id="@+id/btn_dispname"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="当前播放文件" />
-
-            <TextView
-                android:id="@+id/dispname"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="无" />
-        </LinearLayout>
-
+                android:text="正在播放:"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
         <!-- 播放控制按钮 -->
+
+        <TextView
+            android:id="@+id/dispname"
+            android:layout_width="39dp"
+            android:layout_height="43dp"
+            android:text="无"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="144dp"
@@ -78,6 +96,7 @@
                 android:layout_height="77dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:backgroundTint="@android:color/transparent"
+                android:contentDescription="@string/audplay"
                 android:drawableLeft="@drawable/audplay"
                 android:gravity="center" />
 
@@ -102,7 +121,6 @@
                 android:drawablePadding="8dp"
                 android:gravity="center_vertical|start"
                 android:padding="12dp" />
-
 
         </LinearLayout>
 
@@ -149,13 +167,7 @@
                 android:padding="12dp" />
         </LinearLayout>
 
-        <Button
-            android:id="@+id/btn_audlist"
-            android:layout_width="46dp"
-            android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:backgroundTint="@android:color/transparent"
-            android:drawableLeft="@drawable/audlist" />
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

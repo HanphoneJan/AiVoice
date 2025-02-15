@@ -2,6 +2,6 @@
     <string name="app_name">AiVoice</string>
     <string name="title_home">主页</string>
     <string name="title_bluetooth">蓝牙控制</string>
-    <string name="title_music">音乐播放</string>
+    <string name="title_music">音频播放</string>
     <string name="title_files">文件管理</string>
 </resources>
