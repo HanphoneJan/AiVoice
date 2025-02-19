@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -207,18 +208,16 @@ public class Bluetooth {
     public boolean sendSignal(String order) {
         if (outputStream == null) {
             Log.e(TAG, "未连接蓝牙");
-
+            Toast.makeText(context, "请连接蓝牙", Toast.LENGTH_SHORT).show();
             return false;
         }
         try {
             byte[] command = order.getBytes("GBK");
             outputStream.write(command);
             Log.i(TAG, "已发送数据: " + order);
-
             return  true;
         } catch (IOException e) {
             Log.e(TAG, "发送失败", e);
-
             return false;
         }
     }
@@ -226,6 +225,7 @@ public class Bluetooth {
     public void disconnect() {
         closeConnection();
         Log.i(TAG, "已断开蓝牙连接");
+        Toast.makeText(context, "已断开连接", Toast.LENGTH_SHORT).show();
     }
 
     private void closeConnection() {

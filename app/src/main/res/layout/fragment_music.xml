@@ -38,7 +38,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="200dp"
         android:text="正在播放:"
-
+        android:padding="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -48,7 +48,7 @@
         android:id="@+id/dispname"
         android:layout_width="39dp"
         android:layout_height="43dp"
-        android:layout_marginEnd="136dp"
+        android:layout_marginEnd="148dp"
         android:gravity="center"
         android:text="无"
         app:layout_constraintBottom_toBottomOf="parent"
