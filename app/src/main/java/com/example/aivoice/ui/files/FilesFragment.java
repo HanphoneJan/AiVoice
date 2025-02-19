@@ -148,12 +148,12 @@ public class FilesFragment extends Fragment {
         // 注册 ActivityResultLauncher，用于打开文件夹选择器
         openDirectoryLauncher = registerForActivityResult(
                 new ActivityResultContracts.OpenDocumentTree(),
-                new ActivityResultCallback<Uri>() {
+                new ActivityResultCallback<>() {
                     @Override
                     public void onActivityResult(Uri uri) {
                         // 处理返回的 URI
                         if (uri != null) {
-                            Log.i(TAG, "选中的目录: " + uri.toString());
+                            Log.i(TAG, "选中的目录: " + uri);
 
                             // 保存目录权限
                             requireActivity().getContentResolver().takePersistableUriPermission(
@@ -164,7 +164,7 @@ public class FilesFragment extends Fragment {
                             // 将选中的 URI 存储到 ViewModel 或其他地方，以便后续使用
                             UriManager.setUri(uri);
 
-                            Toast.makeText(getContext(), "已选择目录：" + uri.toString(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), "已选择目录：" + uri, Toast.LENGTH_SHORT).show();
                         }
                     }
                 });

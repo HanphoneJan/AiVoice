@@ -255,7 +255,7 @@ public class BluetoothGattCustom {
 
         try {
             bluetoothGatt = device.connectGatt(context, false, gattCallback); // 第二个参数为 autoConnect，设置为 false 以避免自动连接
-            Log.i(TAG, "成功连接设备：" + device.getName());
+            Log.i(TAG, "成功连接设备Gatt：" + device.getName());
             // 调用 discoverServices() 开始发现服务
 //boolean servicesDiscovered = bluetoothGatt.discoverServices();
 //            if (servicesDiscovered) {

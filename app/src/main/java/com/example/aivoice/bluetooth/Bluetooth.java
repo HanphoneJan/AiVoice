@@ -9,7 +9,6 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -34,6 +33,7 @@ public class Bluetooth {
     private InputStream inputStream;
     private static final UUID SERIAL_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private BluetoothConnectionListener bluetoothConnectionListener;
+    private BluetoothGattCustom bluetoothGattCustom = new BluetoothGattCustom();
 
     //蓝牙数据监听回调
     private BluetoothDataListener dataListener; // 用于存储回调对象
@@ -153,6 +153,13 @@ public class Bluetooth {
                         new String[]{Manifest.permission.BLUETOOTH_ADMIN},
                         2); // 请求码可以是任意整数
             }
+            if (device.getType() == BluetoothDevice.DEVICE_TYPE_DUAL) {
+                Log.i(TAG, "尝试使用Gatt连接设备：" + device.getName());
+                if(bluetoothGattCustom.connectToDevice(device)){
+                    connectedDevice = device;
+                    return true;
+                }
+            }
             bluetoothSocket = device.createRfcommSocketToServiceRecord(SERIAL_UUID);
             bluetoothSocket.connect();
             outputStream = bluetoothSocket.getOutputStream();
@@ -200,18 +207,18 @@ public class Bluetooth {
     public boolean sendSignal(String order) {
         if (outputStream == null) {
             Log.e(TAG, "未连接蓝牙");
-            Toast.makeText(context, "未连接设备", Toast.LENGTH_SHORT).show();
+
             return false;
         }
         try {
             byte[] command = order.getBytes("GBK");
             outputStream.write(command);
             Log.i(TAG, "已发送数据: " + order);
-            Toast.makeText(context, "已发送信号", Toast.LENGTH_SHORT).show();
+
             return  true;
         } catch (IOException e) {
             Log.e(TAG, "发送失败", e);
-            Toast.makeText(context, "发送失败", Toast.LENGTH_SHORT).show();
+
             return false;
         }
     }
@@ -226,6 +233,7 @@ public class Bluetooth {
             if (inputStream != null) inputStream.close();
             if (outputStream != null) outputStream.close();
             if (bluetoothSocket != null) bluetoothSocket.close();
+            connectedDevice = null;
         } catch (IOException e) {
             Log.e(TAG, "关闭连接失败", e);
         }

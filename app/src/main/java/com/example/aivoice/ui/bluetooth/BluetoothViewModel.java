@@ -1,5 +1,6 @@
 package com.example.aivoice.ui.bluetooth;
 
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothDevice;
 
 import android.content.Context;
@@ -22,20 +23,19 @@ public class BluetoothViewModel extends ViewModel {
 
     private static final String TAG = "BluetoothViewModel";
     //    MutableLiveData 和 LiveData 在 UI 和数据层之间传递数据，LiveData只读对外暴露， MutableLiveData则用于修改
-    private final MutableLiveData<Boolean> isBluetoothEnabled = new MutableLiveData<>();
 
     private final MutableLiveData<Set<BluetoothDevice>> pairedDevices = new MutableLiveData<>();
     private final MutableLiveData<Set<BluetoothDevice>> bluetoothDevicesList = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isConnected = new MutableLiveData<>();
-    private final MutableLiveData<String> connectionStatus = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isReceiverRegistered = new MutableLiveData<>(false);
     private final Bluetooth bluetooth = new Bluetooth();
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    @SuppressLint("StaticFieldLeak")
     private Context context;
     private long startTime; // 扫描蓝牙开始时间
     private long elapsedTime = 0; // 已扫描的时间
     private final MutableLiveData<Long> recordingTime = new MutableLiveData<>(0L); // 时间，单位：秒
-    private static BluetoothDevice connectedDevice;
+    private final MutableLiveData<String> connectedDeviceName= new MutableLiveData<>();
 
 
     public void setContext(Context context) {
@@ -43,9 +43,7 @@ public class BluetoothViewModel extends ViewModel {
         bluetooth.setContext(context);
     }
 
-    public LiveData<Boolean> getIsBluetoothEnabled() {
-        return isBluetoothEnabled;
-    }
+
 
     public LiveData<Set<BluetoothDevice>> getPairedDevices() {
         fetchPairedDevices();
@@ -59,11 +57,14 @@ public class BluetoothViewModel extends ViewModel {
         return isConnected;
     }
 
-    public LiveData<String> getConnectionStatus() {
-        return connectionStatus;
+
+    public LiveData<String> getConnectedDeviceName() {
+        return connectedDeviceName;
     }
 
-
+    public void setConnectedDeviceName(String deviceName) {
+        connectedDeviceName.postValue(deviceName);  //使用post，而不是set
+    }
 
 
     public LiveData<Boolean> getIsReceiverRegistered() {
@@ -96,16 +97,15 @@ public class BluetoothViewModel extends ViewModel {
             try {
                 boolean success = bluetooth.connectToDevice(device);
                 isConnected.postValue(success);
-                connectionStatus.postValue(success ? "Connected to " + device.getName() : "Connection failed");
                 if (success) {
-                    connectedDevice = device;
+                    setConnectedDeviceName(bluetooth.getConnectedDeviceName());
                 } else {
-                    Toast.makeText(context, "连接设备失败", Toast.LENGTH_SHORT).show();
+                    Log.i(TAG, "蓝牙连接失败");
                 }
             } catch (SecurityException e) {
-                Toast.makeText(context, "蓝牙连接权限未打开", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "蓝牙连接权限异常", e);
             } catch (Exception e) {
-                Toast.makeText(context, "连接蓝牙错误", Toast.LENGTH_SHORT).show();
+               Log.e(TAG, "蓝牙连接异常", e);
             }
         });
     }
@@ -150,7 +150,7 @@ public class BluetoothViewModel extends ViewModel {
     public void disconnectDevice(){
         bluetooth.disconnect();
         isConnected.setValue(false);
-        connectionStatus.setValue("Disconnected");
+        setConnectedDeviceName("无");
         Log.i(TAG,"蓝牙设备已断开连接");
     }
     

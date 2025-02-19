@@ -14,7 +14,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -25,11 +24,12 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.aivoice.R;
 import com.example.aivoice.bluetooth.Bluetooth;
-import com.example.aivoice.bluetooth.BluetoothConnectionListener;
+
 import com.example.aivoice.bluetooth.BluetoothDeviceInfo;
 
 import java.util.ArrayList;
@@ -58,8 +58,18 @@ public class BluetoothFragment extends Fragment {
         bluetoothViewModel = new ViewModelProvider(this).get(BluetoothViewModel.class);
         bluetoothViewModel.setContext(requireContext());
 
-        // 初始化视图
+        //蓝牙连接状态显示
         tvBluetoothStatus = root.findViewById(R.id.tv_bluetooth_status);
+        bluetoothViewModel.getConnectedDeviceName().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String newName) {
+                tvBluetoothStatus.setText(newName);
+            }
+        });
+
+
+
+
         lvBluetoothDevices = root.findViewById(R.id.lv_bluetooth);
         Button btnScanBluetooth = root.findViewById(R.id.btn_scan_bluetooth);
 
@@ -87,18 +97,6 @@ public class BluetoothFragment extends Fragment {
                     bluetoothDevicesAdapter.add(new BluetoothDeviceInfo(deviceName, device.getAddress()));
                     bluetoothDeviceList.add(device); // 将设备添加到列表中
                 }
-            }
-        });
-        // 设置蓝牙连接监听器
-        bluetooth.setBluetoothConnectionListener(new BluetoothConnectionListener() {
-            @Override
-            public void onDeviceConnected(BluetoothDevice device) {
-                tvBluetoothStatus.setText("已连接: " + bluetooth.getConnectedDeviceName());
-            }
-
-            @Override
-            public void onDeviceDisconnected(BluetoothDevice device) {
-                tvBluetoothStatus.setText("未连接");
             }
         });
 
@@ -152,7 +150,7 @@ public class BluetoothFragment extends Fragment {
         BluetoothDevice connectedDevice = bluetooth.getConnectedDevice();
         if (Objects.equals(device, connectedDevice)) {
             bluetoothViewModel.disconnectDevice();
-            tvBluetoothStatus.setText("未连接");
+            tvBluetoothStatus.setText("无");
             Toast.makeText(requireContext(), "断开连接", Toast.LENGTH_SHORT).show();
         } else if (device != null) {
             Toast.makeText(requireContext(), "连接中", Toast.LENGTH_SHORT).show();

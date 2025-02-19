@@ -18,36 +18,30 @@
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:gravity="left|center_vertical"
-            android:paddingLeft="112dp"
+            android:paddingLeft="72dp"
             android:orientation="horizontal">
+            <!--        扫描蓝牙-->
+            <Button
+                android:id="@+id/btn_scan_bluetooth"
+                android:layout_width="54dp"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:backgroundTint="@android:color/transparent"
+                android:drawableLeft="@drawable/bluetoothscan" />
             <Button
                 android:id="@+id/btn_connect_bluetooth"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="蓝牙连接状态" />
+                android:text="当前连接设备" />
 
             <TextView
                 android:id="@+id/tv_bluetooth_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="未连接" />
+                android:text="无" />
         </LinearLayout>
-<!--        扫描蓝牙-->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:gravity="left|center_vertical"
-            android:paddingLeft="112dp"
-            android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/btn_scan_bluetooth"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="扫描蓝牙设备" />
 
-        </LinearLayout>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="40dp"
