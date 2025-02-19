@@ -3,10 +3,9 @@ package com.example.aivoice.ui.home;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
+
 import android.content.pm.PackageManager;
 
 import android.media.MediaRecorder;
@@ -15,7 +14,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -58,11 +56,10 @@ public class HomeViewModel extends ViewModel {
     private MutableLiveData<Boolean> isRecording = new MutableLiveData<>(false);
     private MutableLiveData<Uri> audioFileUri = new MutableLiveData<>();
     private MutableLiveData<Uri> fileUri = new MutableLiveData<>();
-    private MutableLiveData<Boolean> isFileUploaded = new MutableLiveData<>(false);
-
-    private MutableLiveData<Long> recordingTime = new MutableLiveData<>(0L); // 录音时间，单位：秒
-    private static Uri musicUri = UriManager.getUri();
     private Context context;
+    private MutableLiveData<Long> recordingTime = new MutableLiveData<>(0L); // 录音时间，单位：秒
+    private static Uri musicUri;
+
     private MediaRecorder mediaRecorder;
     private Handler handler = new Handler(Looper.getMainLooper()); // 用于更新UI
     private Runnable updateTimeRunnable;
@@ -100,9 +97,12 @@ public class HomeViewModel extends ViewModel {
     // 选择音频文件
     public void chooseAudio(ActivityResultLauncher<Intent> chooseAudioLauncher) {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("audio/wav");
+        intent.setType("*/*");  // 允许选择所有文件类型，包括 wav
+        //在我的手机上有bug，被迫改成audio/*
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[] {"audio/*"});  // 限制选择 wav 文件
         chooseAudioLauncher.launch(intent);
     }
+
 
     // 选择普通文件
     public void chooseFile(ActivityResultLauncher<Intent> chooseFileLauncher) {
@@ -145,7 +145,7 @@ public class HomeViewModel extends ViewModel {
                 Uri outputUri;
 
                 // 1. 获取用户选择的目录
-                musicUri = UriManager.getUri();
+                musicUri = UriManager.getUri(context);
                 Log.d(TAG, "Music URI: " + musicUri);
 
                 if (musicUri != null) {
@@ -233,7 +233,7 @@ public class HomeViewModel extends ViewModel {
 
     // 上传文件
     public void uploadFiles(String model, String emotion, String speed,String userInput) {
-        if (audioFileUri.getValue() != null && fileUri.getValue() != null) {
+        if (model != null && emotion != null && speed != null) {
             // 设置超时时间
             OkHttpClient client = new OkHttpClient.Builder()
                     .connectTimeout(2, TimeUnit.MINUTES) // 连接超时
@@ -263,6 +263,7 @@ public class HomeViewModel extends ViewModel {
                             RequestBody.create(MediaType.parse(audioMimeType),
                                     getAudioFileContent(audioFileUri.getValue())));
                 }
+
                 // 添加常规文件部分
                 if (userInput.isEmpty()) {
                     // 如果 userInput 为空，使用 fileUri 中的文件
@@ -288,15 +289,16 @@ public class HomeViewModel extends ViewModel {
                         if (textFile != null) {
                             requestBodyBuilder.addFormDataPart("file", textFile.getName(),
                                     RequestBody.create(MediaType.parse("text/plain"), textFile));
+                            Log.i(TAG,"生成txt文件成功");
                         } else {
-                            Toast.makeText(context, "保存文本文件失败", Toast.LENGTH_SHORT).show();
+                            Log.i(TAG,"生成txt文件失败");
                             return;
                         }
                     }
                 }
                 // 构建完整的请求体
                 RequestBody requestBody = requestBodyBuilder.build();
-                String url = "https://640b4e7c.r34.cpolar.top/aivoice/upload";
+                String url = "https://www.hanphone.top/aivoice/upload";
                 Request request = new Request.Builder()
                         .url(url)
                         .post(requestBody)
@@ -306,7 +308,10 @@ public class HomeViewModel extends ViewModel {
                 client.newCall(request).enqueue(new Callback() {
                     @Override
                     public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                        Toast.makeText(context, "上传失败", Toast.LENGTH_SHORT).show();
+                        // 使用runOnUiThread切换到主线程
+                        new Handler(Looper.getMainLooper()).post(() -> {
+                            Toast.makeText(context, "上传失败", Toast.LENGTH_SHORT).show();
+                        });
                     }
 
                     @Override
@@ -315,19 +320,25 @@ public class HomeViewModel extends ViewModel {
                             if (response.isSuccessful()) {
                                 byte[] responseBody = response.body().bytes();
                                 storeReturnedFile(responseBody);
-                                isFileUploaded.postValue(true);
-                                Toast.makeText(context, "上传成功", Toast.LENGTH_SHORT).show();
+                                Log.i(TAG, "生成音频成功");
+                                // 使用runOnUiThread切换到主线程
+                                new Handler(Looper.getMainLooper()).post(() -> {
+                                    Toast.makeText(context, "生成音频成功", Toast.LENGTH_SHORT).show();
+                                });
                             } else {
-                                Toast.makeText(context, "上传失败", Toast.LENGTH_SHORT).show();
+                                Log.e(TAG, "生成音频失败");
+                                // 使用runOnUiThread切换到主线程
+                                new Handler(Looper.getMainLooper()).post(() -> {
+                                    Toast.makeText(context, "生成音频失败", Toast.LENGTH_SHORT).show();
+                                });
                             }
                         } finally {
-                            response.close(); // 确保资源释放
+                            response.close(); //释放资源
                         }
                     }
                 });
             } catch (IOException e) {
-                e.printStackTrace();
-                Toast.makeText(context, "文件读取错误", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "文件读取错误");
             }
         } else {
             Toast.makeText(context, "请选择文件", Toast.LENGTH_SHORT).show();
@@ -337,6 +348,7 @@ public class HomeViewModel extends ViewModel {
     private byte[] getAudioFileContent(Uri uri) throws IOException {
         try (InputStream inputStream = context.getContentResolver().openInputStream(uri)) {
             Log.i(TAG,"获取本地音频成功");
+            assert inputStream != null;
             return getBytes(inputStream);
         }
     }
@@ -370,7 +382,7 @@ public class HomeViewModel extends ViewModel {
 
     private void storeReturnedFile(byte[] data) {
         String fileName = "生成音频文件_" + System.currentTimeMillis() + ".wav";
-        musicUri = UriManager.getUri();
+        musicUri = UriManager.getUri(context);
         if (musicUri != null) {
             // 如果 uri 不为空，使用用户选择的目录
             DocumentFile pickedDir = DocumentFile.fromTreeUri(context, musicUri);
@@ -381,17 +393,17 @@ public class HomeViewModel extends ViewModel {
                     try (OutputStream outputStream = context.getContentResolver().openOutputStream(newFile.getUri())) {
                         if (outputStream != null) {
                             outputStream.write(data);
-                            Toast.makeText(context, "保存成功", Toast.LENGTH_SHORT).show();
+                            Log.i(TAG,"保存成功");
                         }
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        Log.e(TAG,"文件IO错误");
                     }
                 } else {
                     // 创建文件失败
-                    Toast.makeText(context, "无法创建音频文件", Toast.LENGTH_SHORT).show();
+                     Log.i(TAG,"无法保存生成的音频文件");
                 }
             } else {
-                Toast.makeText(context, "无法访问选定目录", Toast.LENGTH_SHORT).show();
+                Log.i(TAG,"无法访问选定的目录");
             }
         } else {
             // 默认目录路径
@@ -399,12 +411,11 @@ public class HomeViewModel extends ViewModel {
             if (!musicDir.exists()) {
                 musicDir.mkdirs();
             }
-
             File file = new File(musicDir, fileName);
             try (FileOutputStream outputStream = new FileOutputStream(file)) {
                 outputStream.write(data);
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.i(TAG,"IO错误");
             }
         }
     }
@@ -424,7 +435,6 @@ public class HomeViewModel extends ViewModel {
             outputStream.write(text.getBytes());
             return file; // 返回保存的文件对象
         } catch (IOException e) {
-            e.printStackTrace();
             return null; // 保存失败，返回 null
         }
     }

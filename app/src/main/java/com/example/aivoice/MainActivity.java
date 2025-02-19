@@ -1,7 +1,6 @@
 package com.example.aivoice;
 
 import android.Manifest;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -103,22 +102,16 @@ public class MainActivity extends AppCompatActivity {
                 .setTitle("权限请求")
                 .setMessage("该应用需要部分权限才能正常运行。请前往设置手动开启权限。")
                 .setCancelable(false)
-                .setPositiveButton("前往设置", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // 打开应用设置页面
-                        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                        Uri uri = Uri.fromParts("package", getPackageName(), null);
-                        intent.setData(uri);
-                        startActivity(intent);
-                    }
+                .setPositiveButton("前往设置", (dialog, which) -> {
+                    // 打开应用设置页面
+                    Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                    Uri uri = Uri.fromParts("package", getPackageName(), null);
+                    intent.setData(uri);
+                    startActivity(intent);
                 })
-                .setNegativeButton("退出应用", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // 退出应用
-                        finish();
-                    }
+                .setNegativeButton("退出应用", (dialog, which) -> {
+                    // 退出应用
+                    finish();
                 })
                 .show();
     }

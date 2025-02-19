@@ -22,8 +22,6 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.aivoice.R;
 import com.example.aivoice.databinding.FragmentHomeBinding;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class HomeFragment extends Fragment {
 
@@ -80,7 +78,6 @@ public class HomeFragment extends Fragment {
         textFileTextView = root.findViewById(R.id.textFileTextView_status);
 
         EditText inputText = root.findViewById(R.id.inputText);
-        String userInput = inputText.getText().toString();
 
         // 初始化 ActivityResultLaunchers
         chooseAudioLauncher = registerForActivityResult(
@@ -118,7 +115,7 @@ public class HomeFragment extends Fragment {
                 ((Spinner) root.findViewById(R.id.spinner_model)).getSelectedItem().toString(),
                 ((Spinner) root.findViewById(R.id.spinner_emotion)).getSelectedItem().toString(),
                 ((Spinner) root.findViewById(R.id.spinner_speed)).getSelectedItem().toString(),
-                userInput));
+                inputText.getText().toString()));
 
         // 观察录音状态，更新 UI
         homeViewModel.getIsRecording().observe(getViewLifecycleOwner(), isRecording -> {

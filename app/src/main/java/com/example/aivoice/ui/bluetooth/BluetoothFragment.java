@@ -1,7 +1,6 @@
 package com.example.aivoice.ui.bluetooth;
 
 import android.Manifest;
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -24,7 +23,6 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.aivoice.R;
@@ -46,8 +44,6 @@ public class BluetoothFragment extends Fragment {
 
     private TextView tvBluetoothStatus;  // 蓝牙连接状态
     private ListView lvBluetoothDevices; // 蓝牙设备列表视图
-
-    private BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter(); // 蓝牙适配器
     private Bluetooth bluetooth = new Bluetooth();
 
     @Override
@@ -60,12 +56,7 @@ public class BluetoothFragment extends Fragment {
 
         //蓝牙连接状态显示
         tvBluetoothStatus = root.findViewById(R.id.tv_bluetooth_status);
-        bluetoothViewModel.getConnectedDeviceName().observe(getViewLifecycleOwner(), new Observer<String>() {
-            @Override
-            public void onChanged(String newName) {
-                tvBluetoothStatus.setText(newName);
-            }
-        });
+        bluetoothViewModel.getConnectedDeviceName().observe(getViewLifecycleOwner(), newName -> tvBluetoothStatus.setText(newName));
 
 
 
@@ -99,7 +90,6 @@ public class BluetoothFragment extends Fragment {
                 }
             }
         });
-
         return root;
     }
 

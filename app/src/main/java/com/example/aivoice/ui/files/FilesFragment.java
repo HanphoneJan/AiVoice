@@ -7,13 +7,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -34,9 +32,8 @@ public class FilesFragment extends Fragment {
     private static final String TAG = "FilesFragment";
     private ActivityResultLauncher<Uri> openDirectoryLauncher;
 
-    private static final int REQUEST_CODE_OPEN_DIRECTORY = 1001;
     private FilesViewModel filesViewModel;
-    private Uri fileUri = UriManager.getUri();
+    private static Uri fileUri = null;
     private ListView lvFiles;
     private ArrayList<String> audioFileList;  // 存储音频文件路径的列表
     private static String selectedFileName; //当前播放的文件
@@ -59,18 +56,15 @@ public class FilesFragment extends Fragment {
         lvFiles.setAdapter(audioFileadapter);
         loadAudioFiles();
         // 设置 ListView 的点击事件监听器
-        lvFiles.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String newSelectedFileName = audioFileList.get(position);
-                if(Objects.equals(newSelectedFileName, selectedFileName)){
-                    filesViewModel.stopAudioFile();
-                    Toast.makeText(requireContext(),"已停止播放",Toast.LENGTH_SHORT).show();
-                }else {
-                    selectedFileName = newSelectedFileName;
-                    // 调用播放方法
-                    playAudio(selectedFileName);
-                }
+        lvFiles.setOnItemClickListener((parent, view, position, id) -> {
+            String newSelectedFileName = audioFileList.get(position);
+            if(Objects.equals(newSelectedFileName, selectedFileName)){
+                filesViewModel.stopAudioFile();
+                Toast.makeText(requireContext(),"已停止播放",Toast.LENGTH_SHORT).show();
+            }else {
+                selectedFileName = newSelectedFileName;
+                // 调用播放方法
+                playAudio(selectedFileName);
             }
         });
         return root;
@@ -80,13 +74,12 @@ public class FilesFragment extends Fragment {
     private void loadAudioFiles() {
         try {
             File musicDir;
-
+            fileUri = UriManager.getUri(requireContext());
             if (fileUri != null) {
                 // 使用已选择的目录
                 DocumentFile pickedDir = DocumentFile.fromTreeUri(requireContext(), fileUri);
                 if (pickedDir == null || !pickedDir.exists() || !pickedDir.isDirectory()) {
                     Toast.makeText(requireContext(), "无法访问选定目录", Toast.LENGTH_SHORT).show();
-                    Log.i(TAG,"1111111111");
                     return;
                 }
 
@@ -148,24 +141,18 @@ public class FilesFragment extends Fragment {
         // 注册 ActivityResultLauncher，用于打开文件夹选择器
         openDirectoryLauncher = registerForActivityResult(
                 new ActivityResultContracts.OpenDocumentTree(),
-                new ActivityResultCallback<>() {
-                    @Override
-                    public void onActivityResult(Uri uri) {
-                        // 处理返回的 URI
-                        if (uri != null) {
-                            Log.i(TAG, "选中的目录: " + uri);
-
-                            // 保存目录权限
-                            requireActivity().getContentResolver().takePersistableUriPermission(
-                                    uri,
-                                    Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                            );
-
-                            // 将选中的 URI 存储到 ViewModel 或其他地方，以便后续使用
-                            UriManager.setUri(uri);
-
-                            Toast.makeText(getContext(), "已选择目录：" + uri, Toast.LENGTH_SHORT).show();
-                        }
+                uri -> {
+                    // 处理返回的 URI
+                    if (uri != null) {
+                        Log.i(TAG, "选中的目录: " + uri);
+                        UriManager.setUri(requireContext(),uri);
+                        loadAudioFiles();
+                        // 保存目录权限
+                        requireActivity().getContentResolver().takePersistableUriPermission(
+                                uri,
+                                Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                        );
+                        // 将选中的 URI 存储到 ViewModel 或其他地方，以便后续使用
                     }
                 });
     }

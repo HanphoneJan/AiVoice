@@ -54,7 +54,6 @@ public class MusicFragment extends Fragment {
 
 
         // 按钮对应的功能绑定
-
         int[] iconPlayMusic = {
                 R.drawable.audplay, // 第一个图标
                 R.drawable.audstop, // 第二个图标
@@ -122,6 +121,10 @@ public class MusicFragment extends Fragment {
         }
     }
     private void onChangedFile(String nowPlayAudioFile){
+        if(nowPlayAudioFile.isEmpty()){
+            nowAudioFile.setText("无");
+            return;
+        }
         nowAudioFile.setText(nowPlayAudioFile);
     }
 

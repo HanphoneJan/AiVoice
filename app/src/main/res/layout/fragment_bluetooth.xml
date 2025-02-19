@@ -18,7 +18,7 @@
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:gravity="left|center_vertical"
-            android:paddingLeft="72dp"
+            android:paddingLeft="52dp"
             android:orientation="horizontal">
             <!--        扫描蓝牙-->
             <Button

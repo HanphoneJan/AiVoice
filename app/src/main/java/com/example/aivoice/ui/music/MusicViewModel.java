@@ -19,7 +19,6 @@ public class MusicViewModel extends ViewModel implements Bluetooth.BluetoothData
     private static boolean isPlay = false;
     public MusicViewModel() {
         bluetooth.setDataListener(this);
-        //空
     }
     public void setContext(Context context) {
         bluetooth.setContext(context);
@@ -90,18 +89,25 @@ public class MusicViewModel extends ViewModel implements Bluetooth.BluetoothData
     // 实现 onDataReceived 回调
     @Override
     public void onDataReceived(String data) {
-        if (data.startsWith("dispname ")) {
+        if (data != null && data.startsWith("dispname ")) {
+            // 更新当前播放的音频文件名
             nowPlayAudioFile.postValue(data.replace("dispname ", ""));
-        } else if (data.startsWith("audlist ")) {
+        } else if (data != null && data.startsWith("audlist ")) {
             // 解析音频列表
-            String audios = data.replace("audlist ", "");
-            Set<String> audioSet = new HashSet<>();
-            // 假设返回的数据是用换行符分隔的音频文件名
-            String[] audioArray = audios.split("\n");
-            for (String audio : audioArray) {
-                audioSet.add(audio.trim()); // 去除空格并添加到Set
+            String audios = data.replace("audlist ", "").trim();
+
+            if (!audios.isEmpty()) {
+                Set<String> audioSet = new HashSet<>();
+                // 假设返回的数据是用换行符分隔的音频文件名
+                String[] audioArray = audios.split("\n");
+                for (String audio : audioArray) {
+                    if (!audio.trim().isEmpty()) {
+                        audioSet.add(audio.trim()); // 去除空格并添加到Set
+                    }
+                }
+                audList.postValue(audioSet); // 更新LiveData
             }
-            audList.postValue(audioSet); // 更新LiveData
         }
     }
+
 }
