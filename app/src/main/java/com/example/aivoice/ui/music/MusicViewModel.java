@@ -31,7 +31,10 @@ public class MusicViewModel extends ViewModel implements Bluetooth.BluetoothData
     public LiveData<Set<String>> getAudList() {
         return audList;
     }
-
+    // 更新 audList 数据
+    public void updateAudList(Set<String> audioSet) {
+        audList.postValue(audioSet);
+    }
     public boolean getIsPlay(){
         return isPlay;
     }
@@ -93,8 +96,8 @@ public class MusicViewModel extends ViewModel implements Bluetooth.BluetoothData
             // 解析音频列表
             String audios = data.replace("audlist ", "");
             Set<String> audioSet = new HashSet<>();
-            // 假设返回的数据是用逗号分隔的音频文件名
-            String[] audioArray = audios.split(",");
+            // 假设返回的数据是用换行符分隔的音频文件名
+            String[] audioArray = audios.split("\n");
             for (String audio : audioArray) {
                 audioSet.add(audio.trim()); // 去除空格并添加到Set
             }

@@ -7,14 +7,17 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.aivoice.R;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import java.util.Set;
 
@@ -69,7 +72,7 @@ public class MusicFragment extends Fragment {
             }
         });
 
-        btnAudList.setOnClickListener(v -> musicViewModel.showAudioList());
+        btnAudList.setOnClickListener(v -> showMusicListDialog());
         btnNext.setOnClickListener(v -> musicViewModel.playNextTrack());
         btnPrev.setOnClickListener(v -> musicViewModel.playPreviousTrack());
         btnDispName.setOnClickListener(v -> musicViewModel.displayTrackName());
@@ -120,6 +123,40 @@ public class MusicFragment extends Fragment {
     }
     private void onChangedFile(String nowPlayAudioFile){
         nowAudioFile.setText(nowPlayAudioFile);
+    }
+
+    // 显示歌曲列表弹框
+    private void showMusicListDialog() {
+        // 创建 BottomSheetDialog
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(requireContext());
+        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.music_list, null);
+        bottomSheetDialog.setContentView(dialogView);
+
+        // 获取 ListView
+        ListView listViewSongs = dialogView.findViewById(R.id.listView_songs);
+
+        // 观察 ViewModel 中的 audList 数据
+        musicViewModel.getAudList().observe(getViewLifecycleOwner(), new Observer<Set<String>>() {
+            @Override
+            public void onChanged(Set<String> audioSet) {
+                // 将 Set 转换为数组
+                String[] songs = audioSet.toArray(new String[0]);
+
+                // 设置适配器
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, songs);
+                listViewSongs.setAdapter(adapter);
+
+                // 设置歌曲列表点击事件
+                listViewSongs.setOnItemClickListener((parent, view, position, id) -> {
+                    String selectedSong = songs[position];
+                    Toast.makeText(requireContext(), "已选择: " + selectedSong, Toast.LENGTH_SHORT).show();
+                    bottomSheetDialog.dismiss(); // 关闭弹框
+                });
+            }
+        });
+
+        // 显示弹框
+        bottomSheetDialog.show();
     }
 
     @Override
