@@ -130,6 +130,7 @@ public class MusicFragment extends Fragment {
 
     // 显示歌曲列表弹框
     private void showMusicListDialog() {
+        musicViewModel.showAudioList();
         // 创建 BottomSheetDialog
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(requireContext());
         View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.music_list, null);
@@ -152,8 +153,7 @@ public class MusicFragment extends Fragment {
                 // 设置歌曲列表点击事件
                 listViewSongs.setOnItemClickListener((parent, view, position, id) -> {
                     String selectedSong = songs[position];
-                    Toast.makeText(requireContext(), "已选择: " + selectedSong, Toast.LENGTH_SHORT).show();
-                    bottomSheetDialog.dismiss(); // 关闭弹框
+                    musicViewModel.playAudStart(selectedSong);
                 });
             }
         });

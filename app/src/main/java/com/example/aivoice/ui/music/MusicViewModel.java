@@ -50,6 +50,10 @@ public class MusicViewModel extends ViewModel implements Bluetooth.BluetoothData
         return isPlay;
     }
 
+    public boolean playAudStart(String selectedSong) {
+        return bluetooth.sendSignal("audstart "+selectedSong);
+    }
+
     public boolean showAudioList() {
         return bluetooth.sendSignal("audlist");
     }
