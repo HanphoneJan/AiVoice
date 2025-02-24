@@ -12,8 +12,8 @@
       "filters": [],
       "attributes": [],
       "versionCode": 1,
-      "versionName": "1.2",
-      "outputFile": "AiVoice-release-1.21.apk"
+      "versionName": "1.3",
+      "outputFile": "AiVoice-release-1.31.apk"
     }
   ],
   "elementType": "File",
@@ -22,14 +22,14 @@
       "minApi": 28,
       "maxApi": 30,
       "baselineProfiles": [
-        "baselineProfiles/1/AiVoice-release-1.21.dm"
+        "baselineProfiles/1/AiVoice-release-1.31.dm"
       ]
     },
     {
       "minApi": 31,
       "maxApi": 2147483647,
       "baselineProfiles": [
-        "baselineProfiles/0/AiVoice-release-1.21.dm"
+        "baselineProfiles/0/AiVoice-release-1.31.dm"
       ]
     }
   ],

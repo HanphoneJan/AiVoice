@@ -9,7 +9,6 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -44,7 +43,7 @@ public class MusicFragment extends Fragment {
         Button btnAudList = root.findViewById(R.id.btn_audlist);
         Button btnNext = root.findViewById(R.id.btn_audnext);
         Button btnPrev = root.findViewById(R.id.btn_audprev);
-        Button btnDispName = root.findViewById(R.id.btn_dispname);
+//        Button btnDispName = root.findViewById(R.id.btn_dispname);
 
         Button btnSeekBwd = root.findViewById(R.id.btn_seekbwd);
         Button btnFwd = root.findViewById(R.id.btn_seekfwd);
@@ -74,7 +73,7 @@ public class MusicFragment extends Fragment {
         btnAudList.setOnClickListener(v -> showMusicListDialog());
         btnNext.setOnClickListener(v -> musicViewModel.playNextTrack());
         btnPrev.setOnClickListener(v -> musicViewModel.playPreviousTrack());
-        btnDispName.setOnClickListener(v -> musicViewModel.displayTrackName());
+//        btnDispName.setOnClickListener(v -> musicViewModel.displayTrackName());
 
         btnSeekBwd.setOnClickListener(v -> musicViewModel.seekBackward());
         btnFwd.setOnClickListener(v -> musicViewModel.seekForward());

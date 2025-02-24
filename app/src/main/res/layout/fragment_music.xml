@@ -8,8 +8,8 @@
     <!-- 居中显示的 ImageView -->
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="269dp"
-        android:layout_height="332dp"
+        android:layout_width="309dp"
+        android:layout_height="388dp"
         android:src="@drawable/music"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -32,33 +32,33 @@
         app:layout_constraintVertical_bias="0.023" />
 
     <!-- 当前播放文件信息 -->
-    <Button
-        android:id="@+id/btn_dispname"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="200dp"
-        android:text="正在播放:"
-        android:padding="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.579" />
+<!--    <Button-->
+<!--        android:id="@+id/btn_dispname"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginEnd="200dp"-->
+<!--        android:text="正在播放:"-->
+<!--        android:padding="8dp"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="parent"-->
+<!--        app:layout_constraintVertical_bias="0.579" />-->
 
+    <!-- 播放控制按钮 -->
     <TextView
         android:id="@+id/dispname"
         android:layout_width="39dp"
         android:layout_height="43dp"
         android:layout_marginEnd="148dp"
         android:gravity="center"
-        android:text="无"
+        android:text=""
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.333"
-        app:layout_constraintStart_toEndOf="@+id/btn_dispname"
+        app:layout_constraintHorizontal_bias="0.83"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.582" />
+        app:layout_constraintVertical_bias="0.574" />
 
-    <!-- 播放控制按钮 -->
     <LinearLayout
         android:id="@+id/linear_play"
         android:layout_width="match_parent"
@@ -68,7 +68,7 @@
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btn_dispname">
+        app:layout_constraintTop_toBottomOf="@id/dispname">
 
         <Button
             android:id="@+id/btn_seekbwd"

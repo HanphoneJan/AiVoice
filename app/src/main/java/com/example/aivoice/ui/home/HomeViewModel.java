@@ -247,12 +247,20 @@ public class HomeViewModel extends ViewModel {
 
             try {
                 // 添加Model参数部分
+                if(speed.equals("正常")){
+                    speed = "x1.0";
+                }else if(speed.equals("稍快")){
+                    speed = "x1.1";
+                }else if(speed.equals("稍慢")){
+                    speed = "x0.9";
+                }else if(speed.equals("快速")){
+                    speed = "x1.2";
+                }else if(speed.equals("慢速")){
+                    speed = "x0.8";
+                }
+
                 requestBodyBuilder.addFormDataPart("model", model);
-
-                // 添加Emotion参数部分
                 requestBodyBuilder.addFormDataPart("emotion", emotion);
-
-                // 添加Speed参数部分
                 requestBodyBuilder.addFormDataPart("speed", speed);
 
                 if(model.equals("克隆音色")){
