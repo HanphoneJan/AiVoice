@@ -43,8 +43,6 @@ public class BluetoothViewModel extends ViewModel {
         bluetooth.setContext(context);
     }
 
-
-
     public LiveData<Set<BluetoothDevice>> getPairedDevices() {
         fetchPairedDevices();
         return pairedDevices;

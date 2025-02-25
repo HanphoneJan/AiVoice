@@ -12,7 +12,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.aivoice.R;
@@ -27,6 +26,13 @@ public class MusicFragment extends Fragment {
 
     private ArrayAdapter<String> fileNameListAdapter;
     private MusicViewModel musicViewModel;
+    private Button btnAudPlay; // 成员变量
+    // icon播放资源
+    int[] iconPlayMusic = {
+            R.drawable.audplay, // 第一个图标
+            R.drawable.audstop, // 第二个图标
+    };
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_music, container, false);
@@ -39,7 +45,7 @@ public class MusicFragment extends Fragment {
         fileNameListAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         //按钮
-        Button btnAudPlay = root.findViewById(R.id.btn_audplay);
+        btnAudPlay = root.findViewById(R.id.btn_audplay);
         Button btnAudList = root.findViewById(R.id.btn_audlist);
         Button btnNext = root.findViewById(R.id.btn_audnext);
         Button btnPrev = root.findViewById(R.id.btn_audprev);
@@ -51,12 +57,6 @@ public class MusicFragment extends Fragment {
         ImageButton btnVoluinc =root.findViewById(R.id.btn_voluinc);
 
 
-
-        // 按钮对应的功能绑定
-        int[] iconPlayMusic = {
-                R.drawable.audplay, // 第一个图标
-                R.drawable.audstop, // 第二个图标
-        };
         btnAudPlay.setOnClickListener(v -> {
             // 切换播放模式
             if( musicViewModel.playAudio()){
@@ -66,7 +66,6 @@ public class MusicFragment extends Fragment {
                 }else {
                     btnAudPlay.setCompoundDrawablesWithIntrinsicBounds(iconPlayMusic[0], 0, 0, 0);
                 }
-
             }
         });
 
@@ -121,7 +120,7 @@ public class MusicFragment extends Fragment {
     }
     private void onChangedFile(String nowPlayAudioFile){
         if(nowPlayAudioFile.isEmpty()){
-            nowAudioFile.setText("无");
+            nowAudioFile.setText("");
             return;
         }
         nowAudioFile.setText(nowPlayAudioFile);
@@ -139,22 +138,19 @@ public class MusicFragment extends Fragment {
         ListView listViewSongs = dialogView.findViewById(R.id.listView_songs);
 
         // 观察 ViewModel 中的 audList 数据
-        musicViewModel.getAudList().observe(getViewLifecycleOwner(), new Observer<Set<String>>() {
-            @Override
-            public void onChanged(Set<String> audioSet) {
-                // 将 Set 转换为数组
-                String[] songs = audioSet.toArray(new String[0]);
-
-                // 设置适配器
-                ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, songs);
-                listViewSongs.setAdapter(adapter);
-
-                // 设置歌曲列表点击事件
-                listViewSongs.setOnItemClickListener((parent, view, position, id) -> {
-                    String selectedSong = songs[position];
-                    musicViewModel.playAudStart(selectedSong);
-                });
-            }
+        musicViewModel.getAudList().observe(getViewLifecycleOwner(), audioSet -> {
+            // 将 Set 转换为数组
+            String[] songs = audioSet.toArray(new String[0]);
+            // 设置适配器
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, songs);
+            listViewSongs.setAdapter(adapter);
+            // 设置歌曲列表点击事件
+            listViewSongs.setOnItemClickListener((parent, view, position, id) -> {
+                String selectedSong = songs[position];
+                if(musicViewModel.playAudStart(selectedSong)){
+                    btnAudPlay.setCompoundDrawablesWithIntrinsicBounds(iconPlayMusic[1], 0, 0, 0);
+                }
+            });
         });
 
         // 显示弹框

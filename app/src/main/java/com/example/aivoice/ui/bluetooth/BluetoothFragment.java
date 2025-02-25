@@ -58,9 +58,6 @@ public class BluetoothFragment extends Fragment {
         tvBluetoothStatus = root.findViewById(R.id.tv_bluetooth_status);
         bluetoothViewModel.getConnectedDeviceName().observe(getViewLifecycleOwner(), newName -> tvBluetoothStatus.setText(newName));
 
-
-
-
         lvBluetoothDevices = root.findViewById(R.id.lv_bluetooth);
         Button btnScanBluetooth = root.findViewById(R.id.btn_scan_bluetooth);
 

@@ -70,7 +70,6 @@ public class FilesFragment extends Fragment {
         return root;
     }
 
-
     private void loadAudioFiles() {
         try {
             File musicDir;
@@ -82,22 +81,18 @@ public class FilesFragment extends Fragment {
                     Toast.makeText(requireContext(), "无法访问选定目录", Toast.LENGTH_SHORT).show();
                     return;
                 }
-
                 ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1);
                 audioFileList.clear(); // 清空之前的数据
-
                 for (DocumentFile file : pickedDir.listFiles()) {
                     if (file.isFile() && file.getName() != null) {
                         adapter.add(file.getName());
                         audioFileList.add(file.getName());
                     }
                 }
-
                 lvFiles.setAdapter(adapter);
             } else {
                 // 默认路径
                 musicDir = new File(requireContext().getFilesDir(), "Music");
-
                 // 检查文件夹是否存在，如果不存在则创建
                 if (!musicDir.exists()) {
                     boolean isCreated = musicDir.mkdirs();
@@ -124,14 +119,31 @@ public class FilesFragment extends Fragment {
             }
         } catch (Exception e) {
             Toast.makeText(requireContext(), "加载音频文件失败", Toast.LENGTH_SHORT).show();
-            Log.e(TAG, "Error loading audio files", e);
+            Log.e(TAG, "加载音频文件失败", e);
         }
     }
 
     private void playAudio(String fileName){
-            File selectedFile = new File(requireContext().getFilesDir(), "Music/" +selectedFileName);
-            Toast.makeText(requireContext(), "即将播放"+fileName, Toast.LENGTH_SHORT).show();
-            filesViewModel.playAudioFile(selectedFile);
+            fileUri = UriManager.getUri(requireContext());
+            if (fileUri != null) {
+                Uri audioUri = null; // 用于存储要播放的文件的 URI
+                DocumentFile pickedDir = DocumentFile.fromTreeUri(requireContext(), fileUri);
+                if (pickedDir != null && pickedDir.isDirectory()) {
+                    // 遍历目录，查找与 fileName 匹配的文件
+                    for (DocumentFile file : pickedDir.listFiles()) {
+                        if (file.isFile() && fileName.equals(file.getName())) {
+                            // 找到匹配的文件，获取其 URI
+                            audioUri = file.getUri();
+                            break;
+                        }
+                    }
+                }
+                filesViewModel.playAudioFile(audioUri);
+            }else{
+                File selectedFile = new File(requireContext().getFilesDir(), "Music/"+selectedFileName);
+                filesViewModel.playAudioFile(selectedFile);
+            }
+            Toast.makeText(requireContext(), "播放"+fileName, Toast.LENGTH_SHORT).show();
     }
 
     @Override
