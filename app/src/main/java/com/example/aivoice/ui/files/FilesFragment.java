@@ -1,18 +1,14 @@
 package com.example.aivoice.ui.files;
 
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowInsets;
-import android.view.WindowInsetsController;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -22,7 +18,6 @@ import androidx.annotation.NonNull;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.media3.ui.PlayerView;
 
 import com.example.aivoice.R;
 import com.example.aivoice.files.UriManager;
@@ -41,9 +36,7 @@ public class FilesFragment extends Fragment {
     private static Uri fileUri = null;
     private ListView lvFiles;
     private ArrayList<String> audioFileList;  // 存储音频文件路径的列表
-    private PlayerView playerView;
-    private boolean isFullScreen = false;
-
+    private static String selectedFileName; //当前播放的文件
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_files, container, false);
@@ -52,6 +45,7 @@ public class FilesFragment extends Fragment {
         filesViewModel.setContext(requireContext());
         //
         Button fileButton = root.findViewById(R.id.btn_files);
+        //fileButton.setOnClickListener(v -> filesViewModel.jumpToFolder(requireActivity(), REQUEST_CODE_OPEN_DIRECTORY));
         fileButton.setOnClickListener(v -> openDirectorySelector());
 
         // 找到显示文件列表的列表视图
@@ -64,86 +58,16 @@ public class FilesFragment extends Fragment {
         // 设置 ListView 的点击事件监听器
         lvFiles.setOnItemClickListener((parent, view, position, id) -> {
             String newSelectedFileName = audioFileList.get(position);
-            playAudio(newSelectedFileName);
-        });
-
-        // 初始化 PlayerView
-        playerView = root.findViewById(R.id.player_view);
-        // 获取全屏按钮
-        ImageButton fullScreenButton = playerView.findViewById(R.id.exo_fullscreen);
-        fullScreenButton.setOnClickListener(v -> toggleFullScreen());
-        // 将 PlayerView 绑定到 ExoPlayer
-        playerView.setPlayer(filesViewModel.getExoPlayer());
-        filesViewModel.getIsVideoPlaying().observe(getViewLifecycleOwner(), isVideoPlaying -> {
-            if (isVideoPlaying) {
-                playerView.setVisibility(View.VISIBLE); // 显示 PlayerView
-                fullScreenButton.setVisibility(View.VISIBLE);
-            }else{
-                playerView.setVisibility(View.GONE); // 隐藏 PlayerView
-                fullScreenButton.setVisibility(View.GONE);
-
+            if(Objects.equals(newSelectedFileName, selectedFileName)){
+                filesViewModel.stopAudioFile();
+                Toast.makeText(requireContext(),"已停止播放",Toast.LENGTH_SHORT).show();
+            }else {
+                selectedFileName = newSelectedFileName;
+                // 调用播放方法
+                playAudio(selectedFileName);
             }
         });
-
         return root;
-    }
-    private void toggleFullScreen() {
-        if (isFullScreen) {
-            // 退出全屏
-            exitFullScreen();
-        } else {
-            // 进入全屏
-            enterFullScreen();
-        }
-        isFullScreen = !isFullScreen;
-    }
-
-    private void enterFullScreen() {
-        // 获取 WindowInsetsController
-        WindowInsetsController insetsController = requireActivity().getWindow().getInsetsController();
-        if (insetsController != null) {
-            // 隐藏状态栏和导航栏
-            insetsController.hide(WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars());
-            // 设置沉浸式模式
-            insetsController.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
-        }
-
-        // 设置 PlayerView 为全屏
-        ViewGroup.LayoutParams params = playerView.getLayoutParams();
-        params.width = ViewGroup.LayoutParams.MATCH_PARENT;
-        params.height = ViewGroup.LayoutParams.MATCH_PARENT;
-        playerView.setLayoutParams(params);
-
-        // 强制横屏
-        requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-    }
-
-    private void exitFullScreen() {
-        // 获取 WindowInsetsController
-        WindowInsetsController insetsController = requireActivity().getWindow().getInsetsController();
-        if (insetsController != null) {
-            // 显示状态栏和导航栏
-            insetsController.show(WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars());
-        }
-
-        // 恢复 PlayerView 的原始布局
-        ViewGroup.LayoutParams params = playerView.getLayoutParams();
-        params.width = ViewGroup.LayoutParams.MATCH_PARENT;
-        params.height = ViewGroup.LayoutParams.MATCH_PARENT;
-        playerView.setLayoutParams(params);
-
-        // 恢复竖屏
-        requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        // 退出全屏（如果正在全屏）
-        if (isFullScreen) {
-            exitFullScreen();
-            isFullScreen = false;
-        }
     }
 
     private void loadAudioFiles() {
@@ -202,24 +126,24 @@ public class FilesFragment extends Fragment {
     private void playAudio(String fileName){
             fileUri = UriManager.getUri(requireContext());
             if (fileUri != null) {
-                Uri audioUri = filesViewModel.getFileByUri(fileName); // 用于存储要播放的文件的 URI
-                if (audioUri == null) {
-                    Toast.makeText(requireContext(), "已停止播放", Toast.LENGTH_SHORT).show();
-                    return;
+                Uri audioUri = null; // 用于存储要播放的文件的 URI
+                DocumentFile pickedDir = DocumentFile.fromTreeUri(requireContext(), fileUri);
+                if (pickedDir != null && pickedDir.isDirectory()) {
+                    // 遍历目录，查找与 fileName 匹配的文件
+                    for (DocumentFile file : pickedDir.listFiles()) {
+                        if (file.isFile() && fileName.equals(file.getName())) {
+                            // 找到匹配的文件，获取其 URI
+                            audioUri = file.getUri();
+                            break;
+                        }
+                    }
                 }
-                if(filesViewModel.playFile(audioUri)){
-                    Toast.makeText(requireContext(), "播放"+fileName, Toast.LENGTH_SHORT).show();
-                }
+                filesViewModel.playAudioFile(audioUri);
             }else{
-                File selectedFile = filesViewModel.getFile(fileName);
-                if (selectedFile == null) {
-                    Toast.makeText(requireContext(), "已停止播放", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                if(filesViewModel.playFile(selectedFile)){
-                    Toast.makeText(requireContext(), "播放"+fileName, Toast.LENGTH_SHORT).show();
-                }
+                File selectedFile = new File(requireContext().getFilesDir(), "Music/"+selectedFileName);
+                filesViewModel.playAudioFile(selectedFile);
             }
+            Toast.makeText(requireContext(), "播放"+fileName, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -255,7 +179,9 @@ public class FilesFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         openDirectoryLauncher.unregister(); // 注销 ActivityResultLauncher
-        playerView.setPlayer(null);
     }
+
+
+
 
 }

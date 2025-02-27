@@ -8,10 +8,11 @@ android {
 
     defaultConfig {
         applicationId = "com.example.aivoice"
-        minSdk = 30
+        minSdk = 29
         targetSdk = 34
         versionCode = 1
         versionName = "1.4"
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -58,11 +59,8 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
-    implementation(libs.activity.ktx)
-    implementation(libs.okhttp)  //网络请求
-    implementation(libs.gson)  //缓存
-    implementation("androidx.media3:media3-exoplayer:1.4.1")
-    implementation("androidx.media3:media3-ui:1.4.1")
-    implementation("androidx.media3:media3-common:1.4.1")
+    implementation("androidx.activity:activity-ktx")
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")  //网络请求
+    implementation("com.google.code.gson:gson:2.10.1")  //缓存
 
 }
