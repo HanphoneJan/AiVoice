@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
     <LinearLayout
         android:layout_width="match_parent"
@@ -28,16 +29,21 @@
                 android:layout_height="wrap_content"
                 android:text="音频文件"
                 android:textSize="24sp" />
-
         </LinearLayout>
-
-
     <!-- 文件显示界面 -->
     <ListView
         android:id="@+id/lv_files"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />
-
     </LinearLayout>
+    <!-- 添加 PlayerView 用于视频播放 -->
+    <androidx.media3.ui.PlayerView
+        android:id="@+id/player_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        app:resize_mode="fit"
+        app:use_controller="true"
+        app:controller_layout_id="@layout/custom_player_controls" />
 </LinearLayout>

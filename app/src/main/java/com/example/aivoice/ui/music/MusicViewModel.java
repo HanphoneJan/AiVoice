@@ -1,6 +1,7 @@
 package com.example.aivoice.ui.music;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -12,7 +13,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class MusicViewModel extends ViewModel implements Bluetooth.BluetoothDataListener{
-
+    private static final String TAG = "MusicViewModel";
     private final MutableLiveData<Set<String>> audList = new MutableLiveData<>() ;
     private final MutableLiveData<String> nowPlayAudioFile = new MutableLiveData<>();
     private final Bluetooth bluetooth = new Bluetooth();
@@ -51,11 +52,15 @@ public class MusicViewModel extends ViewModel implements Bluetooth.BluetoothData
     }
 
     public boolean playAudStart(String selectedSong) {
-        if(bluetooth.sendSignal("audstart "+selectedSong)){
-            isPlay = true;
-            return true;
+        if(isPlay){
+            isPlay = !bluetooth.sendSignal("pausresu");
+            return isPlay;
         }
-        return false;
+        isPlay = bluetooth.sendSignal("audstart "+selectedSong);
+        if(isPlay){
+            displayTrackName();
+        }
+        return isPlay;
     }
 
     public boolean showAudioList() {
