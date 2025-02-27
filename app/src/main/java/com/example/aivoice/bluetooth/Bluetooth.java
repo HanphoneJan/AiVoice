@@ -25,15 +25,14 @@ public class Bluetooth {
     private static final String TAG = "Bluetooth";
     //static，生命周期与应用程序相同
     private static BluetoothDevice connectedDevice;
-
     public static ArrayList<BluetoothDevice> bluetoothDeviceList = new ArrayList<>();
-    private BluetoothAdapter bluetoothAdapter;
+    private static BluetoothAdapter bluetoothAdapter;
     private Context context;
-    private BluetoothSocket bluetoothSocket;
-    private OutputStream outputStream;
-    private InputStream inputStream;
+    private static BluetoothSocket bluetoothSocket;
+    private static OutputStream outputStream;
+    private static InputStream inputStream;
     private static final UUID SERIAL_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-    private BluetoothConnectionListener bluetoothConnectionListener;
+    private static BluetoothConnectionListener bluetoothConnectionListener;
     private BluetoothGattCustom bluetoothGattCustom = new BluetoothGattCustom();
 
     //蓝牙数据监听回调
@@ -164,7 +163,22 @@ public class Bluetooth {
             bluetoothSocket = device.createRfcommSocketToServiceRecord(SERIAL_UUID);
             bluetoothSocket.connect();
             outputStream = bluetoothSocket.getOutputStream();
+            if (outputStream == null) {
+                Log.e(TAG, "无法初始化输出流");
+                closeConnection();
+                return false;
+            }
+            // 初始化输入流
             inputStream = bluetoothSocket.getInputStream();
+            if (inputStream == null) {
+                Log.e(TAG, "无法初始化输入流");
+                closeConnection();
+                return false;
+            }
+            if (bluetoothConnectionListener != null) {
+                bluetoothConnectionListener.onDeviceConnected(device);
+            }
+            // 通知监听器连接成功
             if (bluetoothConnectionListener != null) {
                 bluetoothConnectionListener.onDeviceConnected(device);
             }
@@ -184,7 +198,7 @@ public class Bluetooth {
             byte[] buffer = new byte[1024];
             int bytes;
             try {
-                while (true) {
+                while (connectedDevice!=null) {
                     bytes = inputStream.read(buffer);
                     if (bytes == -1) {
                         break; // 输入流结束，退出循环
@@ -199,16 +213,23 @@ public class Bluetooth {
                 }
             } catch (IOException e) {
                 Log.e(TAG, "读取数据错误", e);
-                disconnect();
+                //直接断连会导致错误
+                if(connectedDevice!=null){
+                    disconnect();
+                }
             }
         }).start();
     }
 
 
     public boolean sendSignal(String order) {
-        if (outputStream == null) {
+        if (connectedDevice == null) {
             Log.e(TAG, "未连接蓝牙");
             Toast.makeText(context, "请连接蓝牙", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if(outputStream == null){
+            Log.e(TAG, "outputStream未初始化");
             return false;
         }
         try {
@@ -225,7 +246,7 @@ public class Bluetooth {
     public void disconnect() {
         closeConnection();
         Log.i(TAG, "已断开蓝牙连接");
-        Toast.makeText(context, "已断开连接", Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, "已断开蓝牙连接", Toast.LENGTH_SHORT).show();
     }
 
     private void closeConnection() {
@@ -333,5 +354,19 @@ public class Bluetooth {
         this.bluetoothConnectionListener = listener;
     }
 
+    private void cleanupResources() {
+        try {
+            if (inputStream != null) {
+                inputStream.close();
+                inputStream = null;
+            }
+            if (outputStream != null) {
+                outputStream.close();
+                outputStream = null;
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "关闭流时发生错误", e);
+        }
+    }
 
 }

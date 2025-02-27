@@ -327,11 +327,12 @@ public class HomeViewModel extends ViewModel {
                         try {
                             if (response.isSuccessful()) {
                                 byte[] responseBody = response.body().bytes();
-                                storeReturnedFile(responseBody);
+                                String contentType = response.header("Content-Type");
+                                storeReturnedFile(responseBody,contentType);
                                 Log.i(TAG, "生成音频成功");
                                 // 使用runOnUiThread切换到主线程
                                 new Handler(Looper.getMainLooper()).post(() -> {
-                                    Toast.makeText(context, "生成音频成功", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(context, "生成文件成功", Toast.LENGTH_SHORT).show();
                                 });
                             } else {
                                 Log.e(TAG, "生成音频失败");
@@ -388,15 +389,16 @@ public class HomeViewModel extends ViewModel {
     }
 
 
-    private void storeReturnedFile(byte[] data) {
-        String fileName = "生成音频文件_" + System.currentTimeMillis() + ".wav";
+    private void storeReturnedFile(byte[] data,String contentType) {
+        String fileExtension = getFileExtensionFromMimeType(contentType);
+        String fileName = "生成音频文件_" + System.currentTimeMillis() + "." + fileExtension;
         musicUri = UriManager.getUri(context);
         if (musicUri != null) {
             // 如果 uri 不为空，使用用户选择的目录
             DocumentFile pickedDir = DocumentFile.fromTreeUri(context, musicUri);
             if (pickedDir != null && pickedDir.exists() && pickedDir.isDirectory()) {
                 // SAF 目录下创建文件
-                DocumentFile newFile = pickedDir.createFile("audio/wav", fileName);
+                DocumentFile newFile = pickedDir.createFile(contentType, fileName);
                 if (newFile != null) {
                     try (OutputStream outputStream = context.getContentResolver().openOutputStream(newFile.getUri())) {
                         if (outputStream != null) {
@@ -428,6 +430,46 @@ public class HomeViewModel extends ViewModel {
         }
     }
 
+    private String getFileExtensionFromMimeType(String mimeType) {
+        if (mimeType == null) {
+            return "wav"; // 默认扩展名
+        }
+        switch (mimeType) {
+            // 音频文件类型
+            case "audio/wav":
+                return "wav";
+            case "audio/mpeg":
+                return "mp3";
+            case "audio/ogg":
+                return "ogg";
+            case "audio/aac":
+                return "aac";
+            case "audio/flac":
+                return "flac";
+            case "audio/webm":
+                return "webm";
+
+            // 视频文件类型
+            case "video/mp4":
+                return "mp4";
+            case "video/quicktime":
+                return "mov";
+            case "video/x-msvideo":
+                return "avi";
+            case "video/x-matroska":
+                return "mkv";
+            case "video/webm":
+                return "webm";
+            case "video/3gpp":
+                return "3gp";
+            case "video/mpeg":
+                return "mpeg";
+
+            // 其他类型
+            default:
+                return "wav"; // 默认扩展名
+        }
+    }
     private File saveTextAsFile(String text) {
         // 使用时间戳生成唯一的文件名
         String fileName = "text_file_" + System.currentTimeMillis() + ".txt";
