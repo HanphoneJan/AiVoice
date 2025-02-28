@@ -62,5 +62,5 @@ dependencies {
     implementation("androidx.activity:activity-ktx")
     implementation("com.squareup.okhttp3:okhttp:4.11.0")  //网络请求
     implementation("com.google.code.gson:gson:2.10.1")  //缓存
-
+    implementation("androidx.compose.material:material:1.7.8")  //样式
 }

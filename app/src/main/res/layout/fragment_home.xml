@@ -20,10 +20,9 @@
             android:gravity="left|center_vertical"
             android:orientation="horizontal"
             android:layout_marginTop="16dp"
-            android:paddingLeft="110dp">
+            android:paddingLeft="20dp">
 
-            <Button
-                android:id="@+id/btn_model"
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="模型" />
@@ -43,7 +42,7 @@
             android:orientation="horizontal"
             android:paddingLeft="110dp">
 
-            <Button
+            <TextView
                 android:id="@+id/btn_emotion"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -64,7 +63,7 @@
             android:orientation="horizontal"
             android:paddingLeft="110dp">
 
-            <Button
+            <TextView
                 android:id="@+id/btn_speed"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -149,10 +148,11 @@
         <!-- 选择文本文件按钮 -->
         <Button
             android:id="@+id/btn_choose_file"
-            android:layout_width="wrap_content"
+            android:layout_width="54dp"
             android:layout_height="wrap_content"
-            android:text="选择文本文件"
-            android:textSize="18sp" />
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:backgroundTint="@android:color/transparent"
+            android:drawableLeft="@drawable/plus_circle" />
 
         <!-- 输入框 -->
 
