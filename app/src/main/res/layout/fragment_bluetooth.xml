@@ -33,7 +33,6 @@
             android:id="@+id/btn_scan_bluetooth"
             android:layout_width="54dp"
             android:layout_height="wrap_content"
-            android:background="white"
             android:drawableStart="@drawable/bluetoothscan" />
 
             <TextView

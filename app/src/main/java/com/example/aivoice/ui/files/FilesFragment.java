@@ -19,9 +19,11 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.core.content.FileProvider;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.media3.ui.AspectRatioFrameLayout;
 import androidx.media3.ui.PlayerView;
 
 import com.example.aivoice.R;
@@ -30,13 +32,11 @@ import com.example.aivoice.files.UriManager;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class FilesFragment extends Fragment {
 
     private static final String TAG = "FilesFragment";
     private ActivityResultLauncher<Uri> openDirectoryLauncher;
-
     private FilesViewModel filesViewModel;
     private static Uri fileUri = null;
     private ListView lvFiles;
@@ -65,26 +65,39 @@ public class FilesFragment extends Fragment {
         lvFiles.setOnItemClickListener((parent, view, position, id) -> {
             String newSelectedFileName = audioFileList.get(position);
             playAudio(newSelectedFileName);
-        });
-
-        // 初始化 PlayerView
-        playerView = root.findViewById(R.id.player_view);
-        // 获取全屏按钮
-        ImageButton fullScreenButton = playerView.findViewById(R.id.exo_fullscreen);
-        fullScreenButton.setOnClickListener(v -> toggleFullScreen());
-        // 将 PlayerView 绑定到 ExoPlayer
-        playerView.setPlayer(filesViewModel.getExoPlayer());
-        filesViewModel.getIsVideoPlaying().observe(getViewLifecycleOwner(), isVideoPlaying -> {
-            if (isVideoPlaying) {
-                playerView.setVisibility(View.VISIBLE); // 显示 PlayerView
-                fullScreenButton.setVisibility(View.VISIBLE);
-            }else{
-                playerView.setVisibility(View.GONE); // 隐藏 PlayerView
-                fullScreenButton.setVisibility(View.GONE);
-
+            if(filesViewModel.getIsVideoPlaying()){
+                createPlayerView();
             }
         });
+        // 设置 ListView 的长按事件监听器
+        lvFiles.setOnItemLongClickListener((parent, view, position, id) -> {
+            String fileName = audioFileList.get(position);
+            // 假设你有一个方法可以根据文件名获取文件的绝对路径
+            fileUri = UriManager.getUri(requireContext());
+            Uri uri;String mimeType;
+            if (fileUri != null) {
+                uri = filesViewModel.getFileByUri(fileName);
+                mimeType = filesViewModel.getMimeTypeByUri(uri);
+            }else{
+                String filePath = filesViewModel.getFile(fileName).toString();
+                File file = new File(filePath);
+                mimeType = filesViewModel.getMimeType(filePath);
+                uri = FileProvider.getUriForFile(requireContext(), requireContext().getPackageName() + ".fileprovider", file);
+            }
+                // 获取文件的 MIME 类型
+                if (mimeType != null) {
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setDataAndType(uri, mimeType);
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    // 创建选择器
+                    Intent chooser = Intent.createChooser(intent, "选择应用打开");
+                    if (intent.resolveActivity(requireContext().getPackageManager()) != null) {
+                        startActivity(chooser);
+                    }
+                }
 
+            return true;
+        });
         return root;
     }
     private void toggleFullScreen() {
@@ -144,6 +157,24 @@ public class FilesFragment extends Fragment {
             exitFullScreen();
             isFullScreen = false;
         }
+    }
+
+    private void createPlayerView(){
+        // 初始化 PlayerView
+        playerView = requireView().findViewById(R.id.player_view);
+
+        // 获取全屏按钮
+        ImageButton fullScreenButton = playerView.findViewById(R.id.exo_fullscreen);
+        fullScreenButton.setOnClickListener(v -> toggleFullScreen());
+
+        // 将 PlayerView 绑定到 ExoPlayer
+        playerView.setPlayer(filesViewModel.getExoPlayer());
+
+        // 设置 PlayerView 可见
+        playerView.setVisibility(View.VISIBLE);
+
+        // 设置播放器控制器的可见性
+        playerView.setUseController(true);
     }
 
     private void loadAudioFiles() {
@@ -240,7 +271,6 @@ public class FilesFragment extends Fragment {
                                 uri,
                                 Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                         );
-                        // 将选中的 URI 存储到 ViewModel 或其他地方，以便后续使用
                     }
                 });
     }
@@ -255,7 +285,6 @@ public class FilesFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         openDirectoryLauncher.unregister(); // 注销 ActivityResultLauncher
-        playerView.setPlayer(null);
     }
 
 }

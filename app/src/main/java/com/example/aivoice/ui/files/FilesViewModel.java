@@ -30,14 +30,14 @@ public class FilesViewModel extends ViewModel {
     private Context context;
     private static Uri fileUri = null;
     private static String selectedFileName; //当前播放的文件
-    private MutableLiveData<Boolean> isVideoPlaying = new MutableLiveData<>(false);
+    private Boolean isVideoPlaying = false;
     public FilesViewModel() {
     }
     public void setContext(Context context) {
         this.context = context;
         exoPlayer = new ExoPlayer.Builder(context).build();
     }
-    public LiveData<Boolean> getIsVideoPlaying() {
+    public Boolean getIsVideoPlaying() {
         return isVideoPlaying;
     }
     public ExoPlayer getExoPlayer() {
@@ -62,10 +62,16 @@ public class FilesViewModel extends ViewModel {
         return mimeType != null && mimeType.startsWith("video/");
     }
     // 获取文件的 MIME 类型
-    private String getMimeType(String filePath) {
+    public String getMimeType(String filePath) {
         String extension = MimeTypeMap.getFileExtensionFromUrl(filePath);
         return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
     }
+
+    public String getMimeTypeByUri(Uri uri) {
+        String mimeType = context.getContentResolver().getType(uri);
+        return mimeType;
+    }
+
     public boolean playFile(File file){
         if(isAudioFile(file)){
             try {
@@ -97,7 +103,7 @@ public class FilesViewModel extends ViewModel {
                 // 创建 MediaItem
                 MediaItem mediaItem = MediaItem.fromUri(Uri.fromFile(file));
                 exoPlayer.setMediaItem(mediaItem);
-                isVideoPlaying.setValue(true);
+                isVideoPlaying=true;
                 exoPlayer.prepare();
                 exoPlayer.play(); // 开始播放
                 Log.i(TAG, "开始播放视频（ExoPlayer）");
@@ -144,7 +150,7 @@ public class FilesViewModel extends ViewModel {
             }
             MediaItem mediaItem = MediaItem.fromUri(uri);
             exoPlayer.setMediaItem(mediaItem);
-            isVideoPlaying.setValue(true);
+            isVideoPlaying=true;
             exoPlayer.prepare();
             exoPlayer.play();
             Log.i(TAG, "开始播放视频（ExoPlayer）");
@@ -152,6 +158,7 @@ public class FilesViewModel extends ViewModel {
         }
         return false;
     }
+    // 获取文件的 MIME 类型
 
     public void stopAudioFile() {
         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
