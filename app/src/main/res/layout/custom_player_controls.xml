@@ -1,34 +1,32 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="#80000000">
 
-    <!-- 播放/暂停按钮 -->
-    <ImageButton
-        android:id="@+id/exo_play"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:src="@drawable/audplay"
-        android:contentDescription="播放"
-        android:layout_gravity="center"/>
+    <!-- 按钮容器 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="8dp">
 
-    <!-- 全屏按钮 -->
-    <ImageButton
-        android:id="@+id/exo_fullscreen"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:contentDescription="全屏"
-        android:src="@drawable/fullscreen"
-        android:layout_gravity="end|center_vertical"/>
+        <!-- 返回按钮 -->
+        <ImageButton
+            android:id="@+id/exo_back"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/back"
+            android:contentDescription="@string/back" />
+    </LinearLayout>
 
-    <!-- 添加 PlayerView 用于视频播放 -->
+    <!-- PlayerView 用于视频播放 -->
     <androidx.media3.ui.PlayerView
         android:id="@+id/player_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone"
-        app:resize_mode="fit"
-        app:use_controller="true"/>
-</FrameLayout>
+        android:layout_height="400dp"
+    app:resize_mode="fit"
+    app:use_controller="true" />
+</LinearLayout>

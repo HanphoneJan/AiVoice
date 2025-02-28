@@ -3,42 +3,37 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:layout_marginTop="16dp">
-
-    <!-- 控制界面 -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-
-
+    android:layout_marginTop="8dp"
+    android:gravity="center_horizontal">
         <!--连接状态-->
-            <TextView
-                android:id="@+id/tv_bluetooth_status"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="4dp"
-                android:gravity="center"
-                android:text="未连接设备" />
+<!--        <TextView-->
+<!--            android:id="@+id/tv_bluetooth_status"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="30dp"-->
+<!--            android:gravity="center"-->
+<!--            android:text="@string/noConnect"-->
+<!--            android:textSize="14sp"/>-->
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:gravity="left|center_vertical"
-            android:paddingLeft="108dp"
-            android:orientation="horizontal">
-        <!--        扫描蓝牙-->
+            android:layout_height="50dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+           >
+        <!--  扫描蓝牙-->
             <Button
             android:id="@+id/btn_scan_bluetooth"
-            android:layout_width="54dp"
-            android:layout_height="wrap_content"
-            android:drawableStart="@drawable/bluetoothscan" />
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:backgroundTint="@android:color/transparent"
+            android:contentDescription="@string/scanBluetooth"
+            android:drawableLeft="@drawable/bluetoothscan" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="蓝牙设备列表"
+                android:text="@string/bluetoothList"
                 android:textSize="20sp"
               />
         </LinearLayout>
@@ -48,9 +43,4 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1" />
-
-    </LinearLayout>
-
-
-
 </LinearLayout>

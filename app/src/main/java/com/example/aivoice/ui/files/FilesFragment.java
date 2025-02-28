@@ -12,6 +12,7 @@ import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -100,16 +101,7 @@ public class FilesFragment extends Fragment {
         });
         return root;
     }
-    private void toggleFullScreen() {
-        if (isFullScreen) {
-            // 退出全屏
-            exitFullScreen();
-        } else {
-            // 进入全屏
-            enterFullScreen();
-        }
-        isFullScreen = !isFullScreen;
-    }
+
 
     private void enterFullScreen() {
         // 获取 WindowInsetsController
@@ -127,8 +119,6 @@ public class FilesFragment extends Fragment {
         params.height = ViewGroup.LayoutParams.MATCH_PARENT;
         playerView.setLayoutParams(params);
 
-        // 强制横屏
-        requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
     }
 
     private void exitFullScreen() {
@@ -142,9 +132,8 @@ public class FilesFragment extends Fragment {
         // 恢复 PlayerView 的原始布局
         ViewGroup.LayoutParams params = playerView.getLayoutParams();
         params.width = ViewGroup.LayoutParams.MATCH_PARENT;
-        params.height = ViewGroup.LayoutParams.MATCH_PARENT;
+        params.height = 600;
         playerView.setLayoutParams(params);
-
         // 恢复竖屏
         requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
     }
@@ -160,21 +149,22 @@ public class FilesFragment extends Fragment {
     }
 
     private void createPlayerView(){
-        // 初始化 PlayerView
-        playerView = requireView().findViewById(R.id.player_view);
+        // 动态加载 custom_player_controls.xml
+        LayoutInflater inflater = LayoutInflater.from(requireContext());
+        View playerControlsView = inflater.inflate(R.layout.custom_player_controls, null);
 
-        // 获取全屏按钮
-        ImageButton fullScreenButton = playerView.findViewById(R.id.exo_fullscreen);
-        fullScreenButton.setOnClickListener(v -> toggleFullScreen());
-
+        // 获取 PlayerView
+        playerView = playerControlsView.findViewById(R.id.player_view);
         // 将 PlayerView 绑定到 ExoPlayer
         playerView.setPlayer(filesViewModel.getExoPlayer());
-
-        // 设置 PlayerView 可见
-        playerView.setVisibility(View.VISIBLE);
-
         // 设置播放器控制器的可见性
         playerView.setUseController(true);
+        // 进入全屏模式
+        enterFullScreen();
+        isFullScreen = true;
+        // 将 playerControlsView 添加到当前布局中，实现覆盖效果
+        FrameLayout rootLayout = requireActivity().findViewById(android.R.id.content);
+        rootLayout.addView(playerControlsView);
     }
 
     private void loadAudioFiles() {

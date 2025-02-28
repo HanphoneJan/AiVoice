@@ -2,32 +2,30 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-
-    android:orientation="vertical">
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+    android:orientation="vertical"
+    >
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:gravity="center"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            >
             <!-- 音频文件文字 -->
             <Button
                 android:id="@+id/btn_files"
-                android:layout_width="46dp"
-                android:layout_height="46dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:backgroundTint="@android:color/transparent"
                 android:drawableLeft="@drawable/document"
+                android:contentDescription="@string/selectDocument"
                 android:drawablePadding="8dp"
                 android:gravity="center_vertical|start"
                 android:padding="12dp" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="音频文件"
+                android:text="@string/filesList"
                 android:textSize="24sp" />
         </LinearLayout>
     <!-- 文件显示界面 -->
@@ -36,11 +34,4 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />
-    </LinearLayout>
-    <!-- 包含 custom_player_view -->
-    <include
-        layout="@layout/custom_player_controls"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"/>
 </LinearLayout>

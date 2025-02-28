@@ -4,4 +4,31 @@
     <string name="title_bluetooth">蓝牙控制</string>
     <string name="title_music">音频播放</string>
     <string name="title_files">文件管理</string>
+
+    <string name="noConnect">未连接设备</string>
+    <string name="scanBluetooth">扫描蓝牙</string>
+    <string name="bluetoothList">蓝牙设备列表</string>
+
+    <string name="fullscreen">全屏</string>
+    <string name="back">返回</string>
+    <string name="selectDocument">选定目录</string>
+    <string name="filesList">文件列表</string>
+
+    <string name="audplay">播放音频</string>
+    <string name="audstop">停止音频</string>
+    <string name="audlist">音频列表</string>
+    <string name="audnext">下一首</string>
+    <string name="audprev">上一首</string>
+    <string name="dirback">返回目录</string>
+    <string name="dispname">显示名称</string>
+    <string name="mode">切换模式</string>
+    <string name="pausresu">暂停/恢复</string>
+    <string name="seekbwd">后退</string>
+    <string name="seekfwd">前进</string>
+    <string name="voludec">音量减小</string>
+    <string name="voluinc">音量增加</string>
+
+    <string name="no_audio_files">没有找到音频文件</string>
+    <string name="loading">加载中…</string>
+    <string name="error_occurred">发生错误</string>
 </resources>

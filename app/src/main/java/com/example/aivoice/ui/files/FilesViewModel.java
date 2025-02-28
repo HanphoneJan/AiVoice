@@ -219,7 +219,7 @@ public class FilesViewModel extends ViewModel {
         try {
             mediaPlayer.release();
         } catch (Exception e) {
-            Log.e(TAG, "Error during ViewModel cleanup: " + e.getMessage(), e);
+            Log.e(TAG, "销毁ViewModel错误: " + e.getMessage(), e);
         }
     }
 }
