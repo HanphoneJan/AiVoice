@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="CustomMobileNavigationViewStyle" parent="Widget.MaterialComponents.BottomNavigationView">
+        <!-- 设置底部导航栏的背景颜色 -->
+        <item name="android:background">@color/dark_blue_700</item>
+        <!-- 设置选中菜单项的文本颜色 -->
+        <item name="itemTextColor">@color/white</item>
+        <!-- 设置选中菜单项的图标颜色 -->
+        <item name="itemIconTint">@color/white</item>
+        <!-- 设置未选中菜单项的文本和图标颜色 -->
+        <item name="android:textColorSecondary">@color/grey_600</item>
+    </style>
+    <style name="NavigationStyle" parent="Widget.MaterialComponents.BottomNavigationView">
+        <!-- Background color of the navigation bar -->
+        <item name="android:background">@color/dark_blue_700</item>
+        <!-- Text color of the navigation bar items -->
+        <item name="itemTextColor">@color/white</item>
+        <!-- Icon color of the navigation bar items -->
+        <item name="itemIconTint">@color/white</item>
+    </style>
+</resources>
