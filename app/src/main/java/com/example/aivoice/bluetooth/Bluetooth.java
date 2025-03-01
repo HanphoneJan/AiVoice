@@ -64,10 +64,6 @@ public class Bluetooth {
         void onDataReceived(String data);
     }
 
-    public static BluetoothDevice getConnectedDevice() {
-        return connectedDevice;
-    }
-
     public String getConnectedDeviceName(){
         // 检查BLUETOOTH权限
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH)
@@ -89,8 +85,16 @@ public class Bluetooth {
         return connectedDevice.getName();
     }
 
+    public String getConnectedDeviceAddress(){
+        return connectedDevice.getAddress();
+    }
+
     public void setConnectedDeviceName(BluetoothDevice newConnectedDevice) {
         connectedDevice = newConnectedDevice;
+    }
+
+    public static BluetoothDevice getConnectedDevice(){
+        return  connectedDevice;
     }
 
     public boolean hasBluetoothPermissions() {

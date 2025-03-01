@@ -5,18 +5,35 @@
     android:orientation="horizontal"
     android:gravity="center_vertical"
     android:padding="8dp">
-
-    <ImageView
-        android:id="@+id/bluetooth_icon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:src="@drawable/bluetooth"
-        android:layout_marginEnd="16dp" />
-
+<ImageView
+android:id="@+id/bluetooth_icon"
+android:layout_width="24dp"
+android:layout_height="24dp"
+android:src="@drawable/bluetooth"
+android:layout_marginEnd="16dp" />
+<LinearLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
     <TextView
         android:id="@+id/tv_device_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="16sp"
         android:textColor="@android:color/black" />
+
+    <TextView
+        android:id="@+id/tv_device_address"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"
+        android:textColor="@android:color/black" />
+</LinearLayout>
+    <ImageView
+        android:id="@+id/success"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/success_square"
+        android:visibility="gone"
+        android:layout_marginEnd="16dp" />
 </LinearLayout>

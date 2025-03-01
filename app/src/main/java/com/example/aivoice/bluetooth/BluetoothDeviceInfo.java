@@ -6,10 +6,12 @@ import androidx.annotation.NonNull;
 public class BluetoothDeviceInfo {
     private String deviceName;
     private String deviceAddress;
+    private boolean isConnected;
 
     public BluetoothDeviceInfo(String deviceName, String deviceAddress) {
         this.deviceName = deviceName;
         this.deviceAddress = deviceAddress;
+        this.isConnected = false;
     }
 
     public String getDeviceName() {
@@ -20,9 +22,11 @@ public class BluetoothDeviceInfo {
         return deviceAddress;
     }
 
-    @NonNull
-    @Override
-    public String toString() {
-        return deviceName + " (" + deviceAddress + ")";
+    public boolean isConnected() {
+        return isConnected;
     }
+    public void setConnected(boolean connected) {
+        isConnected = connected;
+    }
+
 }

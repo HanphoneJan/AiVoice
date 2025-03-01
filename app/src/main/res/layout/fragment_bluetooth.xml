@@ -4,7 +4,8 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:layout_marginTop="6dp"
-    android:gravity="center_horizontal">
+    android:gravity="center_horizontal"
+    android:background="@color/white">
         <!--连接状态-->
 <!--        <TextView-->
 <!--            android:id="@+id/tv_bluetooth_status"-->
@@ -22,6 +23,7 @@
             android:elevation="4dp"
             android:padding="8dp"
             android:radius="8dp"
+
            >
         <!--  扫描蓝牙-->
             <ImageButton
@@ -38,6 +40,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/bluetoothList"
                 android:textSize="22sp"
+                android:textColor="@color/black_100"
               />
         </LinearLayout>
         <!-- 蓝牙设备显示界面 -->
@@ -53,5 +56,5 @@
         android:background="@android:color/white"
         android:elevation="4dp"
         android:radius="8dp"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="6dp" />
 </LinearLayout>

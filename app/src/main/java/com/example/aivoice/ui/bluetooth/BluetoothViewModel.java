@@ -13,6 +13,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.aivoice.bluetooth.Bluetooth;
+import com.example.aivoice.bluetooth.BluetoothDeviceInfo;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -23,7 +24,6 @@ public class BluetoothViewModel extends ViewModel {
 
     private static final String TAG = "BluetoothViewModel";
     //    MutableLiveData 和 LiveData 在 UI 和数据层之间传递数据，LiveData只读对外暴露， MutableLiveData则用于修改
-
     private final MutableLiveData<Set<BluetoothDevice>> pairedDevices = new MutableLiveData<>();
     private final MutableLiveData<Set<BluetoothDevice>> bluetoothDevicesList = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isConnected = new MutableLiveData<>();
@@ -36,7 +36,7 @@ public class BluetoothViewModel extends ViewModel {
     private long elapsedTime = 0; // 已扫描的时间
     private final MutableLiveData<Long> recordingTime = new MutableLiveData<>(0L); // 时间，单位：秒
     private final MutableLiveData<String> connectedDeviceName= new MutableLiveData<>();
-
+    private final MutableLiveData<String> connectedAddress = new MutableLiveData<>();
 
     public void setContext(Context context) {
         this.context=context;
@@ -54,8 +54,6 @@ public class BluetoothViewModel extends ViewModel {
     public LiveData<Boolean> getIsConnected() {
         return isConnected;
     }
-
-
     public LiveData<String> getConnectedDeviceName() {
         return connectedDeviceName;
     }
@@ -64,6 +62,13 @@ public class BluetoothViewModel extends ViewModel {
         connectedDeviceName.postValue(deviceName);  //使用post，而不是set
     }
 
+    public void setConnectedDeviceAddress(String deviceAddress){
+        connectedAddress.postValue(deviceAddress);
+    }
+
+    public LiveData<String> getConnectedDeviceAddresss() {
+        return connectedDeviceName;
+    }
 
     public LiveData<Boolean> getIsReceiverRegistered() {
         return isReceiverRegistered;
@@ -97,6 +102,7 @@ public class BluetoothViewModel extends ViewModel {
                 isConnected.postValue(success);
                 if (success) {
                     setConnectedDeviceName(bluetooth.getConnectedDeviceName());
+                    setConnectedDeviceAddress(bluetooth.getConnectedDeviceAddress());
                 } else {
                     Log.i(TAG, "蓝牙连接失败");
                 }

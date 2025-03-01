@@ -32,6 +32,7 @@ import com.example.aivoice.bluetooth.Bluetooth;
 import com.example.aivoice.bluetooth.BluetoothDeviceInfo;
 import com.example.aivoice.bluetooth.CustomBluetoothDeviceAdapter;
 
+import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -42,12 +43,11 @@ public class BluetoothFragment extends Fragment {
 
     private BluetoothViewModel bluetoothViewModel;
     private CustomBluetoothDeviceAdapter bluetoothDevicesAdapter; // 蓝牙设备列表适配器
-    private ArrayList<BluetoothDevice> bluetoothDeviceList = new ArrayList<>(); // 蓝牙设备列表
     private ArrayList<BluetoothDeviceInfo> bluetoothDeviceInfoList = new ArrayList<>();
     private TextView tvBluetoothStatus;  // 蓝牙连接状态
     private ListView lvBluetoothDevices; // 蓝牙设备列表视图
     private Bluetooth bluetooth = new Bluetooth();
-
+    private ArrayList<BluetoothDevice> bluetoothDeviceList = new ArrayList<>(); // 蓝牙设备列表
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_bluetooth, container, false);
@@ -72,22 +72,31 @@ public class BluetoothFragment extends Fragment {
 
         // 设置蓝牙设备列表的点击事件
         lvBluetoothDevices.setOnItemClickListener((parent, view, position, id) -> {
-            BluetoothDeviceInfo deviceInfo = (BluetoothDeviceInfo) bluetoothDevicesAdapter.getItem(position);
+            BluetoothDeviceInfo deviceInfo = bluetoothDevicesAdapter.getItem(position);
             BluetoothDevice device = getDeviceByAddress(deviceInfo.getDeviceAddress());
             connectToBluetoothDevice(device);
         });
 
         // 观察已配对设备列表
         bluetoothViewModel.getPairedDevices().observe(getViewLifecycleOwner(), devices -> {
-            bluetoothDevicesAdapter.clear();
+//            bluetoothDevicesAdapter.clear();
             if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.BLUETOOTH_SCAN)
                     == PackageManager.PERMISSION_GRANTED) {
                 for (BluetoothDevice device : devices) {
                     String deviceName = device.getName() != null && !device.getName().isEmpty() ? device.getName() : "未知设备";
-                    bluetoothDevicesAdapter.add(new BluetoothDeviceInfo(deviceName, device.getAddress()));
+                    bluetoothDevicesAdapter.add(new BluetoothDeviceInfo(deviceName, device.getAddress())); // 将设备添加到列表中
                     bluetoothDeviceList.add(device); // 将设备添加到列表中
                 }
             }
+        });
+
+        // 观察连接状态变化
+        bluetoothViewModel.getConnectedDeviceAddresss().observe(getViewLifecycleOwner(), connectedDeviceAddress -> {
+            for (BluetoothDeviceInfo deviceInfo : bluetoothDeviceInfoList) {
+                boolean isConnected = connectedDeviceAddress != null && connectedDeviceAddress.equals(deviceInfo.getDeviceAddress());
+                deviceInfo.setConnected(isConnected);
+            }
+            bluetoothDevicesAdapter.notifyDataSetChanged();
         });
         return root;
     }
@@ -103,7 +112,8 @@ public class BluetoothFragment extends Fragment {
                     BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                     if (device != null && device.getName() != null) {
                         bluetoothDeviceList.add(device); // 将设备添加到列表中
-                        bluetoothDevicesAdapter.add(new BluetoothDeviceInfo(device.getName(), device.getAddress())); // 更新适配器
+                        String deviceName = device.getName() != null && !device.getName().isEmpty() ? device.getName() : "未知设备";
+                        bluetoothDeviceInfoList.add( new BluetoothDeviceInfo(deviceName, device.getAddress()));
                         bluetoothDevicesAdapter.notifyDataSetChanged(); // 刷新列表
                         Log.i(TAG, "发现设备: " + device.getName() + " (" + device.getAddress() + ")");
                     }
@@ -136,7 +146,7 @@ public class BluetoothFragment extends Fragment {
 
     // 连接或断开蓝牙设备
     private void connectToBluetoothDevice(BluetoothDevice device) {
-        BluetoothDevice connectedDevice = bluetooth.getConnectedDevice();
+        BluetoothDevice connectedDevice = Bluetooth.getConnectedDevice();
         if (Objects.equals(device, connectedDevice)) {
             bluetoothViewModel.disconnectDevice();
             tvBluetoothStatus.setText("无");

@@ -1,10 +1,8 @@
 package com.example.aivoice.bluetooth;
 
-import android.Manifest;
-import android.app.Activity;
-import android.bluetooth.BluetoothDevice;
+
 import android.content.Context;
-import android.content.pm.PackageManager;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,14 +10,12 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
 import com.example.aivoice.R;
 
 import java.util.ArrayList;
 
-public class CustomBluetoothDeviceAdapter extends ArrayAdapter<BluetoothDevice> {
+public class CustomBluetoothDeviceAdapter extends ArrayAdapter<BluetoothDeviceInfo> {
 
     private Context mContext;
     private int mResource;
@@ -33,7 +29,7 @@ public class CustomBluetoothDeviceAdapter extends ArrayAdapter<BluetoothDevice> 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         // 获取当前位置的蓝牙设备对象
-        BluetoothDevice device = getItem(position);
+        BluetoothDeviceInfo deviceInfo = getItem(position);
 
         // 检查 convertView 是否可复用
         if (convertView == null) {
@@ -43,28 +39,20 @@ public class CustomBluetoothDeviceAdapter extends ArrayAdapter<BluetoothDevice> 
         // 获取列表项中的控件
         ImageView bluetoothIcon = convertView.findViewById(R.id.bluetooth_icon);
         TextView deviceName = convertView.findViewById(R.id.tv_device_name);
-
-        // 设置蓝牙图标
+        TextView deviceAddress = convertView.findViewById(R.id.tv_device_address);
+        ImageView successIcon = convertView.findViewById(R.id.success);
+        //蓝牙图标
         bluetoothIcon.setImageResource(R.drawable.bluetooth);
-
-        // 设置设备名称
-        if (device != null) {
-            // 检查BLUETOOTH权限
-            if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.BLUETOOTH)
-                    != PackageManager.PERMISSION_GRANTED) {
-                // 请求BLUETOOTH权限
-                ActivityCompat.requestPermissions((Activity) mContext,
-                        new String[]{Manifest.permission.BLUETOOTH},
-                        1); // 请求码可以是任意整数
-            }
-            String name = device.getName();
-            if (name != null && !name.isEmpty()) {
-                deviceName.setText(name);
-            } else {
-                deviceName.setText("未命名设备");
+        // 设置设备名称,地址
+        if (deviceInfo != null) {
+            deviceName.setText(deviceInfo.getDeviceName());
+            deviceAddress.setText(deviceInfo.getDeviceAddress());
+            // 根据连接状态设置 success 图标的可见性
+            if (deviceInfo.isConnected()) {
+                successIcon.setVisibility(View.VISIBLE);
+                successIcon.setImageResource(R.drawable.success_square);
             }
         }
-
         return convertView;
     }
 }
