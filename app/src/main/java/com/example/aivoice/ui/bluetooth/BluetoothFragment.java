@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,6 +30,7 @@ import com.example.aivoice.R;
 import com.example.aivoice.bluetooth.Bluetooth;
 
 import com.example.aivoice.bluetooth.BluetoothDeviceInfo;
+import com.example.aivoice.bluetooth.CustomBluetoothDeviceAdapter;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -39,9 +41,9 @@ public class BluetoothFragment extends Fragment {
     private static final String TAG = "BluetoothFragment";
 
     private BluetoothViewModel bluetoothViewModel;
-    private ArrayAdapter<BluetoothDeviceInfo> bluetoothDevicesAdapter; // 蓝牙设备列表适配器
+    private CustomBluetoothDeviceAdapter bluetoothDevicesAdapter; // 蓝牙设备列表适配器
     private ArrayList<BluetoothDevice> bluetoothDeviceList = new ArrayList<>(); // 蓝牙设备列表
-
+    private ArrayList<BluetoothDeviceInfo> bluetoothDeviceInfoList = new ArrayList<>();
     private TextView tvBluetoothStatus;  // 蓝牙连接状态
     private ListView lvBluetoothDevices; // 蓝牙设备列表视图
     private Bluetooth bluetooth = new Bluetooth();
@@ -59,10 +61,10 @@ public class BluetoothFragment extends Fragment {
 //        bluetoothViewModel.getConnectedDeviceName().observe(getViewLifecycleOwner(), newName -> tvBluetoothStatus.setText(newName));
 
         lvBluetoothDevices = root.findViewById(R.id.lv_bluetooth);
-        Button btnScanBluetooth = root.findViewById(R.id.btn_scan_bluetooth);
+        ImageButton btnScanBluetooth = root.findViewById(R.id.btn_scan_bluetooth);
 
         // 初始化蓝牙设备列表适配器
-        bluetoothDevicesAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1);
+        bluetoothDevicesAdapter = new CustomBluetoothDeviceAdapter(requireContext(),R.layout.list_item_bluetooth,bluetoothDeviceInfoList);
         lvBluetoothDevices.setAdapter(bluetoothDevicesAdapter);
 
         // 设置扫描蓝牙设备的按钮点击事件

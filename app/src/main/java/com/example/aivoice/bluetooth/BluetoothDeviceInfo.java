@@ -1,5 +1,7 @@
 package com.example.aivoice.bluetooth;
 
+import androidx.annotation.NonNull;
+
 // 自定义类表示蓝牙设备信息
 public class BluetoothDeviceInfo {
     private String deviceName;
@@ -18,6 +20,7 @@ public class BluetoothDeviceInfo {
         return deviceAddress;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return deviceName + " (" + deviceAddress + ")";

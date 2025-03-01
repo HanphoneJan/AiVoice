@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:layout_marginTop="4dp"
+    android:layout_marginTop="6dp"
     android:gravity="center_horizontal">
         <!--连接状态-->
 <!--        <TextView-->
@@ -19,28 +19,39 @@
             android:layout_height="50dp"
             android:gravity="center"
             android:orientation="horizontal"
+            android:elevation="4dp"
+            android:padding="8dp"
+            android:radius="8dp"
            >
         <!--  扫描蓝牙-->
-            <Button
+            <ImageButton
             android:id="@+id/btn_scan_bluetooth"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:backgroundTint="@android:color/transparent"
             android:contentDescription="@string/scanBluetooth"
-            android:drawableLeft="@drawable/bluetoothscan" />
+            android:src="@drawable/bluetoothscan" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/bluetoothList"
-                android:textSize="20sp"
+                android:textSize="22sp"
               />
         </LinearLayout>
         <!-- 蓝牙设备显示界面 -->
-        <ListView
-            android:id="@+id/lv_bluetooth"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
+    <!-- 蓝牙设备显示界面 -->
+    <ListView
+        android:id="@+id/lv_bluetooth"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:divider="@android:color/darker_gray"
+        android:dividerHeight="1dp"
+        android:padding="8dp"
+        android:background="@android:color/white"
+        android:elevation="4dp"
+        android:radius="8dp"
+        android:layout_marginTop="16dp" />
 </LinearLayout>
