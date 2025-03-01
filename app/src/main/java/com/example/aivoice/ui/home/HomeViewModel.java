@@ -265,11 +265,16 @@ public class HomeViewModel extends ViewModel {
 
                 if(model.equals("克隆音色")){
                     // 添加音频文件部分
-                    String audioMimeType = context.getContentResolver().getType(audioFileUri.getValue());
-                    String audioFileName = getFileName(audioFileUri.getValue());
-                    requestBodyBuilder.addFormDataPart("audio", audioFileName,
-                            RequestBody.create(MediaType.parse(audioMimeType),
-                                    getAudioFileContent(audioFileUri.getValue())));
+                    if(audioFileUri.getValue()!=null){
+                        String audioMimeType = context.getContentResolver().getType(audioFileUri.getValue());
+                        String audioFileName = getFileName(audioFileUri.getValue());
+                        requestBodyBuilder.addFormDataPart("audio", audioFileName,
+                                RequestBody.create(MediaType.parse(audioMimeType),
+                                        getAudioFileContent(audioFileUri.getValue())));
+                    }else{
+                        Toast.makeText(context, "请选择音频文件", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                 }
 
                 // 添加常规文件部分
@@ -283,7 +288,7 @@ public class HomeViewModel extends ViewModel {
                                         getFileContent(fileUri.getValue())));
                     } else {
                         // 如果 fileUri 也为空，提示用户选择文件或输入文本
-                        Toast.makeText(context, "请选择文件或输入文本", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "请选择文本文件或输入文本", Toast.LENGTH_SHORT).show();
                         return;
                     }
                 } else {

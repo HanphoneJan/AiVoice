@@ -6,15 +6,15 @@
     android:layout_height="match_parent"
     android:fillViewport="true"
     android:background="@android:color/white"
-    android:padding="16dp">
-
+    android:padding="2dp"
+   >
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center_horizontal"
         android:background="@android:color/white"
-        android:padding="16dp"
+        android:padding="8dp"
         android:elevation="4dp"
         android:radius="8dp">
 
@@ -22,32 +22,32 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="64dp"
-            android:gravity="left|center_vertical"
-            android:orientation="horizontal"
             android:layout_marginTop="16dp"
-            android:paddingLeft="20dp"
             android:background="@android:color/white"
             android:elevation="2dp"
-            android:radius="8dp">
+            android:gravity="left|center_vertical"
+            android:orientation="horizontal"
+            android:paddingLeft="20dp"
+            android:radius="8dp"
+            android:visibility="visible">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginRight="16dp"
                 android:text="@string/model"
-                android:textSize="16sp"
                 android:textColor="@android:color/black"
-                android:layout_marginRight="16dp" />
+                android:textSize="16sp" />
 
             <Spinner
                 android:id="@+id/spinner_model"
-                android:layout_width="0dp"
-                android:layout_weight="1"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:minHeight="48dp"
                 android:background="@android:color/white"
                 android:elevation="2dp"
-                android:radius="8dp"
-                android:padding="8dp" />
+                android:minHeight="48dp"
+                android:padding="8dp"
+                android:radius="8dp" />
         </LinearLayout>
 
         <!-- 情感 -->
@@ -56,7 +56,7 @@
             android:layout_height="64dp"
             android:gravity="left|center_vertical"
             android:orientation="horizontal"
-            android:paddingLeft="110dp"
+            android:paddingLeft="20dp"
             android:background="@android:color/white"
             android:elevation="2dp"
             android:radius="8dp"
@@ -89,7 +89,7 @@
             android:layout_height="64dp"
             android:gravity="left|center_vertical"
             android:orientation="horizontal"
-            android:paddingLeft="110dp"
+            android:paddingLeft="20dp"
             android:background="@android:color/white"
             android:elevation="2dp"
             android:radius="8dp"
@@ -101,8 +101,9 @@
                 android:layout_height="wrap_content"
                 android:text="@string/speed"
                 android:textSize="16sp"
+                android:layout_marginRight="16dp"
                 android:textColor="@android:color/black"
-                android:layout_marginRight="16dp" />
+                />
 
             <Spinner
                 android:id="@+id/spinner_speed"
@@ -144,6 +145,20 @@
                 android:text="@string/noSelect"
                 android:textSize="18sp"
                 android:textColor="@android:color/black" />
+            <!-- 选择音频文件按钮 -->
+            <ImageButton
+                android:id="@+id/btn_choose_audio"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:gravity="center"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:backgroundTint="@android:color/transparent"
+                android:scaleType="centerInside"
+                android:src="@drawable/plus_square"
+                android:elevation="2dp"
+                android:radius="8dp"
+                android:contentDescription="@string/chooseAudioFile"
+               />
         </LinearLayout>
 
         <LinearLayout
@@ -156,31 +171,21 @@
             android:radius="8dp"
             android:padding="16dp">
 
-            <!-- 选择音频文件按钮 -->
-            <Button
-                android:id="@+id/btn_choose_audio"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:gravity="center"
-                android:background="@android:color/white"
-                android:backgroundTint="@android:color/transparent"
-                android:drawableLeft="@drawable/plus_square"
-                android:elevation="2dp"
-                android:radius="8dp"
-                android:layout_marginRight="16dp" />
+
 
             <!-- 录音按钮 -->
-            <Button
+            <ImageButton
                 android:id="@+id/btn_record_audio"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:gravity="center"
-                android:background="@android:color/white"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:backgroundTint="@android:color/transparent"
-                android:drawableLeft="@drawable/record"
+                android:scaleType="centerInside"
+                android:src="@drawable/record"
                 android:elevation="2dp"
                 android:radius="8dp"
-                android:layout_marginRight="16dp" />
+                android:contentDescription="@string/recordButton"/>
 
             <!-- 录音计时器 -->
             <TextView
@@ -220,20 +225,23 @@
                 android:text="@string/noSelect"
                 android:textSize="18sp"
                 android:textColor="@android:color/black" />
+            <!-- 选择文本文件按钮 -->
+            <ImageButton
+                android:id="@+id/btn_choose_file"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:gravity="center"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:backgroundTint="@android:color/transparent"
+                android:scaleType="centerInside"
+                android:src="@drawable/plus_square"
+                android:elevation="2dp"
+                android:radius="8dp"
+                android:contentDescription="@string/chooseTextFile"
+             />
         </LinearLayout>
 
-        <!-- 选择文本文件按钮 -->
-        <Button
-            android:id="@+id/btn_choose_file"
-            android:layout_width="54dp"
-            android:layout_height="54dp"
-            android:background="@android:color/white"
-            android:backgroundTint="@android:color/transparent"
-            android:drawableLeft="@drawable/plus_square"
-            android:elevation="2dp"
-            android:radius="8dp"
-            android:layout_gravity="center"
-            android:layout_marginTop="12dp" />
+
 
         <!-- 输入框 -->
         <ScrollView
@@ -265,17 +273,19 @@
         </ScrollView>
 
         <!-- 上传按钮 -->
-        <Button
+        <ImageButton
             android:id="@+id/btn_upload"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:gravity="center"
-            android:background="@android:color/white"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:backgroundTint="@android:color/transparent"
-            android:drawableLeft="@drawable/upload"
+            android:scaleType="centerInside"
+            android:src="@drawable/upload"
             android:elevation="2dp"
             android:radius="8dp"
             android:layout_gravity="center"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="16dp"
+            android:contentDescription="@string/uploadButton"/>
     </LinearLayout>
 </ScrollView>
