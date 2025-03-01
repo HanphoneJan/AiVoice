@@ -36,7 +36,7 @@ public class BluetoothViewModel extends ViewModel {
     private long elapsedTime = 0; // 已扫描的时间
     private final MutableLiveData<Long> recordingTime = new MutableLiveData<>(0L); // 时间，单位：秒
     private final MutableLiveData<String> connectedDeviceName= new MutableLiveData<>();
-    private final MutableLiveData<String> connectedAddress = new MutableLiveData<>();
+    private final MutableLiveData<String> connectedDeviceAddress = new MutableLiveData<>();
 
     public void setContext(Context context) {
         this.context=context;
@@ -63,11 +63,11 @@ public class BluetoothViewModel extends ViewModel {
     }
 
     public void setConnectedDeviceAddress(String deviceAddress){
-        connectedAddress.postValue(deviceAddress);
+        connectedDeviceAddress.postValue(deviceAddress);
     }
 
     public LiveData<String> getConnectedDeviceAddresss() {
-        return connectedDeviceName;
+        return connectedDeviceAddress;
     }
 
     public LiveData<Boolean> getIsReceiverRegistered() {

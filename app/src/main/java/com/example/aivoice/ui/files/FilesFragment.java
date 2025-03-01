@@ -58,7 +58,7 @@ public class FilesFragment extends Fragment {
         filesViewModel = new ViewModelProvider(this).get(FilesViewModel.class);
         filesViewModel.setContext(requireContext());
         //
-        Button fileButton = root.findViewById(R.id.btn_files);
+        ImageButton fileButton = root.findViewById(R.id.btn_files);
         fileButton.setOnClickListener(v -> openDirectorySelector());
 
         // 找到显示文件列表的列表视图

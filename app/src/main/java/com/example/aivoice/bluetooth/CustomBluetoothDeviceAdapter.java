@@ -21,10 +21,11 @@ public class CustomBluetoothDeviceAdapter extends ArrayAdapter<BluetoothDeviceIn
     private int mResource;
 
     public CustomBluetoothDeviceAdapter(Context context, int resource, ArrayList<BluetoothDeviceInfo> objects) {
-        super(context, resource);
+        super(context, resource,objects);
         mContext = context;
         mResource = resource;
     }
+
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
@@ -51,6 +52,8 @@ public class CustomBluetoothDeviceAdapter extends ArrayAdapter<BluetoothDeviceIn
             if (deviceInfo.isConnected()) {
                 successIcon.setVisibility(View.VISIBLE);
                 successIcon.setImageResource(R.drawable.success_square);
+            } else {
+                successIcon.setVisibility(View.GONE); // 重置为不可见
             }
         }
         return convertView;

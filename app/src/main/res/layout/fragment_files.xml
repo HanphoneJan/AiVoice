@@ -6,27 +6,28 @@
     >
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="wrap_content"
             android:gravity="center"
             android:orientation="horizontal"
+            android:layout_marginTop="8dp"
             >
             <!-- 音频文件文字 -->
-            <Button
+            <ImageButton
                 android:id="@+id/btn_files"
                 android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_height="wrap_content"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:backgroundTint="@android:color/transparent"
-                android:drawableLeft="@drawable/document"
+                android:src="@drawable/document"
                 android:contentDescription="@string/selectDocument"
-                android:drawablePadding="8dp"
-                android:gravity="center_vertical|start"
-                android:padding="12dp" />
+                android:paddingTop="3dp"
+                />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/filesList"
-                android:textSize="20sp" />
+                android:textSize="20sp"
+                android:textColor="@color/black_200"/>
         </LinearLayout>
     <!-- 文件显示界面 -->
     <ListView
