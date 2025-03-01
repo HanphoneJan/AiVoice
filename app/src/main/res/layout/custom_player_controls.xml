@@ -1,21 +1,9 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:orientation="vertical"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/black">
-
-
-        <!-- 返回按钮 -->
-        <ImageButton
-            android:id="@+id/exo_back"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:src="@drawable/back"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:backgroundTint="@android:color/transparent"
-            android:contentDescription="@string/back" />
-
 
     <!-- PlayerView 用于视频播放 -->
     <androidx.media3.ui.PlayerView
@@ -24,4 +12,13 @@
         android:layout_height="match_parent"
     app:resize_mode="fit"
     app:use_controller="true" />
+    <!-- 返回按钮 -->
+    <ImageButton
+        android:id="@+id/exo_back"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/back"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:layout_gravity="top|start"
+        android:contentDescription="@string/back" />
 </FrameLayout>

@@ -171,6 +171,7 @@ public class FilesViewModel extends ViewModel {
             exoPlayer.release();
             exoPlayer = null;
             selectedFileName = null;
+            isVideoPlaying = false;
         }
         Log.i(TAG,"已停止播放");
     }
@@ -217,7 +218,12 @@ public class FilesViewModel extends ViewModel {
     protected void onCleared() {
         super.onCleared();
         try {
-            mediaPlayer.release();
+            if(mediaPlayer!=null){
+                mediaPlayer.release();
+            }
+            if(exoPlayer!=null){
+                exoPlayer.release();
+            }
         } catch (Exception e) {
             Log.e(TAG, "销毁ViewModel错误: " + e.getMessage(), e);
         }

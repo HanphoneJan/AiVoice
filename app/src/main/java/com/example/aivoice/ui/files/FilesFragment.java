@@ -5,7 +5,9 @@ import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
@@ -20,9 +22,11 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.media3.ui.AspectRatioFrameLayout;
 import androidx.media3.ui.PlayerView;
@@ -33,6 +37,7 @@ import com.example.aivoice.files.UriManager;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class FilesFragment extends Fragment {
 
@@ -43,6 +48,7 @@ public class FilesFragment extends Fragment {
     private ListView lvFiles;
     private ArrayList<String> audioFileList;  // 存储音频文件路径的列表
     private PlayerView playerView;
+    private View playerControlsView;
     private boolean isFullScreen = false;
 
     @Override
@@ -73,7 +79,7 @@ public class FilesFragment extends Fragment {
         // 设置 ListView 的长按事件监听器
         lvFiles.setOnItemLongClickListener((parent, view, position, id) -> {
             String fileName = audioFileList.get(position);
-            // 假设你有一个方法可以根据文件名获取文件的绝对路径
+            // 根据文件名获取文件的绝对路径
             fileUri = UriManager.getUri(requireContext());
             Uri uri;String mimeType;
             if (fileUri != null) {
@@ -99,6 +105,8 @@ public class FilesFragment extends Fragment {
 
             return true;
         });
+
+
         return root;
     }
 
@@ -118,7 +126,7 @@ public class FilesFragment extends Fragment {
         params.width = ViewGroup.LayoutParams.MATCH_PARENT;
         params.height = ViewGroup.LayoutParams.MATCH_PARENT;
         playerView.setLayoutParams(params);
-
+        isFullScreen = true;
     }
 
     private void exitFullScreen() {
@@ -128,14 +136,19 @@ public class FilesFragment extends Fragment {
             // 显示状态栏和导航栏
             insetsController.show(WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars());
         }
-
-        // 恢复 PlayerView 的原始布局
-        ViewGroup.LayoutParams params = playerView.getLayoutParams();
-        params.width = ViewGroup.LayoutParams.MATCH_PARENT;
-        params.height = 600;
-        playerView.setLayoutParams(params);
         // 恢复竖屏
         requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+        // 移除播放器控件视图
+        if (playerControlsView != null) {
+            FrameLayout rootLayout = requireActivity().findViewById(android.R.id.content);
+            rootLayout.removeView(playerControlsView);
+        }
+        // 恢复 ActionBar 显示
+        if (requireActivity() instanceof AppCompatActivity) {
+            ((AppCompatActivity) requireActivity()).getSupportActionBar().show();
+        }
+        isFullScreen = false;
+        filesViewModel.stopAudioFile();
     }
 
     @Override
@@ -144,14 +157,12 @@ public class FilesFragment extends Fragment {
         // 退出全屏（如果正在全屏）
         if (isFullScreen) {
             exitFullScreen();
-            isFullScreen = false;
         }
     }
-
     private void createPlayerView(){
         // 动态加载 custom_player_controls.xml
         LayoutInflater inflater = LayoutInflater.from(requireContext());
-        View playerControlsView = inflater.inflate(R.layout.custom_player_controls, null);
+        playerControlsView = inflater.inflate(R.layout.custom_player_controls, null);
 
         // 获取 PlayerView
         playerView = playerControlsView.findViewById(R.id.player_view);
@@ -161,10 +172,25 @@ public class FilesFragment extends Fragment {
         playerView.setUseController(true);
         // 进入全屏模式
         enterFullScreen();
-        isFullScreen = true;
+        // 隐藏 ActionBar
+        if (requireActivity() instanceof AppCompatActivity) {
+            Objects.requireNonNull(((AppCompatActivity) requireActivity()).getSupportActionBar()).hide();
+        }
         // 将 playerControlsView 添加到当前布局中，实现覆盖效果
         FrameLayout rootLayout = requireActivity().findViewById(android.R.id.content);
         rootLayout.addView(playerControlsView);
+        ImageButton backButton = playerControlsView.findViewById(R.id.exo_back);
+        backButton.setOnClickListener(v -> onBackAction());
+
+    }
+
+    private void onBackAction() {
+        exitFullScreen();
+        // 确保显示当前的 FilesFragment
+        FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+        fragmentManager.beginTransaction()
+                .replace(R.id.nav_host_fragment_activity_main, this)
+                .commit();
     }
 
     private void loadAudioFiles() {

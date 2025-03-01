@@ -25,7 +25,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="模型" />
+                android:text="@string/model" />
 
             <Spinner
                 android:id="@+id/spinner_model"
@@ -46,7 +46,7 @@
                 android:id="@+id/btn_emotion"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="情绪" />
+                android:text="@string/emotion" />
 
             <Spinner
                 android:id="@+id/spinner_emotion"
@@ -67,7 +67,7 @@
                 android:id="@+id/btn_speed"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="语速" />
+                android:text="@string/speed" />
 
             <Spinner
                 android:id="@+id/spinner_speed"
@@ -100,19 +100,22 @@
         <!-- 选择音频文件按钮 -->
         <Button
             android:id="@+id/btn_choose_audio"
-            android:layout_width="wrap_content"
+            android:layout_width="48dp"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="选择音频文件"
-            android:textSize="18sp" />
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:backgroundTint="@android:color/transparent"
+            android:drawableLeft="@drawable/plus_square" />
 
         <!-- 录音按钮 -->
         <Button
             android:id="@+id/btn_record_audio"
-            android:layout_width="wrap_content"
+            android:layout_width="48dp"
             android:layout_height="wrap_content"
-            android:text="录音"
-            android:textSize="18sp" />
+            android:gravity="center"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:backgroundTint="@android:color/transparent"
+            android:drawableLeft="@drawable/record"/>
 
         <!-- 录音计时器 -->
         <TextView
@@ -152,7 +155,7 @@
             android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:backgroundTint="@android:color/transparent"
-            android:drawableLeft="@drawable/plus_circle" />
+            android:drawableLeft="@drawable/plus_square" />
 
         <!-- 输入框 -->
 
@@ -186,10 +189,11 @@
         <!-- 上传按钮 -->
         <Button
             android:id="@+id/btn_upload"
-            android:layout_width="wrap_content"
+            android:layout_width="48dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="上传"
-            android:textSize="18sp" />
+            android:gravity="center"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:backgroundTint="@android:color/transparent"
+            android:drawableLeft="@drawable/upload"/>
     </LinearLayout>
 </ScrollView>

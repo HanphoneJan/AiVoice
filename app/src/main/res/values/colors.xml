@@ -22,6 +22,7 @@
     <color name="light_blue_900">#0D47A1</color>
 
     <!-- 黑色系 -->
+    <color name="black_10">#070707</color>
     <color name="black_100">#212121</color>
     <color name="black_200">#424242</color>
     <color name="black_300">#616161</color>

@@ -87,7 +87,6 @@ public class MainActivity extends AppCompatActivity {
 
         if (requestCode == REQUEST_PERMISSIONS) {
             boolean allPermissionsGranted = true;
-
             // 检查每个权限是否被授予
             for (int result : grantResults) {
                 if (result != PackageManager.PERMISSION_GRANTED) {

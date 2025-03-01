@@ -5,6 +5,11 @@
     <string name="title_music">音频播放</string>
     <string name="title_files">文件管理</string>
 
+    <string name="model">模型</string>
+    <string name="emotion">情感</string>
+    <string name="speed">语速</string>
+
+
     <string name="noConnect">未连接设备</string>
     <string name="scanBluetooth">扫描蓝牙</string>
     <string name="bluetoothList">蓝牙设备列表</string>
