@@ -44,11 +44,9 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:background="@android:color/white"
-                android:elevation="2dp"
+                android:background="@drawable/spinner_border"
                 android:minHeight="48dp"
-                android:padding="8dp"
-                android:radius="8dp" />
+                android:padding="8dp" />
         </LinearLayout>
 
         <!-- 情感 -->
@@ -78,9 +76,7 @@
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:minHeight="48dp"
-                android:background="@android:color/white"
-                android:elevation="2dp"
-                android:radius="8dp"
+                android:background="@drawable/spinner_border"
                 android:padding="8dp" />
         </LinearLayout>
 
@@ -112,10 +108,10 @@
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:minHeight="48dp"
-                android:background="@android:color/white"
-                android:elevation="2dp"
-                android:radius="8dp"
-                android:padding="8dp" />
+                android:background="@drawable/spinner_border"
+                android:dropDownSelector="@android:color/darker_gray"
+                android:padding="8dp"
+            />
         </LinearLayout>
 
         <!-- 音频文件 -->
