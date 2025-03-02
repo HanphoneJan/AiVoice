@@ -44,9 +44,7 @@ public class BluetoothFragment extends Fragment {
     private BluetoothViewModel bluetoothViewModel;
     private CustomBluetoothDeviceAdapter bluetoothDevicesAdapter; // 蓝牙设备列表适配器
     private ArrayList<BluetoothDeviceInfo> bluetoothDeviceInfoList = new ArrayList<>();
-    private TextView tvBluetoothStatus;  // 蓝牙连接状态
     private ListView lvBluetoothDevices; // 蓝牙设备列表视图
-    private Bluetooth bluetooth = new Bluetooth();
     private ArrayList<BluetoothDevice> bluetoothDeviceList = new ArrayList<>(); // 蓝牙设备列表
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -55,10 +53,6 @@ public class BluetoothFragment extends Fragment {
         // 使用ViewModelProvider获取BluetoothViewModel的实例
         bluetoothViewModel = new ViewModelProvider(this).get(BluetoothViewModel.class);
         bluetoothViewModel.setContext(requireContext());
-
-        //蓝牙连接状态显示
-//        tvBluetoothStatus = root.findViewById(R.id.tv_bluetooth_status);
-//        bluetoothViewModel.getConnectedDeviceName().observe(getViewLifecycleOwner(), newName -> tvBluetoothStatus.setText(newName));
 
         lvBluetoothDevices = root.findViewById(R.id.lv_bluetooth);
         ImageButton btnScanBluetooth = root.findViewById(R.id.btn_scan_bluetooth);
@@ -73,13 +67,14 @@ public class BluetoothFragment extends Fragment {
         // 设置蓝牙设备列表的点击事件
         lvBluetoothDevices.setOnItemClickListener((parent, view, position, id) -> {
             BluetoothDeviceInfo deviceInfo = bluetoothDevicesAdapter.getItem(position);
+            assert deviceInfo != null;
             BluetoothDevice device = getDeviceByAddress(deviceInfo.getDeviceAddress());
             connectToBluetoothDevice(device);
         });
 
         // 观察已配对设备列表
         bluetoothViewModel.getPairedDevices().observe(getViewLifecycleOwner(), devices -> {
-//            bluetoothDevicesAdapter.clear();
+            bluetoothDevicesAdapter.clear();
             if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.BLUETOOTH_SCAN)
                     == PackageManager.PERMISSION_GRANTED) {
                 for (BluetoothDevice device : devices) {
@@ -111,11 +106,23 @@ public class BluetoothFragment extends Fragment {
                         == PackageManager.PERMISSION_GRANTED) {
                     BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                     if (device != null && device.getName() != null) {
-                        bluetoothDeviceList.add(device); // 将设备添加到列表中
-                        String deviceName = device.getName() != null && !device.getName().isEmpty() ? device.getName() : "未知设备";
-                        bluetoothDeviceInfoList.add( new BluetoothDeviceInfo(deviceName, device.getAddress()));
-                        bluetoothDevicesAdapter.notifyDataSetChanged(); // 刷新列表
-                        Log.i(TAG, "发现设备: " + device.getName() + " (" + device.getAddress() + ")");
+                        // 检查设备是否已经存在
+                        boolean isDeviceExists = false;
+                        String deviceAddress = device.getAddress();
+                        for (BluetoothDeviceInfo info : bluetoothDeviceInfoList) {
+                            if (info.getDeviceAddress().equals(deviceAddress)) {
+                                isDeviceExists = true;
+                                break;
+                            }
+                        }
+                        // 如果设备不存在，则添加到列表中
+                        if (!isDeviceExists) {
+                            bluetoothDeviceList.add(device); // 将设备添加到列表中
+                            String deviceName = device.getName() != null && !device.getName().isEmpty() ? device.getName() : "未知设备";
+                            bluetoothDeviceInfoList.add(new BluetoothDeviceInfo(deviceName, device.getAddress()));
+                            bluetoothDevicesAdapter.notifyDataSetChanged(); // 刷新列表
+                            Log.i(TAG, "发现设备: " + device.getName() + " (" + device.getAddress() + ")");
+                        }
                     }
                 }
             }
@@ -149,7 +156,6 @@ public class BluetoothFragment extends Fragment {
         BluetoothDevice connectedDevice = Bluetooth.getConnectedDevice();
         if (Objects.equals(device, connectedDevice)) {
             bluetoothViewModel.disconnectDevice();
-            tvBluetoothStatus.setText("无");
             Toast.makeText(requireContext(), "断开连接", Toast.LENGTH_SHORT).show();
         } else if (device != null) {
             Toast.makeText(requireContext(), "连接中", Toast.LENGTH_SHORT).show();
