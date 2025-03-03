@@ -3,17 +3,20 @@ package com.example.aivoice.ui.home;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 
 import android.content.pm.PackageManager;
 
+import android.database.Cursor;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 
+import android.provider.OpenableColumns;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -92,32 +95,9 @@ public class HomeViewModel extends ViewModel {
         audioFileUri.setValue(uri);
     }
 
-    public String getFileNameByUri(Uri uri) {
-        if (uri == null) {
-            return null;
-        }
-        // 如果是文件系统的 Uri
-        if ("file".equalsIgnoreCase(uri.getScheme())) {
-            return new File(uri.getPath()).getName();
-        }
-        // 如果是内容提供者的 Uri
-        ContentResolver contentResolver = context.getContentResolver();
-        Cursor cursor = contentResolver.query(uri, null, null, null, null);
-        try {
-            if (cursor != null && cursor.moveToFirst()) {
-                int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-                if (nameIndex != -1) {
-                    return cursor.getString(nameIndex);
-                }
-            }
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-        return null;
+    public void updateAudioFileName(){
+        
     }
-
     public void updateFileUri(Uri uri) {
         fileUri.setValue(uri);
     }
@@ -195,6 +175,7 @@ public class HomeViewModel extends ViewModel {
                             mediaRecorder.start();
                             isRecording.setValue(true);
                             audioFileUri.setValue(outputUri);
+                            audioFileName.setValue(getFileName(outputUri));
                         } else {
                             Toast.makeText(context, "无法创建音频文件", Toast.LENGTH_SHORT).show();
                             return;
@@ -217,6 +198,7 @@ public class HomeViewModel extends ViewModel {
                             context.getPackageName() + ".fileprovider",
                             new File(currentAudioFilePath));
                     audioFileUri.setValue(uri);
+                    audioFileName.setValue(getFileName(uri));
                 }
 
                 // 6. 启动计时器
@@ -257,7 +239,6 @@ public class HomeViewModel extends ViewModel {
             }
         }
     }
-
 
     // 上传文件
     public void uploadFiles(String model, String emotion, String speed,String userInput) {
