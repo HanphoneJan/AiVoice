@@ -29,6 +29,7 @@
             android:gravity="start|center_vertical"
             android:orientation="horizontal"
             android:paddingStart="20dp"
+            android:paddingEnd="0dp"
             android:radius="8dp"
             android:visibility="visible">
 
@@ -60,6 +61,7 @@
             android:gravity="start|center_vertical"
             android:orientation="horizontal"
             android:paddingStart="20dp"
+            android:paddingEnd="0dp"
             android:background="@android:color/white"
             android:elevation="2dp"
             android:radius="8dp"
@@ -93,6 +95,7 @@
             android:gravity="start|center_vertical"
             android:orientation="horizontal"
             android:paddingStart="20dp"
+            android:paddingEnd="0dp"
             android:background="@android:color/white"
             android:elevation="2dp"
             android:radius="8dp"
@@ -131,6 +134,7 @@
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:paddingStart="20dp"
+            android:paddingEnd="0dp"
             android:radius="8dp">
 
             <TextView
@@ -177,6 +181,7 @@
                         android:text="@string/noSelect"
                         android:textColor="@color/grey_700"
                         android:textSize="16sp" />
+
                 </LinearLayout>
 
                 <LinearLayout
@@ -187,6 +192,7 @@
                     android:elevation="2dp"
                     android:gravity="center_vertical"
                     android:paddingStart="16dp"
+                    android:paddingEnd="0dp"
                     android:radius="8dp">
 
                     <!-- 录音按钮 -->
@@ -224,6 +230,7 @@
             android:elevation="2dp"
             android:radius="8dp"
             android:paddingStart="20dp"
+            android:paddingEnd="0dp"
             android:gravity="center_vertical">
 
             <TextView
@@ -282,7 +289,7 @@
                 android:background="@drawable/inputtext_border"
                 android:scrollbars="vertical"
                 android:inputType="textMultiLine"
-                android:maxLines="4"
+                android:maxLines="2"
                 android:gravity="top|start"
                 android:textColor="@android:color/black"
                 android:elevation="1dp"
