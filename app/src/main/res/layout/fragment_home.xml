@@ -185,7 +185,7 @@
                     android:background="@android:color/white"
                     android:elevation="2dp"
                     android:gravity="center_vertical"
-                    android:paddingLeft="20dp"
+                    android:paddingLeft="16dp"
                     android:radius="8dp">
 
                     <!-- 录音按钮 -->
@@ -254,11 +254,9 @@
                 android:gravity="center"
                 android:text="@string/noSelect"
                 android:textSize="16sp"
-                android:textColor="@color/black_200" />
+                android:textColor="@color/grey_700" />
 
         </LinearLayout>
-
-
 
         <!-- 输入框 -->
         <ScrollView
@@ -279,13 +277,13 @@
                 android:hint="@string/inputText"
                 android:textSize="18sp"
                 android:padding="12dp"
-                android:background="@android:color/white"
+                android:background="@drawable/inputtext_border"
                 android:scrollbars="vertical"
                 android:inputType="textMultiLine"
                 android:maxLines="3"
                 android:gravity="top|start"
                 android:textColor="@android:color/black"
-                android:elevation="2dp"
+                android:elevation="1dp"
                 android:radius="8dp" />
         </ScrollView>
 
