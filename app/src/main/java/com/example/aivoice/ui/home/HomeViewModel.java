@@ -56,6 +56,8 @@ public class HomeViewModel extends ViewModel {
     private MutableLiveData<Boolean> isRecording = new MutableLiveData<>(false);
     private MutableLiveData<Uri> audioFileUri = new MutableLiveData<>();
     private MutableLiveData<Uri> fileUri = new MutableLiveData<>();
+    private MutableLiveData<String> audioFileName = new MutableLiveData<>();
+    private MutableLiveData<String> textFileName = new MutableLiveData<>();
     private Context context;
     private MutableLiveData<Long> recordingTime = new MutableLiveData<>(0L); // 录音时间，单位：秒
     private static Uri musicUri;
@@ -88,6 +90,32 @@ public class HomeViewModel extends ViewModel {
     // Setters for updating LiveData
     public void updateAudioFileUri(Uri uri) {
         audioFileUri.setValue(uri);
+    }
+
+    public String getFileNameByUri(Uri uri) {
+        if (uri == null) {
+            return null;
+        }
+        // 如果是文件系统的 Uri
+        if ("file".equalsIgnoreCase(uri.getScheme())) {
+            return new File(uri.getPath()).getName();
+        }
+        // 如果是内容提供者的 Uri
+        ContentResolver contentResolver = context.getContentResolver();
+        Cursor cursor = contentResolver.query(uri, null, null, null, null);
+        try {
+            if (cursor != null && cursor.moveToFirst()) {
+                int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                if (nameIndex != -1) {
+                    return cursor.getString(nameIndex);
+                }
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+        return null;
     }
 
     public void updateFileUri(Uri uri) {
