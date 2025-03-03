@@ -197,9 +197,9 @@ public class HomeViewModel extends ViewModel {
                 updateTimeRunnable = new Runnable() {
                     @Override
                     public void run() {
-                        elapsedTime = (System.currentTimeMillis() - startTime) / 1000;
+                        elapsedTime = (System.currentTimeMillis() - startTime) / 10;
                         recordingTime.setValue(elapsedTime);
-                        handler.postDelayed(this, 1000); // 每秒更新一次
+                        handler.postDelayed(this, 10); // 每秒更新一次
                     }
                 };
                 handler.post(updateTimeRunnable);

@@ -22,6 +22,8 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.aivoice.R;
 import com.example.aivoice.databinding.FragmentHomeBinding;
 
+import java.util.Locale;
+
 
 public class HomeFragment extends Fragment {
 
@@ -132,9 +134,10 @@ public class HomeFragment extends Fragment {
         // 观察 recordingTime LiveData
         homeViewModel.getRecordingTime().observe(getViewLifecycleOwner(), time -> {
             // 格式化时间并更新UI
-            int minutes = (int) (time / 60);
-            int seconds = (int) (time % 60);
-            String timeFormatted = String.format("录音时长：%02d:%02d", minutes, seconds);
+            int minutes = (int) (time / 6000);
+            int seconds = (int) (time % 6000/100);
+            int minseconds= (int) (time%100);
+            String timeFormatted = String.format(Locale.US,"录音时长：%02d:%02d:%02d", minutes, seconds,minseconds);
             recordingTimeTextView.setText(timeFormatted);
         });
 
