@@ -118,7 +118,6 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
             android:layout_marginTop="12dp"
             android:background="@android:color/white"
             android:elevation="2dp"
@@ -147,15 +146,14 @@
                 android:id="@+id/btn_choose_audio"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:gravity="center"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:backgroundTint="@android:color/transparent"
-                android:scaleType="centerInside"
-                android:src="@drawable/plus_square"
-                android:elevation="2dp"
-                android:radius="8dp"
                 android:contentDescription="@string/chooseAudioFile"
-               />
+                android:elevation="2dp"
+                android:gravity="center"
+                android:radius="8dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/clickupload" />
         </LinearLayout>
 
         <LinearLayout
@@ -198,7 +196,6 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
             android:layout_marginTop="12dp"
             android:background="@android:color/white"
             android:elevation="2dp"
@@ -231,7 +228,7 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:backgroundTint="@android:color/transparent"
                 android:scaleType="centerInside"
-                android:src="@drawable/plus_square"
+                android:src="@drawable/clickupload"
                 android:elevation="2dp"
                 android:radius="8dp"
                 android:contentDescription="@string/chooseTextFile"
@@ -270,20 +267,23 @@
         </ScrollView>
 
         <!-- 上传按钮 -->
-        <ImageButton
+        <Button
             android:id="@+id/btn_upload"
-            android:layout_width="48dp"
+            android:layout_width="wrap_content"
             android:layout_height="48dp"
             android:gravity="center"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:backgroundTint="@android:color/transparent"
             android:scaleType="centerInside"
-            android:src="@drawable/upload"
+            android:drawableRight="@drawable/upload2"
             android:elevation="2dp"
-            android:radius="8dp"
+            android:radius="2dp"
             android:layout_gravity="center"
             android:layout_marginTop="16dp"
             app:tint="@color/navy_blue_800"
+            android:text="@string/upload"
+            android:textColor="@color/black_200"
+            android:textSize="18sp"
             android:contentDescription="@string/uploadButton"/>
     </LinearLayout>
 </ScrollView>

@@ -8,11 +8,12 @@
     <string name="model">模型</string>
     <string name="emotion">情感</string>
     <string name="speed">语速</string>
-    <string name="textFile">文本文件：</string>
-    <string name="audioFile">音频文件：</string>
+    <string name="textFile">文本</string>
+    <string name="audioFile">音频</string>
     <string name="chooseAudioFile">选择音频文件</string>
     <string name="chooseTextFile">选择文本文件</string>
     <string name="recordButton">录音按钮</string>
+    <string name="upload">上传</string>
     <string name="uploadButton">上传按钮</string>
     <string name="noSelect">未选择</string>
     <string name="inputText">请输入文本</string>
