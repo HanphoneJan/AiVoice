@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white">
@@ -11,12 +10,14 @@
         android:id="@+id/imageView"
         android:layout_width="309dp"
         android:layout_height="388dp"
+        android:contentDescription="@string/mediaPlayer"
         android:src="@drawable/music"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.117" />
+        app:layout_constraintVertical_bias="0.117"
+        />
 
     <!-- 播放列表按钮 -->
     <Button
@@ -33,36 +34,49 @@
         app:layout_constraintVertical_bias="0.023" />
 
     <!-- 播放控制按钮 -->
-
-    <TextView
-        android:id="@+id/dispname"
-        android:layout_width="wrap_content"
-        android:layout_height="48dp"
-        android:layout_marginEnd="148dp"
-        android:gravity="center"
-        android:text=""
-        android:textColor="@color/black_200"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.779"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.604" />
-
     <LinearLayout
-        android:id="@+id/linear_play"
+        android:id="@+id/dispname_linear"
         android:layout_width="match_parent"
-        android:layout_height="84dp"
-        android:layout_marginTop="32dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
         android:gravity="center"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/dispname">
+        app:layout_constraintTop_toBottomOf="@id/imageView">
+
+        <TextView
+            android:id="@+id/dispname"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text=""
+            android:textColor="@color/black_200"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.779"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.604" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/linear_play"
+        style="?android:attr/buttonBarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="84dp"
+        android:layout_marginTop="26dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/dispname_linear">
 
         <Button
             android:id="@+id/btn_seekbwd"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="46dp"
             android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackgroundBorderless"
@@ -73,6 +87,7 @@
 
         <Button
             android:id="@+id/btn_audprev"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="56dp"
             android:layout_height="56dp"
             android:background="?attr/selectableItemBackgroundBorderless"
@@ -80,18 +95,20 @@
             android:drawableLeft="@drawable/audprev"
             android:gravity="center" />
 
-        <Button
+        <ImageButton
             android:id="@+id/btn_audplay"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="80dp"
             android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:backgroundTint="@android:color/transparent"
             android:contentDescription="@string/audplay"
-            android:drawableLeft="@drawable/audplay"
+            android:src="@drawable/audplay"
             android:gravity="center" />
 
         <Button
             android:id="@+id/btn_audnext"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="56dp"
             android:layout_height="56dp"
             android:background="?attr/selectableItemBackgroundBorderless"
@@ -102,6 +119,7 @@
 
         <Button
             android:id="@+id/btn_seekfwd"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="46dp"
             android:layout_height="46dp"
             android:background="?attr/selectableItemBackgroundBorderless"

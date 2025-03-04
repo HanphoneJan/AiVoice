@@ -27,7 +27,7 @@ public class MusicFragment extends Fragment {
 
     private ArrayAdapter<String> fileNameListAdapter;
     private MusicViewModel musicViewModel;
-    private Button btnAudPlay; // 成员变量
+    private ImageButton btnAudPlay; // 成员变量
     // icon播放资源
     int[] iconPlayMusic = {
             R.drawable.audplay, // 第一个图标
@@ -62,9 +62,9 @@ public class MusicFragment extends Fragment {
             // 播放
             if( musicViewModel.playAudio()){
                 if(musicViewModel.getIsPlay()){
-                    btnAudPlay.setCompoundDrawablesWithIntrinsicBounds(iconPlayMusic[1], 0, 0, 0);
+                    btnAudPlay.setImageResource(iconPlayMusic[1]);
                 }else {
-                    btnAudPlay.setCompoundDrawablesWithIntrinsicBounds(iconPlayMusic[0], 0, 0, 0);
+                    btnAudPlay.setImageResource(iconPlayMusic[0]);
                 }
             }
         });
@@ -150,7 +150,7 @@ public class MusicFragment extends Fragment {
             listViewSongs.setOnItemClickListener((parent, view, position, id) -> {
                 String selectedSong = songs[position];
                 if(musicViewModel.playAudStart(selectedSong)){
-                    btnAudPlay.setCompoundDrawablesWithIntrinsicBounds(iconPlayMusic[1], 0, 0, 0);
+                    btnAudPlay.setImageResource(iconPlayMusic[0]);
                 }
             });
         });

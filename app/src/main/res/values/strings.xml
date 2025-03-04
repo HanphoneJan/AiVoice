@@ -43,6 +43,8 @@
     <string name="seekfwd">前进</string>
     <string name="voludec">音量减小</string>
     <string name="voluinc">音量增加</string>
+    <string name="mediaPlayer">音乐播放器图标</string>
+    <string name="audioList">音频列表</string>
 
     <string name="no_audio_files">没有找到音频文件</string>
     <string name="loading">加载中…</string>

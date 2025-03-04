@@ -9,11 +9,12 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="音频列表"
+        android:text="@string/audioList"
         android:textSize="18sp"
         android:textStyle="bold"
         android:gravity="center"
-        android:paddingBottom="16dp" />
+        android:paddingBottom="16dp"
+        android:textColor="@color/black_300"/>
 
     <!-- 歌曲列表 -->
     <ListView
@@ -22,6 +23,7 @@
         android:layout_height="wrap_content"
         android:maxHeight="500dp"
         android:textSize="16sp"
-        android:textColor="@color/black_200"/> <!-- 设置最大高度，避免弹框过高 -->
+        android:textColor="@color/grey_600"
+        /> <!-- 设置最大高度，避免弹框过高 -->
 
 </LinearLayout>
