@@ -1,17 +1,12 @@
 package com.example.aivoice.ui.files;
 
 import android.content.Context;
-import android.content.pm.ActivityInfo;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.util.Log;
-import android.view.ViewGroup;
-import android.view.WindowInsets;
-import android.view.WindowInsetsController;
 import android.webkit.MimeTypeMap;
 
 import androidx.documentfile.provider.DocumentFile;
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import androidx.media3.common.MediaItem;
@@ -68,8 +63,7 @@ public class FilesViewModel extends ViewModel {
     }
 
     public String getMimeTypeByUri(Uri uri) {
-        String mimeType = context.getContentResolver().getType(uri);
-        return mimeType;
+        return context.getContentResolver().getType(uri);
     }
 
     public boolean playFile(File file){
@@ -141,7 +135,6 @@ public class FilesViewModel extends ViewModel {
                 return true;
             } catch (IOException e) {
                 postError("播放失败");
-                e.printStackTrace();
             }
         }else if(isVideoFile(uri)){
             // 使用 ExoPlayer 播放视频
@@ -182,7 +175,7 @@ public class FilesViewModel extends ViewModel {
             return null;
         }
         fileUri = UriManager.getUri(context);
-        Uri audioUri = null;
+        Uri audioUri;
         if (fileUri != null) {
             DocumentFile pickedDir = DocumentFile.fromTreeUri(context, fileUri);
             if (pickedDir != null && pickedDir.isDirectory()) {

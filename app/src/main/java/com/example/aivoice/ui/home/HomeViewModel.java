@@ -3,20 +3,17 @@ package com.example.aivoice.ui.home;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 
 import android.content.pm.PackageManager;
 
-import android.database.Cursor;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 
-import android.provider.OpenableColumns;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -93,13 +90,20 @@ public class HomeViewModel extends ViewModel {
     // Setters for updating LiveData
     public void updateAudioFileUri(Uri uri) {
         audioFileUri.setValue(uri);
+        audioFileName.setValue(getFileName(uri));
     }
 
-    public void updateAudioFileName(){
-        
-    }
     public void updateFileUri(Uri uri) {
+
         fileUri.setValue(uri);
+        textFileName.setValue(getFileName(uri));
+    }
+
+    public LiveData<String> getAudioFileName(){
+        return audioFileName;
+    }
+    public LiveData<String> getTextFileName(){
+        return textFileName;
     }
 
     // 选择音频文件
@@ -170,6 +174,7 @@ public class HomeViewModel extends ViewModel {
                             mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
                             mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
                             mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+                            assert pfd != null;
                             mediaRecorder.setOutputFile(pfd.getFileDescriptor()); // 兼容 SAF 和本地文件
                             mediaRecorder.prepare();
                             mediaRecorder.start();
@@ -256,16 +261,22 @@ public class HomeViewModel extends ViewModel {
 
             try {
                 // 添加Model参数部分
-                if(speed.equals("正常")){
-                    speed = "x1.0";
-                }else if(speed.equals("稍快")){
-                    speed = "x1.1";
-                }else if(speed.equals("稍慢")){
-                    speed = "x0.9";
-                }else if(speed.equals("快速")){
-                    speed = "x1.2";
-                }else if(speed.equals("慢速")){
-                    speed = "x0.8";
+                switch (speed) {
+                    case "正常":
+                        speed = "x1.0";
+                        break;
+                    case "稍快":
+                        speed = "x1.1";
+                        break;
+                    case "稍慢":
+                        speed = "x0.9";
+                        break;
+                    case "快速":
+                        speed = "x1.2";
+                        break;
+                    case "慢速":
+                        speed = "x0.8";
+                        break;
                 }
 
                 requestBodyBuilder.addFormDataPart("model", model);
@@ -277,9 +288,10 @@ public class HomeViewModel extends ViewModel {
                     if(audioFileUri.getValue()!=null){
                         String audioMimeType = context.getContentResolver().getType(audioFileUri.getValue());
                         String audioFileName = getFileName(audioFileUri.getValue());
+                        assert audioMimeType != null;
                         requestBodyBuilder.addFormDataPart("audio", audioFileName,
-                                RequestBody.create(MediaType.parse(audioMimeType),
-                                        getAudioFileContent(audioFileUri.getValue())));
+                                RequestBody.create(getAudioFileContent(audioFileUri.getValue()),MediaType.parse(audioMimeType)
+                                        ));
                     }else{
                         Toast.makeText(context, "请选择音频文件", Toast.LENGTH_SHORT).show();
                         return;
@@ -292,9 +304,10 @@ public class HomeViewModel extends ViewModel {
                     if (fileUri.getValue() != null) {
                         String fileMimeType = context.getContentResolver().getType(fileUri.getValue());
                         String regularFileName = getFileName(fileUri.getValue());
+                        assert fileMimeType != null;
                         requestBodyBuilder.addFormDataPart("file", regularFileName,
-                                RequestBody.create(MediaType.parse(fileMimeType),
-                                        getFileContent(fileUri.getValue())));
+                                RequestBody.create(
+                                        getFileContent(fileUri.getValue()),MediaType.parse(fileMimeType)));
                     } else {
                         // 如果 fileUri 也为空，提示用户选择文件或输入文本
                         Toast.makeText(context, "请选择文本文件或输入文本", Toast.LENGTH_SHORT).show();
@@ -310,7 +323,7 @@ public class HomeViewModel extends ViewModel {
                         File textFile = saveTextAsFile(userInput); // 保存文本为文件
                         if (textFile != null) {
                             requestBodyBuilder.addFormDataPart("file", textFile.getName(),
-                                    RequestBody.create(MediaType.parse("text/plain"), textFile));
+                                    RequestBody.create(textFile,MediaType.parse("text/plain")));
                             Log.i(TAG,"生成txt文件成功");
                         } else {
                             Log.i(TAG,"生成txt文件失败");
@@ -340,20 +353,17 @@ public class HomeViewModel extends ViewModel {
                     public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                         try {
                             if (response.isSuccessful()) {
+                                assert response.body() != null;
                                 byte[] responseBody = response.body().bytes();
                                 String contentType = response.header("Content-Type");
                                 storeReturnedFile(responseBody,contentType);
                                 Log.i(TAG, "生成音频成功");
                                 // 使用runOnUiThread切换到主线程
-                                new Handler(Looper.getMainLooper()).post(() -> {
-                                    Toast.makeText(context, "生成文件成功", Toast.LENGTH_SHORT).show();
-                                });
+                                new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(context, "生成文件成功", Toast.LENGTH_SHORT).show());
                             } else {
                                 Log.e(TAG, "生成音频失败");
                                 // 使用runOnUiThread切换到主线程
-                                new Handler(Looper.getMainLooper()).post(() -> {
-                                    Toast.makeText(context, "生成音频失败", Toast.LENGTH_SHORT).show();
-                                });
+                                new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(context, "生成音频失败", Toast.LENGTH_SHORT).show());
                             }
                         } finally {
                             response.close(); //释放资源

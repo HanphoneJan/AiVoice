@@ -5,15 +5,12 @@ import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.GestureDetector;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -28,7 +25,6 @@ import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.media3.ui.AspectRatioFrameLayout;
 import androidx.media3.ui.PlayerView;
 
 import com.example.aivoice.R;
@@ -145,7 +141,7 @@ public class FilesFragment extends Fragment {
         }
         // 恢复 ActionBar 显示
         if (requireActivity() instanceof AppCompatActivity) {
-            ((AppCompatActivity) requireActivity()).getSupportActionBar().show();
+            Objects.requireNonNull(((AppCompatActivity) requireActivity()).getSupportActionBar()).show();
         }
         isFullScreen = false;
         filesViewModel.stopAudioFile();

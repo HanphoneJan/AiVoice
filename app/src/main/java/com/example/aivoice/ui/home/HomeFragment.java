@@ -89,7 +89,6 @@ public class HomeFragment extends Fragment {
                     if (result.getResultCode() == getActivity().RESULT_OK) {
                         assert result.getData() != null;
                         homeViewModel.updateAudioFileUri(result.getData().getData());
-                        audioFileTextView.setText("已选择");
                     }
                 });
 
@@ -99,7 +98,6 @@ public class HomeFragment extends Fragment {
                     if (result.getResultCode() == getActivity().RESULT_OK) {
                         assert result.getData() != null;
                         homeViewModel.updateFileUri(result.getData().getData());
-                        textFileTextView.setText("已选择");
                     }
                 });
 
@@ -120,13 +118,11 @@ public class HomeFragment extends Fragment {
                 ((Spinner) root.findViewById(R.id.spinner_speed)).getSelectedItem().toString(),
                 inputText.getText().toString()));
 
-        // 观察录音状态，更新 UI
-        homeViewModel.getIsRecording().observe(getViewLifecycleOwner(), isRecording -> {
-            if (isRecording) {
-                audioFileTextView.setText("已选择");
-            } else {
-
-            }
+        homeViewModel.getAudioFileName().observe(getViewLifecycleOwner(),audioFileName->{
+            audioFileTextView.setText(audioFileName);
+        });
+        homeViewModel.getTextFileName().observe(getViewLifecycleOwner(),textFileName->{
+            textFileTextView.setText(textFileName);
         });
 
         // 找到UI上的TextView
