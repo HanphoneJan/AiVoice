@@ -154,7 +154,8 @@ public class BluetoothViewModel extends ViewModel {
     public void disconnectDevice(){
         bluetooth.disconnect();
         isConnected.setValue(false);
-        setConnectedDeviceName("无");
+        setConnectedDeviceName("");
+        setConnectedDeviceAddress("");
         Log.i(TAG,"蓝牙设备已断开连接");
     }
     

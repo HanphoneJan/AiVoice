@@ -36,18 +36,15 @@ public class Bluetooth {
     private BluetoothGattCustom bluetoothGattCustom = new BluetoothGattCustom();
 
     //蓝牙数据监听回调
-    private BluetoothDataListener dataListener; // 用于存储回调对象
+    private static BluetoothDataListener dataListener; // 用于存储回调对象
 
     public void setDataListener(BluetoothDataListener listener) {
-        this.dataListener = listener;
-    }
-    public interface DataListener {
-        void onDataReceived(String data);
+        dataListener = listener;
     }
 
     public Bluetooth(){
         //空
-        this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     }
 
     public void setContext(Context context) {
@@ -55,7 +52,7 @@ public class Bluetooth {
     }
     public Bluetooth(Context context) {
         this.context = context;
-        this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (bluetoothAdapter == null) {
             throw new UnsupportedOperationException("该设备不支持蓝牙");
         }
@@ -87,10 +84,6 @@ public class Bluetooth {
 
     public String getConnectedDeviceAddress(){
         return connectedDevice.getAddress();
-    }
-
-    public void setConnectedDeviceName(BluetoothDevice newConnectedDevice) {
-        connectedDevice = newConnectedDevice;
     }
 
     public static BluetoothDevice getConnectedDevice(){
@@ -128,7 +121,9 @@ public class Bluetooth {
 
     public void requestBluetoothPermissions() {
         if (context instanceof Activity) {
-            ActivityCompat.requestPermissions((Activity) context, new String[]{Manifest.permission.BLUETOOTH_CONNECT}, 1);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                ActivityCompat.requestPermissions((Activity) context, new String[]{Manifest.permission.BLUETOOTH_CONNECT}, 1);
+            }
         }
     }
 
@@ -250,11 +245,11 @@ public class Bluetooth {
     public void disconnect() {
         closeConnection();
         Log.i(TAG, "已断开蓝牙连接");
-        Toast.makeText(context, "已断开蓝牙连接", Toast.LENGTH_SHORT).show();
     }
 
     private void closeConnection() {
         try {
+            cleanupResources();
             if (inputStream != null) inputStream.close();
             if (outputStream != null) outputStream.close();
             if (bluetoothSocket != null) bluetoothSocket.close();
@@ -352,10 +347,6 @@ public class Bluetooth {
             bluetoothAdapter.cancelDiscovery();
             Log.i(TAG, "蓝牙扫描已停止");
         }
-    }
-
-    public void setBluetoothConnectionListener(BluetoothConnectionListener listener) {
-        this.bluetoothConnectionListener = listener;
     }
 
     private void cleanupResources() {

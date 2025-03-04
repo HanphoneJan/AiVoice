@@ -37,16 +37,20 @@ public class MusicViewModel extends ViewModel implements Bluetooth.BluetoothData
         return isPlay;
     }
 
+    public void setDataListener(){
+        bluetooth.setDataListener(this);
+    }
+
     public boolean playAudio() {
         if(isPlay){
             isPlay = !bluetooth.sendSignal("pausresu");
-            return isPlay;
+            return true;
         }
         isPlay = bluetooth.sendSignal("audplay");
         if(isPlay){
             displayTrackName();
         }
-        return isPlay;
+        return true;
     }
 
     public boolean playAudStart(String selectedSong) {
@@ -100,10 +104,12 @@ public class MusicViewModel extends ViewModel implements Bluetooth.BluetoothData
     // 实现 onDataReceived 回调
     @Override
     public void onDataReceived(String data) {
-        if (data != null && data.startsWith("dispname")) {
+        Log.i(TAG,data);
+        if (data.startsWith("dispname")) {
+            Log.i(TAG,"尝试歌曲名");
             // 更新当前播放的音频文件名
             nowPlayAudioFile.postValue(data.replace("dispname ", ""));
-        } else if (data != null && data.startsWith("audlist")) {
+        } else if (data.startsWith("audlist")) {
             // 解析音频列表
             String audios = data.replace("audlist ", "").trim();
             if (!audios.isEmpty()) {

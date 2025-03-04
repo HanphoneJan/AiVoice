@@ -1,6 +1,7 @@
 package com.example.aivoice.ui.music;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,7 +39,7 @@ public class MusicFragment extends Fragment {
         View root = inflater.inflate(R.layout.fragment_music, container, false);
         musicViewModel = new ViewModelProvider(this).get(MusicViewModel.class);
         musicViewModel.setContext(requireContext());
-
+        musicViewModel.setDataListener();
 
         nowAudioFile = root.findViewById(R.id.dispname);
         fileNameListAdapter = new ArrayAdapter<>(requireContext(),android.R.layout.simple_spinner_item);
@@ -61,7 +62,6 @@ public class MusicFragment extends Fragment {
             // 播放
             if( musicViewModel.playAudio()){
                 if(musicViewModel.getIsPlay()){
-                    // 设置新的图标
                     btnAudPlay.setCompoundDrawablesWithIntrinsicBounds(iconPlayMusic[1], 0, 0, 0);
                 }else {
                     btnAudPlay.setCompoundDrawablesWithIntrinsicBounds(iconPlayMusic[0], 0, 0, 0);
@@ -120,6 +120,7 @@ public class MusicFragment extends Fragment {
         }
     }
     private void onChangedFile(String nowPlayAudioFile){
+        Log.i(TAG,nowPlayAudioFile);
         if(nowPlayAudioFile.isEmpty()){
             nowAudioFile.setText("");
             return;
