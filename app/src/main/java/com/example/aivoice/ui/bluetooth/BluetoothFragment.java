@@ -13,11 +13,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -32,7 +29,6 @@ import com.example.aivoice.bluetooth.Bluetooth;
 import com.example.aivoice.bluetooth.BluetoothDeviceInfo;
 import com.example.aivoice.bluetooth.CustomBluetoothDeviceAdapter;
 
-import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -78,8 +74,14 @@ public class BluetoothFragment extends Fragment {
             if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.BLUETOOTH_SCAN)
                     == PackageManager.PERMISSION_GRANTED) {
                 for (BluetoothDevice device : devices) {
+                    String deviceAddress = device.getAddress();
                     String deviceName = device.getName() != null && !device.getName().isEmpty() ? device.getName() : "未知设备";
-                    bluetoothDevicesAdapter.add(new BluetoothDeviceInfo(deviceName, device.getAddress())); // 将设备添加到列表中
+                    if(Objects.equals(deviceAddress, bluetoothViewModel.getConnectedDeviceAddresss().getValue())){
+                        bluetoothDevicesAdapter.add(new BluetoothDeviceInfo(deviceName, deviceAddress,true));
+                    }else{
+                        bluetoothDevicesAdapter.add(new BluetoothDeviceInfo(deviceName, deviceAddress));
+                    }
+                   // 将设备添加到列表中
                     bluetoothDeviceList.add(device); // 将设备添加到列表中
                 }
             }

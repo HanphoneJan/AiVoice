@@ -32,9 +32,7 @@ public class MusicViewModel extends ViewModel implements Bluetooth.BluetoothData
         return audList;
     }
     // 更新 audList 数据
-    public void updateAudList(Set<String> audioSet) {
-        audList.postValue(audioSet);
-    }
+
     public boolean getIsPlay(){
         return isPlay;
     }
@@ -102,13 +100,12 @@ public class MusicViewModel extends ViewModel implements Bluetooth.BluetoothData
     // 实现 onDataReceived 回调
     @Override
     public void onDataReceived(String data) {
-        if (data != null && data.startsWith("dispname ")) {
+        if (data != null && data.startsWith("dispname")) {
             // 更新当前播放的音频文件名
             nowPlayAudioFile.postValue(data.replace("dispname ", ""));
-        } else if (data != null && data.startsWith("audlist ")) {
+        } else if (data != null && data.startsWith("audlist")) {
             // 解析音频列表
             String audios = data.replace("audlist ", "").trim();
-
             if (!audios.isEmpty()) {
                 Set<String> audioSet = new HashSet<>();
                 // 假设返回的数据是用换行符分隔的音频文件名

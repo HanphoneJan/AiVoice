@@ -246,7 +246,7 @@ public class HomeViewModel extends ViewModel {
     }
 
     // 上传文件
-    public void uploadFiles(String model, String emotion, String speed,String userInput) {
+    public void uploadFiles(String model, String emotion, String speed,String output,String userInput) {
         if (model != null && emotion != null && speed != null) {
             // 设置超时时间
             OkHttpClient client = new OkHttpClient.Builder()
@@ -282,6 +282,7 @@ public class HomeViewModel extends ViewModel {
                 requestBodyBuilder.addFormDataPart("model", model);
                 requestBodyBuilder.addFormDataPart("emotion", emotion);
                 requestBodyBuilder.addFormDataPart("speed", speed);
+                requestBodyBuilder.addFormDataPart("output", output);
 
                 if(model.equals("克隆音色")){
                     // 添加音频文件部分
@@ -344,19 +345,17 @@ public class HomeViewModel extends ViewModel {
                     @Override
                     public void onFailure(@NonNull Call call, @NonNull IOException e) {
                         // 使用runOnUiThread切换到主线程
-                        new Handler(Looper.getMainLooper()).post(() -> {
-                            Toast.makeText(context, "上传失败", Toast.LENGTH_SHORT).show();
-                        });
+                        new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(context, "上传失败", Toast.LENGTH_SHORT).show());
                     }
 
                     @Override
                     public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                        try {
+                        try (response) {
                             if (response.isSuccessful()) {
                                 assert response.body() != null;
                                 byte[] responseBody = response.body().bytes();
                                 String contentType = response.header("Content-Type");
-                                storeReturnedFile(responseBody,contentType);
+                                storeReturnedFile(responseBody, contentType);
                                 Log.i(TAG, "生成音频成功");
                                 // 使用runOnUiThread切换到主线程
                                 new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(context, "生成文件成功", Toast.LENGTH_SHORT).show());
@@ -365,9 +364,8 @@ public class HomeViewModel extends ViewModel {
                                 // 使用runOnUiThread切换到主线程
                                 new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(context, "生成音频失败", Toast.LENGTH_SHORT).show());
                             }
-                        } finally {
-                            response.close(); //释放资源
                         }
+                        //释放资源
                     }
                 });
             } catch (IOException e) {
@@ -389,6 +387,7 @@ public class HomeViewModel extends ViewModel {
     private byte[] getFileContent(Uri uri) throws IOException {
         try (InputStream inputStream = context.getContentResolver().openInputStream(uri)) {
             Log.i(TAG,"获取本地文件成功");
+            assert inputStream != null;
             return getBytes(inputStream);
         }
     }
@@ -471,6 +470,7 @@ public class HomeViewModel extends ViewModel {
             case "audio/flac":
                 return "flac";
             case "audio/webm":
+            case "video/webm":
                 return "webm";
 
             // 视频文件类型
@@ -482,8 +482,6 @@ public class HomeViewModel extends ViewModel {
                 return "avi";
             case "video/x-matroska":
                 return "mkv";
-            case "video/webm":
-                return "webm";
             case "video/3gpp":
                 return "3gp";
             case "video/mpeg":

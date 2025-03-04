@@ -14,6 +14,12 @@ public class BluetoothDeviceInfo {
         this.isConnected = false;
     }
 
+    public BluetoothDeviceInfo(String deviceName,String deviceAddress,boolean isConnected){
+        this.deviceName = deviceName;
+        this.deviceAddress = deviceAddress;
+        this.isConnected = isConnected;
+    }
+
     public String getDeviceName() {
         return deviceName;
     }

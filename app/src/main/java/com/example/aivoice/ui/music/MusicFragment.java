@@ -58,7 +58,7 @@ public class MusicFragment extends Fragment {
 
 
         btnAudPlay.setOnClickListener(v -> {
-            // 切换播放模式
+            // 播放
             if( musicViewModel.playAudio()){
                 if(musicViewModel.getIsPlay()){
                     // 设置新的图标
@@ -107,6 +107,7 @@ public class MusicFragment extends Fragment {
         });
         //音频文件列表
         musicViewModel.getAudList().observe(getViewLifecycleOwner(), this::onChangedFileList);
+        //当前播放文件
         musicViewModel.getNowPlayAudioFile().observe(getViewLifecycleOwner(),this::onChangedFile);
 
         return root;

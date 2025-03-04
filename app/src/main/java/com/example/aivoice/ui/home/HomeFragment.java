@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -16,7 +15,6 @@ import android.widget.TextView;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -33,9 +31,6 @@ public class HomeFragment extends Fragment {
     private TextView recordingTimeTextView;
     private TextView audioFileTextView;
     private TextView textFileTextView;
-    private Spinner spinnerModel;
-    private Spinner spinnerEmotion;
-    private Spinner spinnerSpeed;
 
     private ActivityResultLauncher<Intent> chooseAudioLauncher;
     private ActivityResultLauncher<Intent> chooseFileLauncher;
@@ -49,9 +44,10 @@ public class HomeFragment extends Fragment {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        spinnerModel = root.findViewById(R.id.spinner_model);
-        spinnerEmotion = root.findViewById(R.id.spinner_emotion);
-        spinnerSpeed = root.findViewById(R.id.spinner_speed);
+        Spinner spinnerModel = root.findViewById(R.id.spinner_model);
+        Spinner spinnerEmotion = root.findViewById(R.id.spinner_emotion);
+        Spinner spinnerSpeed = root.findViewById(R.id.spinner_speed);
+        Spinner spinnerOutput = root.findViewById(R.id.spinner_output);
         // 创建ArrayAdapter并设置到Spinner中
         ArrayAdapter<CharSequence> modelAdapter = ArrayAdapter.createFromResource(
                 requireContext(),
@@ -76,6 +72,14 @@ public class HomeFragment extends Fragment {
         );
         speedAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerSpeed.setAdapter(speedAdapter);
+
+        ArrayAdapter<CharSequence> outputAdapter = ArrayAdapter.createFromResource(
+                requireContext(),
+                R.array.output_options,
+                android.R.layout.simple_spinner_item
+        );
+        outputAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerOutput.setAdapter(outputAdapter);
 
         audioFileTextView = root.findViewById(R.id.audioFileTextView_status);
         textFileTextView = root.findViewById(R.id.textFileTextView_status);
@@ -116,14 +120,11 @@ public class HomeFragment extends Fragment {
                 ((Spinner) root.findViewById(R.id.spinner_model)).getSelectedItem().toString(),
                 ((Spinner) root.findViewById(R.id.spinner_emotion)).getSelectedItem().toString(),
                 ((Spinner) root.findViewById(R.id.spinner_speed)).getSelectedItem().toString(),
+                ((Spinner) root.findViewById(R.id.spinner_output)).getSelectedItem().toString(),
                 inputText.getText().toString()));
 
-        homeViewModel.getAudioFileName().observe(getViewLifecycleOwner(),audioFileName->{
-            audioFileTextView.setText(audioFileName);
-        });
-        homeViewModel.getTextFileName().observe(getViewLifecycleOwner(),textFileName->{
-            textFileTextView.setText(textFileName);
-        });
+        homeViewModel.getAudioFileName().observe(getViewLifecycleOwner(),audioFileName-> audioFileTextView.setText(audioFileName));
+        homeViewModel.getTextFileName().observe(getViewLifecycleOwner(),textFileName-> textFileTextView.setText(textFileName));
 
         // 找到UI上的TextView
         recordingTimeTextView = root.findViewById(R.id.recordingTimeTextView);
@@ -141,18 +142,6 @@ public class HomeFragment extends Fragment {
         return root;
     }
 
-    private void setupSpinnerActions(Spinner spinner) {
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                // 处理 spinner 选项选择事件
-            }
-            @Override
-            public void onNothingSelected(AdapterView<?> parentView) {
-                // 处理没有选项的事件
-            }
-        });
-    }
 
     @Override
     public void onDestroyView() {
