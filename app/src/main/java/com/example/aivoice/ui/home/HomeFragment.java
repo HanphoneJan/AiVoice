@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -47,7 +48,6 @@ public class HomeFragment extends Fragment {
         Spinner spinnerModel = root.findViewById(R.id.spinner_model);
         Spinner spinnerEmotion = root.findViewById(R.id.spinner_emotion);
         Spinner spinnerSpeed = root.findViewById(R.id.spinner_speed);
-        Spinner spinnerOutput = root.findViewById(R.id.spinner_output);
         // 创建ArrayAdapter并设置到Spinner中
         ArrayAdapter<CharSequence> modelAdapter = ArrayAdapter.createFromResource(
                 requireContext(),
@@ -73,13 +73,11 @@ public class HomeFragment extends Fragment {
         speedAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerSpeed.setAdapter(speedAdapter);
 
-        ArrayAdapter<CharSequence> outputAdapter = ArrayAdapter.createFromResource(
-                requireContext(),
-                R.array.output_options,
-                android.R.layout.simple_spinner_item
-        );
-        outputAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerOutput.setAdapter(outputAdapter);
+        // 找到所有的 CheckBox
+        CheckBox checkBoxOption1 = root.findViewById(R.id.output_option1);
+        CheckBox checkBoxOption2 = root.findViewById(R.id.output_option2);
+        CheckBox checkBoxOption3 = root.findViewById(R.id.output_option3);
+
 
         audioFileTextView = root.findViewById(R.id.audioFileTextView_status);
         textFileTextView = root.findViewById(R.id.textFileTextView_status);
@@ -108,7 +106,7 @@ public class HomeFragment extends Fragment {
         // 设置按钮点击事件
         binding.btnChooseAudio.setOnClickListener(v -> homeViewModel.chooseAudio(chooseAudioLauncher));
         binding.btnRecordAudio.setOnClickListener(v -> {
-            if (homeViewModel.getIsRecording().getValue()) {
+            if (Boolean.TRUE.equals(homeViewModel.getIsRecording().getValue())) {
                 homeViewModel.stopRecording();
             } else {
                 homeViewModel.startRecording();
@@ -120,7 +118,9 @@ public class HomeFragment extends Fragment {
                 ((Spinner) root.findViewById(R.id.spinner_model)).getSelectedItem().toString(),
                 ((Spinner) root.findViewById(R.id.spinner_emotion)).getSelectedItem().toString(),
                 ((Spinner) root.findViewById(R.id.spinner_speed)).getSelectedItem().toString(),
-                ((Spinner) root.findViewById(R.id.spinner_output)).getSelectedItem().toString(),
+                checkBoxOption1.isChecked(),
+                checkBoxOption2.isChecked(),
+                checkBoxOption3.isChecked(),
                 inputText.getText().toString()));
 
         homeViewModel.getAudioFileName().observe(getViewLifecycleOwner(),audioFileName-> audioFileTextView.setText(audioFileName));

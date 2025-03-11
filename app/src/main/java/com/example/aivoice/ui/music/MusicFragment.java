@@ -27,7 +27,6 @@ public class MusicFragment extends Fragment {
 
     private ArrayAdapter<String> fileNameListAdapter;
     private MusicViewModel musicViewModel;
-    private ImageButton btnAudPlay; // 成员变量
     // icon播放资源
     int[] iconPlayMusic = {
             R.drawable.audplay, // 第一个图标
@@ -46,11 +45,10 @@ public class MusicFragment extends Fragment {
         fileNameListAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         //按钮
-        btnAudPlay = root.findViewById(R.id.btn_audplay);
+        ImageButton btnAudPlay = root.findViewById(R.id.btn_audplay);
         Button btnAudList = root.findViewById(R.id.btn_audlist);
         Button btnNext = root.findViewById(R.id.btn_audnext);
         Button btnPrev = root.findViewById(R.id.btn_audprev);
-//        Button btnDispName = root.findViewById(R.id.btn_dispname);
 
         Button btnSeekBwd = root.findViewById(R.id.btn_seekbwd);
         Button btnFwd = root.findViewById(R.id.btn_seekfwd);
@@ -58,21 +56,14 @@ public class MusicFragment extends Fragment {
         ImageButton btnVoluinc =root.findViewById(R.id.btn_voluinc);
 
 
-        btnAudPlay.setOnClickListener(v -> {
+        btnAudPlay.setOnClickListener(v ->
             // 播放
-            if( musicViewModel.playAudio()){
-                if(musicViewModel.getIsPlay()){
-                    btnAudPlay.setImageResource(iconPlayMusic[1]);
-                }else {
-                    btnAudPlay.setImageResource(iconPlayMusic[0]);
-                }
-            }
-        });
+             musicViewModel.playAudio()
+        );
 
         btnAudList.setOnClickListener(v -> showMusicListDialog());
         btnNext.setOnClickListener(v -> musicViewModel.playNextTrack());
         btnPrev.setOnClickListener(v -> musicViewModel.playPreviousTrack());
-//        btnDispName.setOnClickListener(v -> musicViewModel.displayTrackName());
 
         btnSeekBwd.setOnClickListener(v -> musicViewModel.seekBackward());
         btnFwd.setOnClickListener(v -> musicViewModel.seekForward());
@@ -109,6 +100,13 @@ public class MusicFragment extends Fragment {
         musicViewModel.getAudList().observe(getViewLifecycleOwner(), this::onChangedFileList);
         //当前播放文件
         musicViewModel.getNowPlayAudioFile().observe(getViewLifecycleOwner(),this::onChangedFile);
+        musicViewModel.getIsPlay().observe(getViewLifecycleOwner(),isPlay->{
+            if(isPlay){
+                btnAudPlay.setImageResource(iconPlayMusic[1]);
+            }else{
+                btnAudPlay.setImageResource(iconPlayMusic[0]);
+            }
+        });
 
         return root;
     }
@@ -149,9 +147,7 @@ public class MusicFragment extends Fragment {
             // 设置歌曲列表点击事件
             listViewSongs.setOnItemClickListener((parent, view, position, id) -> {
                 String selectedSong = songs[position];
-                if(musicViewModel.playAudStart(selectedSong)){
-                    btnAudPlay.setImageResource(iconPlayMusic[0]);
-                }
+                musicViewModel.playAudStart(selectedSong);
             });
         });
 

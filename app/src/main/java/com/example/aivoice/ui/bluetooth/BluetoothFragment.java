@@ -178,7 +178,7 @@ public class BluetoothFragment extends Fragment {
         }
 
         ArrayList<String> missingPermissions = new ArrayList<>();
-        for (String permission : permissions) {
+        for (String permission : Objects.requireNonNull(permissions)) {
             if (ContextCompat.checkSelfPermission(requireContext(), permission) != PackageManager.PERMISSION_GRANTED) {
                 missingPermissions.add(permission);
             }

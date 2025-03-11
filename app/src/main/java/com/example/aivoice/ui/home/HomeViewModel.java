@@ -53,13 +53,13 @@ import okhttp3.Response;
 public class HomeViewModel extends ViewModel {
     private static final String TAG = "HomeViewModel";
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
-    private MutableLiveData<Boolean> isRecording = new MutableLiveData<>(false);
-    private MutableLiveData<Uri> audioFileUri = new MutableLiveData<>();
-    private MutableLiveData<Uri> fileUri = new MutableLiveData<>();
-    private MutableLiveData<String> audioFileName = new MutableLiveData<>();
-    private MutableLiveData<String> textFileName = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> isRecording = new MutableLiveData<>(false);
+    private final MutableLiveData<Uri> audioFileUri = new MutableLiveData<>();
+    private final MutableLiveData<Uri> fileUri = new MutableLiveData<>();
+    private final MutableLiveData<String> audioFileName = new MutableLiveData<>();
+    private final MutableLiveData<String> textFileName = new MutableLiveData<>();
     private Context context;
-    private MutableLiveData<Long> recordingTime = new MutableLiveData<>(0L); // 录音时间，单位：秒
+    private final MutableLiveData<Long> recordingTime = new MutableLiveData<>(0L); // 录音时间，单位：秒
     private static Uri musicUri;
 
     private MediaRecorder mediaRecorder;
@@ -246,7 +246,7 @@ public class HomeViewModel extends ViewModel {
     }
 
     // 上传文件
-    public void uploadFiles(String model, String emotion, String speed,String output,String userInput) {
+    public void uploadFiles(String model, String emotion, String speed,Boolean output_audio,Boolean output_video,Boolean output_text,String userInput) {
         if (model != null && emotion != null && speed != null) {
             // 设置超时时间
             OkHttpClient client = new OkHttpClient.Builder()
@@ -282,8 +282,15 @@ public class HomeViewModel extends ViewModel {
                 requestBodyBuilder.addFormDataPart("model", model);
                 requestBodyBuilder.addFormDataPart("emotion", emotion);
                 requestBodyBuilder.addFormDataPart("speed", speed);
-                requestBodyBuilder.addFormDataPart("output", output);
-
+                if(output_audio){
+                    requestBodyBuilder.addFormDataPart("output_audio", "音频");
+                }
+                if(output_video){
+                    requestBodyBuilder.addFormDataPart("output_video", "视频");
+                }
+                if(output_text){
+                    requestBodyBuilder.addFormDataPart("output_text", "字幕");
+                }
                 if(model.equals("克隆音色")){
                     // 添加音频文件部分
                     if(audioFileUri.getValue()!=null){

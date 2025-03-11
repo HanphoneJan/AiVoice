@@ -127,7 +127,7 @@
         <!-- 输出 -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="wrap_content"
             android:gravity="start|center_vertical"
             android:orientation="horizontal"
             android:paddingStart="20dp"
@@ -144,22 +144,35 @@
                 android:text="@string/output"
                 android:textSize="16sp"
                 android:layout_marginEnd="16dp"
-                android:textColor="@android:color/black"
-                />
+                android:textColor="@android:color/black" />
 
-            <Spinner
-                android:id="@+id/spinner_output"
-                android:layout_width="0dp"
-                android:layout_weight="1"
+            <!-- 多个 CheckBox 来实现多选 -->
+            <CheckBox
+                android:id="@+id/output_option1"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:minHeight="48dp"
-                android:background="@drawable/spinner_border"
-                android:dropDownSelector="@android:color/darker_gray"
-                android:padding="8dp"
+                android:text="@string/output_audio"
                 android:textSize="16sp"
-                android:textColor="@color/black_200"
-                />
+                android:textColor="@android:color/black"
+                android:layout_marginEnd="18dp"/>
+
+            <CheckBox
+                android:id="@+id/output_option2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/output_video"
+                android:textSize="16sp"
+                android:textColor="@android:color/black"
+                android:layout_marginEnd="18dp"/>
+            <CheckBox
+                android:id="@+id/output_option3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/output_text"
+                android:textSize="16sp"
+                android:textColor="@android:color/black" />
         </LinearLayout>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

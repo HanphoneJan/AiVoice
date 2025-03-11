@@ -17,7 +17,7 @@ public class MusicViewModel extends ViewModel implements Bluetooth.BluetoothData
     private final MutableLiveData<Set<String>> audList = new MutableLiveData<>() ;
     private final MutableLiveData<String> nowPlayAudioFile = new MutableLiveData<>();
     private final Bluetooth bluetooth = new Bluetooth();
-    private static boolean isPlay = false;
+    private final MutableLiveData<Boolean>  isPlay = new MutableLiveData<>();
     public MusicViewModel() {
         bluetooth.setDataListener(this);
     }
@@ -33,7 +33,7 @@ public class MusicViewModel extends ViewModel implements Bluetooth.BluetoothData
     }
     // 更新 audList 数据
 
-    public boolean getIsPlay(){
+    public LiveData<Boolean> getIsPlay(){
         return isPlay;
     }
 
@@ -41,44 +41,49 @@ public class MusicViewModel extends ViewModel implements Bluetooth.BluetoothData
         bluetooth.setDataListener(this);
     }
 
-    public boolean playAudio() {
-        if(isPlay){
-            isPlay = !bluetooth.sendSignal("pausresu");
-            return true;
+    public void playAudio() {
+        if(Boolean.TRUE.equals(isPlay.getValue())){
+            isPlay.setValue(!bluetooth.sendSignal("pausresu"));
+        }else{
+            if(bluetooth.sendSignal("audplay")){
+                isPlay.setValue(true);
+            }
         }
-        isPlay = bluetooth.sendSignal("audplay");
-        if(isPlay){
+        if(Boolean.TRUE.equals(isPlay.getValue())){
             displayTrackName();
         }
-        return true;
     }
 
-    public boolean playAudStart(String selectedSong) {
-        if(isPlay){
-            isPlay = !bluetooth.sendSignal("pausresu");
-            return isPlay;
+    public void playAudStart(String selectedSong) {
+        if(Boolean.TRUE.equals(isPlay.getValue())){
+            isPlay.setValue(!bluetooth.sendSignal("pausresu"));
+            isPlay.getValue();
+            return;
         }
-        isPlay = bluetooth.sendSignal("audstart "+selectedSong);
-        if(isPlay){
+        isPlay.setValue(bluetooth.sendSignal("audstart "+selectedSong));
+        if(Boolean.TRUE.equals(isPlay.getValue())){
             displayTrackName();
         }
-        return isPlay;
     }
 
-    public boolean showAudioList() {
-        return bluetooth.sendSignal("audlist");
+    public void showAudioList() {
+        bluetooth.sendSignal("audlist");
     }
 
-    public boolean playNextTrack() {
-        return bluetooth.sendSignal("audnext");
+    public void playNextTrack() {
+        if(bluetooth.sendSignal("audnext")){
+            isPlay.setValue(true);
+        }
     }
 
-    public boolean playPreviousTrack() {
-        return bluetooth.sendSignal("audprev");
+    public void playPreviousTrack() {
+        if(bluetooth.sendSignal("audprev")){
+            isPlay.setValue(true);
+        }
     }
 
-    public boolean displayTrackName() {
-        return bluetooth.sendSignal("dispname");
+    public void displayTrackName() {
+        bluetooth.sendSignal("dispname");
     }
 
     public boolean togglePlaybackMode() {
@@ -86,20 +91,20 @@ public class MusicViewModel extends ViewModel implements Bluetooth.BluetoothData
     }
 
 
-    public boolean seekBackward() {
-        return bluetooth.sendSignal("seekbwd");
+    public void seekBackward() {
+        bluetooth.sendSignal("seekbwd");
     }
 
-    public boolean seekForward() {
-        return bluetooth.sendSignal("seekfwd");
+    public void seekForward() {
+        bluetooth.sendSignal("seekfwd");
     }
 
-    public boolean decreaseVolume() {
-        return bluetooth.sendSignal("voludec");
+    public void decreaseVolume() {
+        bluetooth.sendSignal("voludec");
     }
 
-    public boolean increaseVolume() {
-        return bluetooth.sendSignal("voluinc");
+    public void increaseVolume() {
+        bluetooth.sendSignal("voluinc");
     }
     // 实现 onDataReceived 回调
     @Override
