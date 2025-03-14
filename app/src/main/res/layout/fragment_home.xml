@@ -37,9 +37,10 @@
             android:id="@+id/voice_input_button"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:src="@android:drawable/ic_btn_speak_now"
+            android:src="@drawable/record"
             android:background="@android:color/transparent"
-            android:layout_marginEnd="8dp" />
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp" />
 
         <!-- 文字输入框 -->
         <EditText
@@ -56,7 +57,7 @@
             android:gravity="top|start"
             android:textColor="@android:color/black"
             android:elevation="1dp"
-            android:layout_marginEnd="8dp" />
+            android:layout_marginEnd="4dp" />
 
     </LinearLayout>
 
@@ -74,35 +75,45 @@
 
         <LinearLayout
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="40dp"
             android:orientation="horizontal"
             android:layout_weight="1"
             android:padding="4dp">
-            <!-- 语音输入按钮 -->
+
             <ImageButton
                 android:id="@+id/setting_button"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:src="@drawable/setting"
                 android:background="@android:color/transparent"
-                android:layout_marginEnd="8dp" />
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="12dp" />
 
             <CheckBox
                 android:id="@+id/output_option2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/answer_question"
-                android:textSize="16sp"
                 android:button="@drawable/custom_checkbox_1"
+                android:background="@drawable/custom_checkbox_1"
+                android:textSize="12sp"
+                android:drawableStart="@drawable/tip2"
+                android:padding="6dp"
                 android:textColor="@android:color/black"
-                android:layout_marginEnd="18dp" />
+                android:layout_marginEnd="8dp"
+                android:checked="true"
+                />
             <CheckBox
                 android:id="@+id/output_option1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/internet_search"
-                android:textSize="16sp"
+                android:textSize="12sp"
+                android:drawableStart="@drawable/internet"
+                android:button="@drawable/custom_checkbox_1"
+                android:background="@drawable/custom_checkbox_1"
                 android:textColor="@android:color/black"
+                android:padding="6dp"
                 android:layout_marginEnd="18dp"
                 />
 
@@ -144,9 +155,9 @@
         <!-- 发送按钮 -->
         <ImageButton
             android:id="@+id/send_button"
-            android:layout_width="32dp"
+            android:layout_width="34dp"
             android:layout_height="match_parent"
-            android:layout_margin="10dp"
+            android:layout_margin="2dp"
             android:src="@drawable/arrow_up"
             android:background="@drawable/round_button"
             />

@@ -45,26 +45,26 @@ public class HomeFragment extends Fragment {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        Spinner spinnerModel = root.findViewById(R.id.spinner_chat);
-        Spinner spinnerEmotion = root.findViewById(R.id.spinner_chat_emotion);
-        // 创建ArrayAdapter并设置到Spinner中
-        ArrayAdapter<CharSequence> modelAdapter = ArrayAdapter.createFromResource(
-                requireContext(),
-                R.array.chat_options,
-                android.R.layout.simple_spinner_item
-        );
-        modelAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerModel.setAdapter(modelAdapter);
-
-        ArrayAdapter<CharSequence> emotionAdapter = ArrayAdapter.createFromResource(
-                requireContext(),
-                R.array.emotion_options,
-                android.R.layout.simple_spinner_item
-        );
-        emotionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerEmotion.setAdapter(emotionAdapter);
-
-        EditText inputText = root.findViewById(R.id.message_input);
+//        Spinner spinnerModel = root.findViewById(R.id.spinner_chat);
+//        Spinner spinnerEmotion = root.findViewById(R.id.spinner_chat_emotion);
+//        // 创建ArrayAdapter并设置到Spinner中
+//        ArrayAdapter<CharSequence> modelAdapter = ArrayAdapter.createFromResource(
+//                requireContext(),
+//                R.array.chat_options,
+//                android.R.layout.simple_spinner_item
+//        );
+//        modelAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//        spinnerModel.setAdapter(modelAdapter);
+//
+//        ArrayAdapter<CharSequence> emotionAdapter = ArrayAdapter.createFromResource(
+//                requireContext(),
+//                R.array.emotion_options,
+//                android.R.layout.simple_spinner_item
+//        );
+//        emotionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//        spinnerEmotion.setAdapter(emotionAdapter);
+//
+//        EditText inputText = root.findViewById(R.id.message_input);
 
 
 //        binding.moreButton.setOnClickListener(v -> homeViewModel.chooseFile(chooseFileLauncher));
