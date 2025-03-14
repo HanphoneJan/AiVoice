@@ -7,7 +7,7 @@
         <item name="colorPrimaryVariant">@color/light_blue_700</item>
         <item name="colorOnPrimary">@color/white</item>
         <!-- Secondary brand color. 第二主题色 -->
-        <item name="colorSecondary">@color/light_blue_300</item>
+        <item name="colorSecondary">@color/light_blue_500</item>
         <item name="colorSecondaryVariant">@color/light_blue_500</item>
         <item name="colorOnSecondary">@color/black</item>
         <!-- Status bar color. 状态栏颜色-->

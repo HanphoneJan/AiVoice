@@ -20,14 +20,14 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.aivoice.R;
-import com.example.aivoice.databinding.FragmentHomeBinding;
+import com.example.aivoice.databinding.FragmentUploadBinding;
 
 import java.util.Locale;
 
 
 public class UploadFragment extends Fragment {
 
-    private FragmentHomeBinding binding;
+    private FragmentUploadBinding binding;
     private UploadViewModel uploadViewModel;
     private TextView recordingTimeTextView;
     private TextView audioFileTextView;
@@ -42,7 +42,7 @@ public class UploadFragment extends Fragment {
                              Bundle savedInstanceState) {
         uploadViewModel = new ViewModelProvider(this).get(UploadViewModel.class);
         uploadViewModel.setContext(requireContext()); // 设置Context
-        binding = FragmentHomeBinding.inflate(inflater, container, false);
+        binding = FragmentUploadBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
         Spinner spinnerModel = root.findViewById(R.id.spinner_model);

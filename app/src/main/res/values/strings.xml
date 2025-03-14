@@ -1,14 +1,15 @@
 <resources>
     <string name="app_name">AiVoice</string>
-    <string name="title_home">主页</string>
+    <string name="title_home">教学对话</string>
     <string name="title_upload">语音生成</string>
     <string name="title_bluetooth">蓝牙控制</string>
     <string name="title_music">音频播放</string>
     <string name="title_files">文件管理</string>
 
-
+    <string name="input_hint">输入消息</string>
     <string name="standard_voice">标准发声</string>
     <string name="answer_question">答疑解惑</string>
+    <string name="internet_search">联网搜索</string>
 
 <!--    上传界面-->
     <string name="model">模型</string>
@@ -60,4 +61,5 @@
     <string name="no_audio_files">没有找到音频文件</string>
     <string name="loading">加载中…</string>
     <string name="error_occurred">发生错误</string>
+
 </resources>

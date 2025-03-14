@@ -51,7 +51,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class HomeViewModel extends ViewModel {
-    private static final String TAG = "UploadViewModel";
+    private static final String TAG = "HomeViewModel";
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
     private final MutableLiveData<Boolean> isRecording = new MutableLiveData<>(false);
     private final MutableLiveData<Uri> audioFileUri = new MutableLiveData<>();

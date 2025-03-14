@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="chat_options">
+        <item>标准发声</item>
+        <item>克隆音色</item>
+        <item>标准英语</item>
+        <item>河南话</item>
+        <item>四川话</item>
+        <item>粤语</item>
+    </string-array>
+</resources>

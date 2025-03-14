@@ -45,13 +45,12 @@ public class HomeFragment extends Fragment {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        Spinner spinnerModel = root.findViewById(R.id.spinner_model);
-        Spinner spinnerEmotion = root.findViewById(R.id.spinner_emotion);
-        Spinner spinnerSpeed = root.findViewById(R.id.spinner_speed);
+        Spinner spinnerModel = root.findViewById(R.id.spinner_chat);
+        Spinner spinnerEmotion = root.findViewById(R.id.spinner_chat_emotion);
         // 创建ArrayAdapter并设置到Spinner中
         ArrayAdapter<CharSequence> modelAdapter = ArrayAdapter.createFromResource(
                 requireContext(),
-                R.array.model_options,
+                R.array.chat_options,
                 android.R.layout.simple_spinner_item
         );
         modelAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -65,69 +64,12 @@ public class HomeFragment extends Fragment {
         emotionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerEmotion.setAdapter(emotionAdapter);
 
-        ArrayAdapter<CharSequence> speedAdapter = ArrayAdapter.createFromResource(
-                requireContext(),
-                R.array.speed_options,
-                android.R.layout.simple_spinner_item
-        );
-        speedAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerSpeed.setAdapter(speedAdapter);
+        EditText inputText = root.findViewById(R.id.message_input);
 
 
+//        binding.moreButton.setOnClickListener(v -> homeViewModel.chooseFile(chooseFileLauncher));
 
 
-        audioFileTextView = root.findViewById(R.id.audioFileTextView_status);
-        textFileTextView = root.findViewById(R.id.textFileTextView_status);
-
-        EditText inputText = root.findViewById(R.id.inputText);
-
-        // 初始化 ActivityResultLaunchers
-        chooseAudioLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    if (result.getResultCode() == getActivity().RESULT_OK) {
-                        assert result.getData() != null;
-                        homeViewModel.updateAudioFileUri(result.getData().getData());
-                    }
-                });
-
-        chooseFileLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    if (result.getResultCode() == getActivity().RESULT_OK) {
-                        assert result.getData() != null;
-                        homeViewModel.updateFileUri(result.getData().getData());
-                    }
-                });
-
-        // 设置按钮点击事件
-        binding.btnChooseAudio.setOnClickListener(v -> homeViewModel.chooseAudio(chooseAudioLauncher));
-        binding.btnRecordAudio.setOnClickListener(v -> {
-            if (Boolean.TRUE.equals(homeViewModel.getIsRecording().getValue())) {
-                homeViewModel.stopRecording();
-            } else {
-                homeViewModel.startRecording();
-            }
-        });
-        binding.btnChooseFile.setOnClickListener(v -> homeViewModel.chooseFile(chooseFileLauncher));
-
-
-
-        homeViewModel.getAudioFileName().observe(getViewLifecycleOwner(),audioFileName-> audioFileTextView.setText(audioFileName));
-        homeViewModel.getTextFileName().observe(getViewLifecycleOwner(),textFileName-> textFileTextView.setText(textFileName));
-
-        // 找到UI上的TextView
-        recordingTimeTextView = root.findViewById(R.id.recordingTimeTextView);
-
-        // 观察 recordingTime LiveData
-        homeViewModel.getRecordingTime().observe(getViewLifecycleOwner(), time -> {
-            // 格式化时间并更新UI
-            int minutes = (int) (time / 6000);
-            int seconds = (int) (time % 6000/100);
-            int minseconds= (int) (time%100);
-            String timeFormatted = String.format(Locale.US,"录音时长：%02d:%02d:%02d", minutes, seconds,minseconds);
-            recordingTimeTextView.setText(timeFormatted);
-        });
 
         return root;
     }
