@@ -1,10 +1,16 @@
 <resources>
     <string name="app_name">AiVoice</string>
     <string name="title_home">主页</string>
+    <string name="title_upload">语音生成</string>
     <string name="title_bluetooth">蓝牙控制</string>
     <string name="title_music">音频播放</string>
     <string name="title_files">文件管理</string>
 
+
+    <string name="standard_voice">标准发声</string>
+    <string name="answer_question">答疑解惑</string>
+
+<!--    上传界面-->
     <string name="model">模型</string>
     <string name="emotion">情感</string>
     <string name="speed">语速</string>
@@ -23,18 +29,18 @@
     <string name="output_audio">音频</string>
     <string name="output_text">字幕</string>
 
-
-
-
+<!--    蓝牙连接界面-->
     <string name="noConnect">未连接设备</string>
     <string name="scanBluetooth">扫描蓝牙</string>
     <string name="bluetoothList">蓝牙设备列表</string>
 
+<!--    文件控制-->
     <string name="fullscreen">全屏</string>
     <string name="back">返回</string>
     <string name="selectDocument">选定目录</string>
     <string name="filesList">文件列表</string>
 
+<!--    播放控制-->
     <string name="audplay">播放音频</string>
     <string name="audstop">停止音频</string>
     <string name="audlist">音频列表</string>

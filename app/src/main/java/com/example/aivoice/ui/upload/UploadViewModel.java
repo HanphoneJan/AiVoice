@@ -1,4 +1,4 @@
-package com.example.aivoice.ui.home;
+package com.example.aivoice.ui.upload;
 
 
 import android.Manifest;
@@ -50,8 +50,8 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class HomeViewModel extends ViewModel {
-    private static final String TAG = "UploadViewModel";
+public class UploadViewModel extends ViewModel {
+    private static final String TAG = "HomeViewModel";
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
     private final MutableLiveData<Boolean> isRecording = new MutableLiveData<>(false);
     private final MutableLiveData<Uri> audioFileUri = new MutableLiveData<>();
@@ -70,7 +70,7 @@ public class HomeViewModel extends ViewModel {
     private static long elapsedTime = 0; // 已录音的时间
 
     // 添加一个公共的无参构造函数
-    public HomeViewModel() {
+    public UploadViewModel() {
 
     }
 
@@ -259,6 +259,11 @@ public class HomeViewModel extends ViewModel {
             MultipartBody.Builder requestBodyBuilder = new MultipartBody.Builder()
                     .setType(MultipartBody.FORM);
 
+            if(!output_audio && !output_text && !output_video){
+                Toast.makeText(context, "请选择输出形式", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             try {
                 // 添加Model参数部分
                 switch (speed) {
@@ -299,7 +304,7 @@ public class HomeViewModel extends ViewModel {
                         assert audioMimeType != null;
                         requestBodyBuilder.addFormDataPart("audio", audioFileName,
                                 RequestBody.create(getAudioFileContent(audioFileUri.getValue()),MediaType.parse(audioMimeType)
-                                        ));
+                                ));
                     }else{
                         Toast.makeText(context, "请选择音频文件", Toast.LENGTH_SHORT).show();
                         return;
@@ -440,7 +445,7 @@ public class HomeViewModel extends ViewModel {
                     }
                 } else {
                     // 创建文件失败
-                     Log.i(TAG,"无法保存生成的音频文件");
+                    Log.i(TAG,"无法保存生成的音频文件");
                 }
             } else {
                 Log.i(TAG,"无法访问选定的目录");

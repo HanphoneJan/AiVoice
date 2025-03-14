@@ -1,4 +1,4 @@
-package com.example.aivoice.ui.home;
+package com.example.aivoice.ui.upload;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -25,10 +25,10 @@ import com.example.aivoice.databinding.FragmentHomeBinding;
 import java.util.Locale;
 
 
-public class HomeFragment extends Fragment {
+public class UploadFragment extends Fragment {
 
     private FragmentHomeBinding binding;
-    private HomeViewModel homeViewModel;
+    private UploadViewModel uploadViewModel;
     private TextView recordingTimeTextView;
     private TextView audioFileTextView;
     private TextView textFileTextView;
@@ -40,8 +40,8 @@ public class HomeFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
-        homeViewModel.setContext(requireContext()); // 设置Context
+        uploadViewModel = new ViewModelProvider(this).get(UploadViewModel.class);
+        uploadViewModel.setContext(requireContext()); // 设置Context
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
@@ -73,7 +73,10 @@ public class HomeFragment extends Fragment {
         speedAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerSpeed.setAdapter(speedAdapter);
 
-
+        // 找到所有的 CheckBox
+        CheckBox checkBoxOption1 = root.findViewById(R.id.output_option1);
+        CheckBox checkBoxOption2 = root.findViewById(R.id.output_option2);
+        CheckBox checkBoxOption3 = root.findViewById(R.id.output_option3);
 
 
         audioFileTextView = root.findViewById(R.id.audioFileTextView_status);
@@ -87,7 +90,7 @@ public class HomeFragment extends Fragment {
                 result -> {
                     if (result.getResultCode() == getActivity().RESULT_OK) {
                         assert result.getData() != null;
-                        homeViewModel.updateAudioFileUri(result.getData().getData());
+                        uploadViewModel.updateAudioFileUri(result.getData().getData());
                     }
                 });
 
@@ -96,31 +99,38 @@ public class HomeFragment extends Fragment {
                 result -> {
                     if (result.getResultCode() == getActivity().RESULT_OK) {
                         assert result.getData() != null;
-                        homeViewModel.updateFileUri(result.getData().getData());
+                        uploadViewModel.updateFileUri(result.getData().getData());
                     }
                 });
 
         // 设置按钮点击事件
-        binding.btnChooseAudio.setOnClickListener(v -> homeViewModel.chooseAudio(chooseAudioLauncher));
+        binding.btnChooseAudio.setOnClickListener(v -> uploadViewModel.chooseAudio(chooseAudioLauncher));
         binding.btnRecordAudio.setOnClickListener(v -> {
-            if (Boolean.TRUE.equals(homeViewModel.getIsRecording().getValue())) {
-                homeViewModel.stopRecording();
+            if (Boolean.TRUE.equals(uploadViewModel.getIsRecording().getValue())) {
+                uploadViewModel.stopRecording();
             } else {
-                homeViewModel.startRecording();
+                uploadViewModel.startRecording();
             }
         });
-        binding.btnChooseFile.setOnClickListener(v -> homeViewModel.chooseFile(chooseFileLauncher));
+        binding.btnChooseFile.setOnClickListener(v -> uploadViewModel.chooseFile(chooseFileLauncher));
 
+        binding.btnUpload.setOnClickListener(v -> uploadViewModel.uploadFiles(
+                ((Spinner) root.findViewById(R.id.spinner_model)).getSelectedItem().toString(),
+                ((Spinner) root.findViewById(R.id.spinner_emotion)).getSelectedItem().toString(),
+                ((Spinner) root.findViewById(R.id.spinner_speed)).getSelectedItem().toString(),
+                checkBoxOption1.isChecked(),
+                checkBoxOption2.isChecked(),
+                checkBoxOption3.isChecked(),
+                inputText.getText().toString()));
 
-
-        homeViewModel.getAudioFileName().observe(getViewLifecycleOwner(),audioFileName-> audioFileTextView.setText(audioFileName));
-        homeViewModel.getTextFileName().observe(getViewLifecycleOwner(),textFileName-> textFileTextView.setText(textFileName));
+        uploadViewModel.getAudioFileName().observe(getViewLifecycleOwner(),audioFileName-> audioFileTextView.setText(audioFileName));
+        uploadViewModel.getTextFileName().observe(getViewLifecycleOwner(),textFileName-> textFileTextView.setText(textFileName));
 
         // 找到UI上的TextView
         recordingTimeTextView = root.findViewById(R.id.recordingTimeTextView);
 
         // 观察 recordingTime LiveData
-        homeViewModel.getRecordingTime().observe(getViewLifecycleOwner(), time -> {
+        uploadViewModel.getRecordingTime().observe(getViewLifecycleOwner(), time -> {
             // 格式化时间并更新UI
             int minutes = (int) (time / 6000);
             int seconds = (int) (time % 6000/100);

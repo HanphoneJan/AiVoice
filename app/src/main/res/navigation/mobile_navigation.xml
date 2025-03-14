@@ -13,6 +13,12 @@
         tools:layout="@layout/fragment_home" />
 
     <fragment
+        android:id="@+id/navigation_upload"
+        android:name="com.example.aivoice.ui.upload.UploadFragment"
+        android:label="@string/title_upload"
+        tools:layout="@layout/fragment_home" />
+
+    <fragment
         android:id="@+id/navigation_bluetooth"
         android:name="com.example.aivoice.ui.bluetooth.BluetoothFragment"
         android:label="@string/title_bluetooth"
