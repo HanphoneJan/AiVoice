@@ -37,6 +37,7 @@
             android:id="@+id/voice_input_button"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:contentDescription="@string/recordButton"
             android:src="@drawable/record"
             android:background="@android:color/transparent"
             android:layout_marginStart="12dp"
@@ -84,6 +85,7 @@
                 android:id="@+id/setting_button"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:contentDescription="@string/setting"
                 android:src="@drawable/setting"
                 android:background="@android:color/transparent"
                 android:layout_marginStart="8dp"
@@ -148,6 +150,7 @@
             android:id="@+id/more_button"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:contentDescription="@string/chooseTextFile"
             android:src="@drawable/plus"
             android:background="@android:color/transparent"
             android:layout_marginEnd="8dp" />
@@ -157,7 +160,8 @@
             android:id="@+id/send_button"
             android:layout_width="34dp"
             android:layout_height="match_parent"
-            android:layout_margin="2dp"
+            android:layout_margin="3dp"
+            android:contentDescription="@string/upload"
             android:src="@drawable/arrow_up"
             android:background="@drawable/round_button"
             />

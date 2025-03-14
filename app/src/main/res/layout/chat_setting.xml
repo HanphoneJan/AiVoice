@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="240dp"
+    android:orientation="vertical"
+    android:background="@color/white"
+    android:padding="2dp">
+    <!-- 模型 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginTop="10dp"
+        android:background="@android:color/white"
+        android:elevation="2dp"
+        android:gravity="start|center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="20dp"
+        android:paddingEnd="0dp"
+        android:visibility="visible">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:text="@string/model"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            />
+
+        <Spinner
+            android:id="@+id/spinner_model_chat"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:background="@drawable/spinner_border"
+            android:minHeight="48dp"
+            android:textSize="16sp"
+            android:textColor="@color/black_200"
+            android:padding="8dp" />
+    </LinearLayout>
+
+    <!-- 情感 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:gravity="start|center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="20dp"
+        android:paddingEnd="0dp"
+        android:background="@android:color/white"
+        android:elevation="2dp"
+        android:layout_marginTop="10dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/emotion"
+            android:textSize="16sp"
+            android:textColor="@android:color/black"
+            android:layout_marginEnd="16dp" />
+
+        <Spinner
+            android:id="@+id/spinner_emotion_chat"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:textSize="16sp"
+            android:textColor="@color/black_200"
+            android:background="@drawable/spinner_border"
+            android:padding="8dp" />
+    </LinearLayout>
+
+    <!-- 语速 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:gravity="start|center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="20dp"
+        android:paddingEnd="0dp"
+        android:background="@android:color/white"
+        android:elevation="2dp"
+        android:layout_marginTop="10dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/speed"
+            android:textSize="16sp"
+            android:layout_marginEnd="16dp"
+            android:textColor="@android:color/black"
+            />
+
+        <Spinner
+            android:id="@+id/spinner_speed_chat"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:background="@drawable/spinner_border"
+            android:dropDownSelector="@android:color/darker_gray"
+            android:padding="8dp"
+            android:textSize="16sp"
+            android:textColor="@color/black_200"
+            />
+    </LinearLayout>
+</LinearLayout>

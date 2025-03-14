@@ -61,5 +61,6 @@
     <string name="no_audio_files">没有找到音频文件</string>
     <string name="loading">加载中…</string>
     <string name="error_occurred">发生错误</string>
+    <string name="setting">对话设置</string>
 
 </resources>
