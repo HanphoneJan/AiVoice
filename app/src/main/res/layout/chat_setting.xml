@@ -32,7 +32,7 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:background="@drawable/spinner_border"
+            android:background="@drawable/spinner_border2"
             android:minHeight="48dp"
             android:textSize="16sp"
             android:textColor="@color/black_200"
@@ -67,7 +67,7 @@
             android:minHeight="48dp"
             android:textSize="16sp"
             android:textColor="@color/black_200"
-            android:background="@drawable/spinner_border"
+            android:background="@drawable/spinner_border2"
             android:padding="8dp" />
     </LinearLayout>
 
@@ -98,7 +98,7 @@
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:minHeight="48dp"
-            android:background="@drawable/spinner_border"
+            android:background="@drawable/spinner_border2"
             android:dropDownSelector="@android:color/darker_gray"
             android:padding="8dp"
             android:textSize="16sp"

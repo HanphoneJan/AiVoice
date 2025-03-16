@@ -2,7 +2,8 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/white">
 
     <!-- 聊天消息显示区域 -->
     <androidx.recyclerview.widget.RecyclerView
@@ -92,7 +93,7 @@
                 android:layout_marginEnd="12dp" />
 
             <CheckBox
-                android:id="@+id/output_option2"
+                android:id="@+id/output_option1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/answer_question"
@@ -106,7 +107,7 @@
                 android:checked="true"
                 />
             <CheckBox
-                android:id="@+id/output_option1"
+                android:id="@+id/output_option2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/internet_search"

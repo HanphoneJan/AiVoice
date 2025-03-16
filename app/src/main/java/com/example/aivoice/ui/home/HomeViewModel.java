@@ -59,6 +59,8 @@ public class HomeViewModel extends ViewModel {
     private final MutableLiveData<String> audioFileName = new MutableLiveData<>();
     private final MutableLiveData<String> textFileName = new MutableLiveData<>();
     private Context context;
+
+
     private final MutableLiveData<Long> recordingTime = new MutableLiveData<>(0L); // 录音时间，单位：秒
     private static Uri musicUri;
 
@@ -92,7 +94,6 @@ public class HomeViewModel extends ViewModel {
         audioFileUri.setValue(uri);
         audioFileName.setValue(getFileName(uri));
     }
-
     public void updateFileUri(Uri uri) {
 
         fileUri.setValue(uri);
@@ -246,7 +247,7 @@ public class HomeViewModel extends ViewModel {
     }
 
     // 上传文件
-    public void uploadFiles(String model, String emotion, String speed,Boolean output_audio,Boolean output_video,Boolean output_text,String userInput) {
+    public void uploadFiles(String model, String emotion, String speed,Boolean answerQuestion,Boolean internetSearch,String userInput) {
         if (model != null && emotion != null && speed != null) {
             // 设置超时时间
             OkHttpClient client = new OkHttpClient.Builder()
@@ -282,15 +283,8 @@ public class HomeViewModel extends ViewModel {
                 requestBodyBuilder.addFormDataPart("model", model);
                 requestBodyBuilder.addFormDataPart("emotion", emotion);
                 requestBodyBuilder.addFormDataPart("speed", speed);
-                if(output_audio){
-                    requestBodyBuilder.addFormDataPart("output_audio", "音频");
-                }
-                if(output_video){
-                    requestBodyBuilder.addFormDataPart("output_video", "视频");
-                }
-                if(output_text){
-                    requestBodyBuilder.addFormDataPart("output_text", "字幕");
-                }
+                requestBodyBuilder.addFormDataPart("答疑解惑", String.valueOf(answerQuestion));
+                requestBodyBuilder.addFormDataPart("联网搜索", String.valueOf(internetSearch));
                 if(model.equals("克隆音色")){
                     // 添加音频文件部分
                     if(audioFileUri.getValue()!=null){
@@ -365,11 +359,11 @@ public class HomeViewModel extends ViewModel {
                                 storeReturnedFile(responseBody, contentType);
                                 Log.i(TAG, "生成音频成功");
                                 // 使用runOnUiThread切换到主线程
-                                new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(context, "生成文件成功", Toast.LENGTH_SHORT).show());
+                                new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(context, "生成成功", Toast.LENGTH_SHORT).show());
                             } else {
                                 Log.e(TAG, "生成音频失败");
                                 // 使用runOnUiThread切换到主线程
-                                new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(context, "生成音频失败", Toast.LENGTH_SHORT).show());
+                                new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(context, "生成失败", Toast.LENGTH_SHORT).show());
                             }
                         }
                         //释放资源

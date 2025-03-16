@@ -287,15 +287,9 @@ public class UploadViewModel extends ViewModel {
                 requestBodyBuilder.addFormDataPart("model", model);
                 requestBodyBuilder.addFormDataPart("emotion", emotion);
                 requestBodyBuilder.addFormDataPart("speed", speed);
-                if(output_audio){
-                    requestBodyBuilder.addFormDataPart("output_audio", "音频");
-                }
-                if(output_video){
-                    requestBodyBuilder.addFormDataPart("output_video", "视频");
-                }
-                if(output_text){
-                    requestBodyBuilder.addFormDataPart("output_text", "字幕");
-                }
+                requestBodyBuilder.addFormDataPart("output_audio", String.valueOf(output_audio));
+                requestBodyBuilder.addFormDataPart("output_video", String.valueOf(output_video));
+                requestBodyBuilder.addFormDataPart("output_text", String.valueOf(output_text));
                 if(model.equals("克隆音色")){
                     // 添加音频文件部分
                     if(audioFileUri.getValue()!=null){
