@@ -378,7 +378,7 @@ public class UploadViewModel extends ViewModel {
                 Log.e(TAG, "文件读取错误");
             }
         } else {
-            Toast.makeText(context, "请选择文件", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "未选择参数", Toast.LENGTH_SHORT).show();
         }
     }
 

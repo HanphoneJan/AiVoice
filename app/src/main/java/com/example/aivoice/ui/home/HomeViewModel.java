@@ -285,52 +285,27 @@ public class HomeViewModel extends ViewModel {
                 requestBodyBuilder.addFormDataPart("speed", speed);
                 requestBodyBuilder.addFormDataPart("答疑解惑", String.valueOf(answerQuestion));
                 requestBodyBuilder.addFormDataPart("联网搜索", String.valueOf(internetSearch));
-                if(model.equals("克隆音色")){
-                    // 添加音频文件部分
-                    if(audioFileUri.getValue()!=null){
-                        String audioMimeType = context.getContentResolver().getType(audioFileUri.getValue());
-                        String audioFileName = getFileName(audioFileUri.getValue());
-                        assert audioMimeType != null;
-                        requestBodyBuilder.addFormDataPart("audio", audioFileName,
-                                RequestBody.create(getAudioFileContent(audioFileUri.getValue()),MediaType.parse(audioMimeType)
-                                        ));
-                    }else{
-                        Toast.makeText(context, "请选择音频文件", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
+
+                //添加文本文件
+                if (fileUri.getValue() != null) {
+                    String fileMimeType = context.getContentResolver().getType(fileUri.getValue());
+                    String regularFileName = getFileName(fileUri.getValue());
+                    assert fileMimeType != null;
+                    requestBodyBuilder.addFormDataPart("file", regularFileName,
+                            RequestBody.create(
+                                    getFileContent(fileUri.getValue()),MediaType.parse(fileMimeType)));
                 }
 
-                // 添加常规文件部分
-                if (userInput.isEmpty()) {
-                    // 如果 userInput 为空，使用 fileUri 中的文件
-                    if (fileUri.getValue() != null) {
-                        String fileMimeType = context.getContentResolver().getType(fileUri.getValue());
-                        String regularFileName = getFileName(fileUri.getValue());
-                        assert fileMimeType != null;
-                        requestBodyBuilder.addFormDataPart("file", regularFileName,
-                                RequestBody.create(
-                                        getFileContent(fileUri.getValue()),MediaType.parse(fileMimeType)));
-                    } else {
-                        // 如果 fileUri 也为空，提示用户选择文件或输入文本
-                        Toast.makeText(context, "请选择文本文件或输入文本", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
+                if (audioFileUri.getValue()!=null) {
+                    String fileMimeType = context.getContentResolver().getType(audioFileUri.getValue());
+                    String regularFileName = getFileName(audioFileUri.getValue());
+                    assert fileMimeType != null;
+                    requestBodyBuilder.addFormDataPart("audio", regularFileName,
+                            RequestBody.create(
+                                    getFileContent(fileUri.getValue()),MediaType.parse(fileMimeType)));
                 } else {
-                    // 如果 userInput 不为空
-                    if (fileUri.getValue() != null) {
-                        Toast.makeText(context, "请勿同时选择文本和输入文本", Toast.LENGTH_SHORT).show();
-                        return;
-                    } else {
-                        // 如果 fileUri 为空，将 userInput 保存为文件并构建 RequestBody
-                        File textFile = saveTextAsFile(userInput); // 保存文本为文件
-                        if (textFile != null) {
-                            requestBodyBuilder.addFormDataPart("file", textFile.getName(),
-                                    RequestBody.create(textFile,MediaType.parse("text/plain")));
-                            Log.i(TAG,"生成txt文件成功");
-                        } else {
-                            Log.i(TAG,"生成txt文件失败");
-                            return;
-                        }
+                    if(!userInput.isEmpty()){
+                        requestBodyBuilder.addFormDataPart("联网搜索", userInput);
                     }
                 }
                 // 构建完整的请求体
@@ -357,11 +332,11 @@ public class HomeViewModel extends ViewModel {
                                 byte[] responseBody = response.body().bytes();
                                 String contentType = response.header("Content-Type");
                                 storeReturnedFile(responseBody, contentType);
-                                Log.i(TAG, "生成音频成功");
+                                Log.i(TAG, "生成成功");
                                 // 使用runOnUiThread切换到主线程
                                 new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(context, "生成成功", Toast.LENGTH_SHORT).show());
                             } else {
-                                Log.e(TAG, "生成音频失败");
+                                Log.e(TAG, "生成失败");
                                 // 使用runOnUiThread切换到主线程
                                 new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(context, "生成失败", Toast.LENGTH_SHORT).show());
                             }
@@ -373,7 +348,7 @@ public class HomeViewModel extends ViewModel {
                 Log.e(TAG, "文件读取错误");
             }
         } else {
-            Toast.makeText(context, "请选择文件", Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "未选择参数");
         }
     }
 
