@@ -15,6 +15,7 @@ import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.aivoice.R;
+import com.example.aivoice.databinding.ItemMessageBinding;
 import com.example.aivoice.ui.home.HomeViewModel;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,30 +24,58 @@ public class CustomMessageAdapter extends RecyclerView.Adapter<CustomMessageAdap
 
     private List<MessageInfo> messageInfoList = new ArrayList<>();
     private final HomeViewModel homeViewModel;
-    private final int userMargin;
-    private final int aiMargin;
 
-    public CustomMessageAdapter(HomeViewModel homeViewModel, Context context) {
+
+    // 通过布局文件处理
+    public CustomMessageAdapter(HomeViewModel homeViewModel) {
         this.homeViewModel = homeViewModel;
-        // 预计算常用尺寸
-        this.userMargin = dpToPx(context, 64);
-        this.aiMargin = dpToPx(context, 16);
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        ViewDataBinding binding = DataBindingUtil.inflate(
+        ItemMessageBinding binding = DataBindingUtil.inflate(
                 inflater, R.layout.item_message, parent, false);
         return new ViewHolder(binding);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        MessageInfo message = messageInfoList.get(position);
+        holder.binding.setItem(message); // 绑定消息数据
         holder.binding.setViewModel(homeViewModel); // 绑定ViewModel
-        holder.bind(messageInfoList.get(position));
+        holder.binding.executePendingBindings(); // 立即执行绑定
 
+        // 处理动态边距（建议通过ConstraintLayout约束条件替代）
+//        setupLayoutGravity(holder, message.isUser());
+    }
+
+    // ViewHolder重构
+    static class ViewHolder extends RecyclerView.ViewHolder {
+        final ItemMessageBinding binding;
+
+        public ViewHolder(ItemMessageBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
+
+            // 初始化点击监听（建议通过DataBinding处理）
+            binding.ivAudio.setOnClickListener(v ->
+                    binding.getViewModel().playAudio(binding.getItem().getAudioFileUri()));
+        }
+    }
+
+    // 布局方向处理（若无法通过XML实现）
+    private void setupLayoutGravity(ViewHolder holder, boolean isUser) {
+        // 获取正确的 LayoutParams 类型
+        ViewGroup.MarginLayoutParams params =
+                (ViewGroup.MarginLayoutParams) holder.binding.getRoot().getLayoutParams();
+
+        // 设置边距实现对齐效果
+//        params.leftMargin = isUser ? userMargin : aiMargin;
+//        params.rightMargin = isUser ? aiMargin : userMargin;
+
+        holder.binding.getRoot().setLayoutParams(params);
     }
 
     @Override
@@ -59,13 +88,6 @@ public class CustomMessageAdapter extends RecyclerView.Adapter<CustomMessageAdap
         return messageInfoList.get(position).getId();
     }
 
-    @Override
-    public void onViewRecycled(@NonNull ViewHolder holder) {
-        super.onViewRecycled(holder);
-        // 释放资源
-        holder.ivAudio.setOnClickListener(null);
-    }
-
     // 核心优化方法
     public void submitList(List<MessageInfo> newList) {
         DiffUtil.DiffResult result = DiffUtil.calculateDiff(
@@ -73,79 +95,6 @@ public class CustomMessageAdapter extends RecyclerView.Adapter<CustomMessageAdap
 
         messageInfoList = new ArrayList<>(newList);
         result.dispatchUpdatesTo(this);
-    }
-
-    // 样式应用封装
-    private void applyMessageStyle(ViewHolder holder, MessageInfo message) {
-        Context context = holder.itemView.getContext();
-        boolean isUser = message.isUser();
-
-        // 背景与文字颜色
-        int bgRes = isUser ? R.drawable.user_message_bg : R.drawable.ai_message_bg;
-        int textColor = ContextCompat.getColor(context,
-                isUser ? R.color.user_text : R.color.ai_text);
-
-        holder.tvMessage.setBackgroundResource(bgRes);
-        holder.tvMessage.setTextColor(textColor);
-
-        // 布局方向与边距
-        ViewGroup.MarginLayoutParams params =
-                (ViewGroup.MarginLayoutParams) holder.itemView.getLayoutParams();
-
-        if (isUser) {
-            params.leftMargin = userMargin;
-            params.rightMargin = aiMargin;
-            ((FrameLayout.LayoutParams) params).gravity = Gravity.END;
-        } else {
-            params.leftMargin = aiMargin;
-            params.rightMargin = userMargin;
-            ((FrameLayout.LayoutParams) params).gravity = Gravity.START;
-        }
-    }
-
-    // 内容可见性控制
-    private void setupContentVisibility(ViewHolder holder, MessageInfo message) {
-        // 用户消息：文字或语音二选一
-        if (message.isUser()) {
-            boolean showText = message.isText();
-            holder.tvMessage.setVisibility(showText ? View.VISIBLE : View.GONE);
-            holder.ivAudio.setVisibility(showText ? View.GONE : View.VISIBLE);
-        }
-        // AI消息：始终显示文字+操作按钮
-        else {
-            holder.tvMessage.setVisibility(View.VISIBLE);
-            holder.ivAudio.setVisibility(message.hasAudio() ? View.VISIBLE : View.GONE);
-        }
-    }
-
-    // 音频交互处理
-    private void setupAudioInteraction(ViewHolder holder, MessageInfo message) {
-        if (message.getAudioFileUri() != null) {
-            holder.ivAudio.setOnClickListener(v ->
-                    homeViewModel.playAudio(message.getAudioFileUri()));
-        }
-    }
-
-    // 尺寸转换工具
-    private int dpToPx(Context context, int dp) {
-        return (int) (dp * context.getResources().getDisplayMetrics().density);
-    }
-
-    // ViewHolder 优化
-    static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvMessage;
-        ImageView ivAudio;
-        ImageView ivCopy;
-
-        public ViewHolder(ViewDataBinding itemView) {
-            super(itemView);
-            tvMessage = itemView.findViewById(R.id.tv_message);
-            ivAudio = itemView.findViewById(R.id.iv_play);
-            ivCopy = itemView.findViewById(R.id.iv_copy);
-
-            // 初始化时设置点击效果
-            itemView.setBackgroundResource(R.drawable.selector_message_click);
-        }
     }
 
     // DiffUtil 实现

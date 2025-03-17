@@ -91,11 +91,15 @@ public class HomeFragment extends Fragment {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         chatMessageList.setLayoutManager(layoutManager);
-        customMessageAdapter = new CustomMessageAdapter(homeViewModel,requireContext());
+        customMessageAdapter = new CustomMessageAdapter(homeViewModel);
+        chatMessageList.setAdapter(customMessageAdapter);  // 必须建立适配器与RecyclerView的关联[6](@ref)
+
         homeViewModel.getResponseInfoList().observe(getViewLifecycleOwner(), responses -> {
             customMessageAdapter.submitList(responses);
-            chatMessageList.smoothScrollToPosition(responses.size() - 1);
+//            chatMessageList.smoothScrollToPosition(responses.size() - 1);
         });
+
+
         // 设置事件监听器
         setupListeners();
         return view;
@@ -222,6 +226,12 @@ public class HomeFragment extends Fragment {
                 // 当没有选中项时，可根据需求处理
             }
         });
-
     }
-}    
+    // 应在onDestroyView中移除观察者
+
+    @Override
+    public void onDestroyView() {
+        homeViewModel.getResponseInfoList().removeObservers(getViewLifecycleOwner());
+        super.onDestroyView();
+    }
+}

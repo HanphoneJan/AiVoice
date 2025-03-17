@@ -115,7 +115,7 @@ public class HomeViewModel extends ViewModel {
     public LiveData<String> getTextFileName(){
         return textFileName;
     }
-    public void addResponseInfo(String message, Uri audioUri,boolean isUser) {
+    public void addMessageInfo(String message, Uri audioUri, boolean isUser) {
         List<MessageInfo> currentList = responseList.getValue();
         Objects.requireNonNull(currentList).add(new MessageInfo(message, audioUri,isUser));
         responseList.postValue(currentList);
@@ -320,9 +320,11 @@ public class HomeViewModel extends ViewModel {
                     requestBodyBuilder.addFormDataPart("audio", regularFileName,
                             RequestBody.create(
                                     getFileContent(audioFileUri.getValue()),MediaType.parse(fileMimeType)));
+                   addMessageInfo(null,audioFileUri.getValue(),true);
                 } else {
                     if(!userInput.isEmpty()){
                         requestBodyBuilder.addFormDataPart("messageInput", userInput);
+                        addMessageInfo(userInput,null,true);
                     }else{
                         Toast.makeText(context, "请输入语音或文本", Toast.LENGTH_SHORT).show();
                         return;
@@ -381,7 +383,7 @@ public class HomeViewModel extends ViewModel {
                                     if (audioBytes != null) {
                                         String audioContentType = "audio/mpeg"; // 默认类型
                                         Uri audioUri = storeReturnedFile(audioBytes, audioContentType);
-                                        addResponseInfo(messageAnswer, audioUri,false);
+                                        addMessageInfo(messageAnswer, audioUri,false);
                                         new Handler(Looper.getMainLooper()).post(() -> {
                                             Toast.makeText(context, "生成成功", Toast.LENGTH_LONG).show();
                                         });
