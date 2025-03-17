@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-
-
+    <color name="user_bg_color">#DCF8C6</color> <!-- 微信同款绿色 -->
+    <color name="ai_bg_color">#FFFFFF</color>
+    <color name="user_text">#000000</color>
+    <color name="ai_text">#4A4A4A</color>
 
     <color name="purple_200">#FFBB86FC</color>
     <color name="purple_500">#FF6200EE</color>

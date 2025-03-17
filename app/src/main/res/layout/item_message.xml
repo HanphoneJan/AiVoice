@@ -1,15 +1,58 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_height="match_parent"
-    android:layout_width="wrap_content">
-    <TextView android:id="@+id/tv_message"
-        android:textSize="16sp"
-        android:textColor="#333"
-        android:layout_height="match_parent"
-        android:layout_width="wrap_content" />
-    <ImageView android:id="@+id/iv_audio_icon"
-        android:src="@drawable/audplay"
-        android:visibility="gone"
-        android:layout_height="match_parent"
-        android:layout_width="wrap_content" />
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:layout_marginVertical="4dp">
+
+    <!-- 消息内容容器 -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@{item.isUser ? @drawable/user_bg : @drawable/ai_bg}"
+        android:padding="12dp"
+        android:orientation="vertical"
+        android:minWidth="64dp">
+
+        <!-- 文字内容区域 -->
+        <TextView
+            android:id="@+id/tv_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{item.content}"
+            android:textColor="@{item.isUser ? @color/user_text : @color/ai_text}"
+            android:visibility="@{item.isText ? View.VISIBLE : View.GONE}"
+            android:maxWidth="240dp"/>
+
+        <!-- 操作按钮组 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end"
+            android:visibility="@{!item.isUser || item.hasAudio ? View.VISIBLE : View.GONE}">
+
+            <!-- 语音播放控件 -->
+            <ImageView
+                android:id="@+id/iv_play"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_audio_play"
+                android:visibility="@{item.hasAudio ? View.VISIBLE : View.GONE}"
+                android:contentDescription="播放语音"
+               />
+
+            <!-- 复制按钮 -->
+            <ImageView
+                android:id="@+id/iv_copy"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_content_copy"
+                android:visibility="@{item.isUser ? View.GONE : View.VISIBLE}"
+                android:contentDescription="复制内容"/>
+        </LinearLayout>
+    </LinearLayout>
 </LinearLayout>

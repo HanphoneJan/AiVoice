@@ -31,7 +31,7 @@ import androidx.lifecycle.ViewModel;
 
 
 import com.example.aivoice.files.UriManager;
-import com.example.aivoice.message.ResponseInfo;
+import com.example.aivoice.message.MessageInfo;
 
 
 import java.io.ByteArrayOutputStream;
@@ -66,7 +66,7 @@ public class HomeViewModel extends ViewModel {
     private final MutableLiveData<Uri> fileUri = new MutableLiveData<>();
     private final MutableLiveData<String> audioFileName = new MutableLiveData<>();
     private final MutableLiveData<String> textFileName = new MutableLiveData<>();
-    private MutableLiveData<List<ResponseInfo>> responseList = new MutableLiveData<>(new ArrayList<>());
+    private MutableLiveData<List<MessageInfo>> responseList = new MutableLiveData<>(new ArrayList<>());
     private Context context;
 
 
@@ -115,13 +115,13 @@ public class HomeViewModel extends ViewModel {
     public LiveData<String> getTextFileName(){
         return textFileName;
     }
-    public void addResponseInfo(String message, Uri audioUri) {
-        List<ResponseInfo> currentList = responseList.getValue();
-        Objects.requireNonNull(currentList).add(new ResponseInfo(message, audioUri));
+    public void addResponseInfo(String message, Uri audioUri,boolean isUser) {
+        List<MessageInfo> currentList = responseList.getValue();
+        Objects.requireNonNull(currentList).add(new MessageInfo(message, audioUri,isUser));
         responseList.postValue(currentList);
     }
 
-    public LiveData<List<ResponseInfo>> getResponseInfoList() {
+    public LiveData<List<MessageInfo>> getResponseInfoList() {
         return responseList;
     }
     // 选择音频文件
@@ -378,7 +378,7 @@ public class HomeViewModel extends ViewModel {
                                     if (audioBytes != null) {
                                         String audioContentType = "audio/mpeg"; // 默认类型
                                         Uri audioUri = storeReturnedFile(audioBytes, audioContentType);
-                                        addResponseInfo(messageAnswer, audioUri);
+                                        addResponseInfo(messageAnswer, audioUri,false);
                                         new Handler(Looper.getMainLooper()).post(() -> {
                                             Toast.makeText(context, "生成成功", Toast.LENGTH_LONG).show();
                                         });
