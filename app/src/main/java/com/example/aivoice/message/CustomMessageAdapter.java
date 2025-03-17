@@ -10,6 +10,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+import androidx.databinding.DataBindingUtil;
+import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.aivoice.R;
@@ -34,17 +36,17 @@ public class CustomMessageAdapter extends RecyclerView.Adapter<CustomMessageAdap
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_message, parent, false);
-        return new ViewHolder(view);
+        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+        ViewDataBinding binding = DataBindingUtil.inflate(
+                inflater, R.layout.item_message, parent, false);
+        return new ViewHolder(binding);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        MessageInfo message = messageInfoList.get(position);
-        applyMessageStyle(holder, message);
-        setupContentVisibility(holder, message);
-        setupAudioInteraction(holder, message);
+        holder.binding.setViewModel(homeViewModel); // 绑定ViewModel
+        holder.bind(messageInfoList.get(position));
+
     }
 
     @Override
@@ -135,7 +137,7 @@ public class CustomMessageAdapter extends RecyclerView.Adapter<CustomMessageAdap
         ImageView ivAudio;
         ImageView ivCopy;
 
-        public ViewHolder(View itemView) {
+        public ViewHolder(ViewDataBinding itemView) {
             super(itemView);
             tvMessage = itemView.findViewById(R.id.tv_message);
             ivAudio = itemView.findViewById(R.id.iv_play);
