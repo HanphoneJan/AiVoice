@@ -19,10 +19,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.aivoice.R;
+import com.example.aivoice.message.CustomMessageAdapter;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+
+import java.util.ArrayList;
 
 public class HomeFragment extends Fragment {
 
@@ -40,7 +44,7 @@ public class HomeFragment extends Fragment {
     private String speed="正常";
     private ActivityResultLauncher<Intent> chooseAudioLauncher;
     private ActivityResultLauncher<Intent> chooseFileLauncher;
-
+    private CustomMessageAdapter customMessageAdapter;
     int[] iconChatMode = {
             R.drawable.record, // 第一个图标
             R.drawable.keyboard, // 第二个图标
@@ -84,6 +88,14 @@ public class HomeFragment extends Fragment {
                     }
                 });
 
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        chatMessageList.setLayoutManager(layoutManager);
+        customMessageAdapter = new CustomMessageAdapter(new ArrayList<>(),homeViewModel);
+        homeViewModel.getResponseInfoList().observe(getViewLifecycleOwner(), responses -> {
+            customMessageAdapter.submitList(responses);
+            chatMessageList.smoothScrollToPosition(responses.size() - 1);
+        });
         // 设置事件监听器
         setupListeners();
         return view;

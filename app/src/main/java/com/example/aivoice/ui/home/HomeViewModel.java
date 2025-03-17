@@ -8,6 +8,7 @@ import android.content.Intent;
 
 import android.content.pm.PackageManager;
 
+import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Handler;
@@ -28,6 +29,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+
 import com.example.aivoice.files.UriManager;
 import com.example.aivoice.message.ResponseInfo;
 
@@ -37,7 +39,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,6 +60,7 @@ import okhttp3.Response;
 public class HomeViewModel extends ViewModel {
     private static final String TAG = "HomeViewModel";
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
+    private MediaPlayer mediaPlayer;
     private final MutableLiveData<Boolean> isRecording = new MutableLiveData<>(false);
     private final MutableLiveData<Uri> audioFileUri = new MutableLiveData<>();
     private final MutableLiveData<Uri> fileUri = new MutableLiveData<>();
@@ -375,13 +377,12 @@ public class HomeViewModel extends ViewModel {
                                     }
                                     if (audioBytes != null) {
                                         String audioContentType = "audio/mpeg"; // 默认类型
-                                        storeReturnedFile(audioBytes, audioContentType);
+                                        Uri audioUri = storeReturnedFile(audioBytes, audioContentType);
+                                        addResponseInfo(messageAnswer, audioUri);
+                                        new Handler(Looper.getMainLooper()).post(() -> {
+                                            Toast.makeText(context, "生成成功", Toast.LENGTH_LONG).show();
+                                        });
                                     }
-                                    String finalMessageAnswer = messageAnswer;
-                                    new Handler(Looper.getMainLooper()).post(() -> {
-                                        Toast.makeText(context, "生成成功", Toast.LENGTH_LONG).show();
-                                    });
-
                                 } else {
                                     handleError("响应格式错误");
                                 }
@@ -435,46 +436,66 @@ public class HomeViewModel extends ViewModel {
     }
 
 
-    private void storeReturnedFile(byte[] data,String contentType) {
+    //保存在私有目录里
+    private Uri storeReturnedFile(byte[] data, String contentType) {
         String fileExtension = getFileExtensionFromMimeType(contentType);
-        String fileName = "生成音频文件_" + System.currentTimeMillis() + "." + fileExtension;
-        musicUri = UriManager.getUri(context);
-        if (musicUri != null) {
-            // 如果 uri 不为空，使用用户选择的目录
-            DocumentFile pickedDir = DocumentFile.fromTreeUri(context, musicUri);
-            if (pickedDir != null && pickedDir.exists() && pickedDir.isDirectory()) {
-                // SAF 目录下创建文件
-                DocumentFile newFile = pickedDir.createFile(contentType, fileName);
-                if (newFile != null) {
-                    try (OutputStream outputStream = context.getContentResolver().openOutputStream(newFile.getUri())) {
-                        if (outputStream != null) {
-                            outputStream.write(data);
-                            Log.i(TAG,"保存成功");
-                        }
-                    } catch (IOException e) {
-                        Log.e(TAG,"文件IO错误");
-                    }
-                } else {
-                    // 创建文件失败
-                     Log.i(TAG,"无法保存生成的音频文件");
-                }
-            } else {
-                Log.i(TAG,"无法访问选定的目录");
-            }
-        } else {
-            // 默认目录路径
+        String fileName = "对话音频_" + System.currentTimeMillis() + "." + fileExtension;
+        Uri savedUri = null;
             File musicDir = new File(context.getFilesDir(), "Music");
-            if (!musicDir.exists()) {
-                musicDir.mkdirs();
+            if (!musicDir.exists() && !musicDir.mkdirs()) {
+                Log.w(TAG, "目录创建失败：" + musicDir.getAbsolutePath());
+                return null;
             }
             File file = new File(musicDir, fileName);
             try (FileOutputStream outputStream = new FileOutputStream(file)) {
                 outputStream.write(data);
+                // 使用FileProvider生成安全的content:// URI[1,4](@ref)
+                savedUri = FileProvider.getUriForFile(context,
+                        context.getPackageName() + ".fileprovider",
+                        file);
+                Log.i(TAG, "本地保存成功");
+            } catch (IOException | IllegalArgumentException e) {
+                Log.e(TAG, "保存失败：" + e.getMessage());
+            }
+        return savedUri;
+    }
+
+
+    private boolean isAudioFile(Uri uri) {
+        String mimeType = context.getContentResolver().getType(uri);
+        return mimeType != null && mimeType.startsWith("audio/");
+    }
+
+    public boolean playAudio(Uri uri) {
+        if (uri == null) {
+            handleError("无效的文件");
+            return false;
+        }
+        if(isAudioFile(uri)){
+            if (mediaPlayer == null) {
+                mediaPlayer = new MediaPlayer();
+            }
+            try {
+                // 如果 MediaPlayer 正在播放，先停止之前的播放
+                if (mediaPlayer.isPlaying()) {
+                    mediaPlayer.stop();
+                    mediaPlayer.reset();  // 重置播放器，准备重新播放
+                } else {
+                    mediaPlayer.reset(); // 默认进行重置，否则再次播放会出问题
+                }
+                // 设置音频文件的 Uri
+                mediaPlayer.setDataSource(context, uri); // 注意：这里需要传入 Context
+                mediaPlayer.prepare();  // 准备播放
+                mediaPlayer.start();  // 开始播放
+                Log.i(TAG, "开始播放");
+                return true;
             } catch (IOException e) {
-                Log.i(TAG,"IO错误");
+                handleError("播放失败");
             }
         }
+        return false;
     }
+
 
     private String getFileExtensionFromMimeType(String mimeType) {
         if (mimeType == null) {
@@ -513,24 +534,6 @@ public class HomeViewModel extends ViewModel {
             // 其他类型
             default:
                 return "wav"; // 默认扩展名
-        }
-    }
-    private File saveTextAsFile(String text) {
-        // 使用时间戳生成唯一的文件名
-        String fileName = "text_file_" + System.currentTimeMillis() + ".txt";
-
-        // 保存到应用的默认目录
-        File textDir = new File(context.getFilesDir(), "TextFiles");
-        if (!textDir.exists()) {
-            textDir.mkdirs();
-        }
-
-        File file = new File(textDir, fileName);
-        try (FileOutputStream outputStream = new FileOutputStream(file)) {
-            outputStream.write(text.getBytes());
-            return file; // 返回保存的文件对象
-        } catch (IOException e) {
-            return null; // 保存失败，返回 null
         }
     }
 
