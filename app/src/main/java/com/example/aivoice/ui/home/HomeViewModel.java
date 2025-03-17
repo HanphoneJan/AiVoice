@@ -323,6 +323,9 @@ public class HomeViewModel extends ViewModel {
                 } else {
                     if(!userInput.isEmpty()){
                         requestBodyBuilder.addFormDataPart("messageInput", userInput);
+                    }else{
+                        Toast.makeText(context, "请输入语音或文本", Toast.LENGTH_SHORT).show();
+                        return;
                     }
                 }
                 // 构建完整的请求体

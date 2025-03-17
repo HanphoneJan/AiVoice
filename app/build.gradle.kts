@@ -30,6 +30,7 @@ android {
     }
     buildFeatures {
         viewBinding = true  //开启数据绑定
+        dataBinding = true
     }
     applicationVariants.all { // 遍历所有应用程序构建变体
         val variant = this // 获取当前变体

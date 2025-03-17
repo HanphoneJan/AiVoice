@@ -91,7 +91,7 @@ public class HomeFragment extends Fragment {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         chatMessageList.setLayoutManager(layoutManager);
-        customMessageAdapter = new CustomMessageAdapter(new ArrayList<>(),homeViewModel);
+        customMessageAdapter = new CustomMessageAdapter(homeViewModel,requireContext());
         homeViewModel.getResponseInfoList().observe(getViewLifecycleOwner(), responses -> {
             customMessageAdapter.submitList(responses);
             chatMessageList.smoothScrollToPosition(responses.size() - 1);
