@@ -11,6 +11,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.CheckBox;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -110,8 +111,10 @@ public class HomeFragment extends Fragment {
         voiceInputButton.setOnClickListener(v -> {
             if (Boolean.TRUE.equals(homeViewModel.getIsRecording().getValue())) {
                 homeViewModel.stopRecording();
+                Toast.makeText(requireContext(), "停止录音", Toast.LENGTH_SHORT).show();
             } else {
                 homeViewModel.startRecording();
+                Toast.makeText(requireContext(), "开始录音", Toast.LENGTH_SHORT).show();
             }
         });
 

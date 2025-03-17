@@ -104,7 +104,6 @@
                 android:padding="6dp"
                 android:textColor="@android:color/black"
                 android:layout_marginEnd="8dp"
-                android:checked="true"
                 />
             <CheckBox
                 android:id="@+id/output_option2"
@@ -119,30 +118,6 @@
                 android:padding="6dp"
                 android:layout_marginEnd="18dp"
                 />
-
-
-
-
-<!--            <Spinner-->
-<!--                android:id="@+id/spinner_chat"-->
-<!--                android:layout_width="100dp"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:background="@drawable/spinner_chat"-->
-<!--                android:minHeight="48dp"-->
-<!--                android:textSize="1sp"-->
-<!--                android:textColor="@color/black_200"-->
-<!--                android:padding="2dp"-->
-<!--                android:layout_marginEnd="12dp"/>-->
-
-<!--            <Spinner-->
-<!--                android:id="@+id/spinner_chat_emotion"-->
-<!--                android:layout_width="60dp"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:background="@drawable/spinner_chat"-->
-<!--                android:minHeight="48dp"-->
-<!--                android:textSize="6sp"-->
-<!--                android:textColor="@color/black_200"-->
-<!--                android:padding="2dp" />-->
 
         </LinearLayout>
 

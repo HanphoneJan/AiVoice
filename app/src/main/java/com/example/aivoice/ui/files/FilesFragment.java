@@ -61,8 +61,8 @@ public class FilesFragment extends Fragment {
         lvFiles = root.findViewById(R.id.lv_files);
         audioFileList = new ArrayList<>();  // 初始化音频文件列表
         // 设置适配器
-        ArrayAdapter<String> audioFileadapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, audioFileList);
-        lvFiles.setAdapter(audioFileadapter);
+        ArrayAdapter<String> audioFileAdapter = new ArrayAdapter<>(requireContext(), R.layout.list_item_file, audioFileList);
+        lvFiles.setAdapter(audioFileAdapter);
         loadAudioFiles();
         // 设置 ListView 的点击事件监听器
         lvFiles.setOnItemClickListener((parent, view, position, id) -> {
@@ -85,7 +85,7 @@ public class FilesFragment extends Fragment {
                 String filePath = filesViewModel.getFile(fileName).toString();
                 File file = new File(filePath);
                 mimeType = filesViewModel.getMimeType(filePath);
-                uri = FileProvider.getUriForFile(requireContext(), requireContext().getPackageName() + ".fileprovider", file);
+                uri = FileProvider.getUriForFile(requireContext(), requireContext().getPackageName() + ".fileProvider", file);
             }
                 // 获取文件的 MIME 类型
                 if (mimeType != null) {
@@ -200,7 +200,7 @@ public class FilesFragment extends Fragment {
                     Toast.makeText(requireContext(), "无法访问选定目录", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1);
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), R.layout.list_item_file);
                 audioFileList.clear(); // 清空之前的数据
                 for (DocumentFile file : pickedDir.listFiles()) {
                     if (file.isFile() && file.getName() != null) {

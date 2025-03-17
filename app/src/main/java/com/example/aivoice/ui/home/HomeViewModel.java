@@ -29,6 +29,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.aivoice.files.UriManager;
+import com.example.aivoice.message.ResponseInfo;
 
 
 import java.io.ByteArrayOutputStream;
@@ -38,13 +39,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.Headers;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
+import okhttp3.MultipartReader;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -58,6 +64,7 @@ public class HomeViewModel extends ViewModel {
     private final MutableLiveData<Uri> fileUri = new MutableLiveData<>();
     private final MutableLiveData<String> audioFileName = new MutableLiveData<>();
     private final MutableLiveData<String> textFileName = new MutableLiveData<>();
+    private MutableLiveData<List<ResponseInfo>> responseList = new MutableLiveData<>(new ArrayList<>());
     private Context context;
 
 
@@ -106,7 +113,15 @@ public class HomeViewModel extends ViewModel {
     public LiveData<String> getTextFileName(){
         return textFileName;
     }
+    public void addResponseInfo(String message, Uri audioUri) {
+        List<ResponseInfo> currentList = responseList.getValue();
+        Objects.requireNonNull(currentList).add(new ResponseInfo(message, audioUri));
+        responseList.postValue(currentList);
+    }
 
+    public LiveData<List<ResponseInfo>> getResponseInfoList() {
+        return responseList;
+    }
     // 选择音频文件
     public void chooseAudio(ActivityResultLauncher<Intent> chooseAudioLauncher) {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -283,8 +298,8 @@ public class HomeViewModel extends ViewModel {
                 requestBodyBuilder.addFormDataPart("model", model);
                 requestBodyBuilder.addFormDataPart("emotion", emotion);
                 requestBodyBuilder.addFormDataPart("speed", speed);
-                requestBodyBuilder.addFormDataPart("答疑解惑", String.valueOf(answerQuestion));
-                requestBodyBuilder.addFormDataPart("联网搜索", String.valueOf(internetSearch));
+                requestBodyBuilder.addFormDataPart("answerQuestion", String.valueOf(answerQuestion));
+                requestBodyBuilder.addFormDataPart("internetSearch", String.valueOf(internetSearch));
 
                 //添加文本文件
                 if (fileUri.getValue() != null) {
@@ -302,15 +317,15 @@ public class HomeViewModel extends ViewModel {
                     assert fileMimeType != null;
                     requestBodyBuilder.addFormDataPart("audio", regularFileName,
                             RequestBody.create(
-                                    getFileContent(fileUri.getValue()),MediaType.parse(fileMimeType)));
+                                    getFileContent(audioFileUri.getValue()),MediaType.parse(fileMimeType)));
                 } else {
                     if(!userInput.isEmpty()){
-                        requestBodyBuilder.addFormDataPart("联网搜索", userInput);
+                        requestBodyBuilder.addFormDataPart("messageInput", userInput);
                     }
                 }
                 // 构建完整的请求体
                 RequestBody requestBody = requestBodyBuilder.build();
-                String url = "https://www.hanphone.top/aivoice/upload";
+                String url = "https://www.hanphone.top/aivoice/chat";
                 Request request = new Request.Builder()
                         .url(url)
                         .post(requestBody)
@@ -321,27 +336,59 @@ public class HomeViewModel extends ViewModel {
                     @Override
                     public void onFailure(@NonNull Call call, @NonNull IOException e) {
                         // 使用runOnUiThread切换到主线程
-                        new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(context, "上传失败", Toast.LENGTH_SHORT).show());
+                        new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(context, "发送失败", Toast.LENGTH_SHORT).show());
                     }
 
                     @Override
                     public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                         try (response) {
                             if (response.isSuccessful()) {
-                                assert response.body() != null;
-                                byte[] responseBody = response.body().bytes();
-                                String contentType = response.header("Content-Type");
-                                storeReturnedFile(responseBody, contentType);
-                                Log.i(TAG, "生成成功");
-                                // 使用runOnUiThread切换到主线程
-                                new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(context, "生成成功", Toast.LENGTH_SHORT).show());
+                                MediaType contentType = response.body().contentType();
+                                if (contentType != null && "multipart".equals(contentType.type())) {
+                                    String boundary = contentType.parameter("boundary");
+                                    if (boundary == null) {
+                                        handleError("未找到 multipart 边界");
+                                        return;
+                                    }
+                                    String messageAnswer = null;
+                                    byte[] audioBytes = null;
+
+                                    try (MultipartReader reader = new MultipartReader(response.body().source(), boundary)) {
+                                        MultipartReader.Part part;
+                                        while ((part = reader.nextPart()) != null) {
+                                            Headers headers = part.headers();
+                                            String contentDisposition = headers.get("Content-Disposition");
+                                            if (contentDisposition == null) continue;
+
+                                            // 解析name参数
+                                            String name = extractNameFromContentDisposition(contentDisposition);
+
+                                            if ("messageAnswer".equals(name)) {
+                                                messageAnswer = part.body().readUtf8();
+                                            } else if ("audioFile".equals(name)) {
+                                                audioBytes = part.body().readByteArray();
+                                            }
+                                        }
+                                    } catch (IOException e) {
+                                        handleError("解析响应失败: " + e.getMessage());
+                                        return;
+                                    }
+                                    if (audioBytes != null) {
+                                        String audioContentType = "audio/mpeg"; // 默认类型
+                                        storeReturnedFile(audioBytes, audioContentType);
+                                    }
+                                    String finalMessageAnswer = messageAnswer;
+                                    new Handler(Looper.getMainLooper()).post(() -> {
+                                        Toast.makeText(context, "生成成功", Toast.LENGTH_LONG).show();
+                                    });
+
+                                } else {
+                                    handleError("响应格式错误");
+                                }
                             } else {
-                                Log.e(TAG, "生成失败");
-                                // 使用runOnUiThread切换到主线程
-                                new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(context, "生成失败", Toast.LENGTH_SHORT).show());
+                                handleError("生成失败，状态码: " + response.code());
                             }
                         }
-                        //释放资源
                     }
                 });
             } catch (IOException e) {
@@ -485,6 +532,26 @@ public class HomeViewModel extends ViewModel {
         } catch (IOException e) {
             return null; // 保存失败，返回 null
         }
+    }
+
+    // 辅助方法：从Content-Disposition中提取name参数
+    private String extractNameFromContentDisposition(String contentDisposition) {
+        String[] parts = contentDisposition.split(";");
+        for (String part : parts) {
+            part = part.trim();
+            if (part.startsWith("name=")) {
+                return part.substring(5).replace("\"", "");
+            }
+        }
+        return null;
+    }
+
+    // 辅助方法：处理错误
+    private void handleError(String message) {
+        Log.e(TAG, message);
+//        new Handler(Looper.getMainLooper()).post(() -> {
+//            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+//        });
     }
 
     @Override
