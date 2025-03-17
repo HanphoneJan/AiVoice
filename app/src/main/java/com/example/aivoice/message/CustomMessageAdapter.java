@@ -19,6 +19,7 @@ import com.example.aivoice.databinding.ItemMessageBinding;
 import com.example.aivoice.ui.home.HomeViewModel;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class CustomMessageAdapter extends RecyclerView.Adapter<CustomMessageAdapter.ViewHolder> {
 
@@ -119,8 +120,8 @@ public class CustomMessageAdapter extends RecyclerView.Adapter<CustomMessageAdap
             MessageInfo oldItem = oldList.get(oldPos);
             MessageInfo newItem = newList.get(newPos);
 
-            return oldItem.getContent().equals(newItem.getContent())
-                    && oldItem.getAudioFileUri().equals(newItem.getAudioFileUri())
+            return Objects.equals(oldItem.getContent(), newItem.getContent())
+                    && Objects.equals(oldItem.getAudioFileUri(), newItem.getAudioFileUri())
                     && oldItem.isUser() == newItem.isUser();
         }
     }
