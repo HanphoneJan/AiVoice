@@ -1,15 +1,18 @@
 package com.example.aivoice.message;
 
 import android.content.Context;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+import androidx.databinding.BindingAdapter;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.DiffUtil;
@@ -25,11 +28,17 @@ public class CustomMessageAdapter extends RecyclerView.Adapter<CustomMessageAdap
 
     private List<MessageInfo> messageInfoList = new ArrayList<>();
     private final HomeViewModel homeViewModel;
-
+    private final int userMargin;  // 用户消息边距
+    private final int aiMargin;    // AI消息边距
 
     // 通过布局文件处理
-    public CustomMessageAdapter(HomeViewModel homeViewModel) {
+    public CustomMessageAdapter(HomeViewModel homeViewModel,Context context) {
         this.homeViewModel = homeViewModel;
+        // 转换DP值为像素（建议值：用户消息右侧留白64dp，AI消息左侧留白16dp）
+        this.userMargin = (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, 16, context.getResources().getDisplayMetrics());
+        this.aiMargin = (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, 16, context.getResources().getDisplayMetrics());
     }
 
     @NonNull
@@ -48,7 +57,7 @@ public class CustomMessageAdapter extends RecyclerView.Adapter<CustomMessageAdap
         holder.binding.setViewModel(homeViewModel); // 绑定ViewModel
         holder.binding.executePendingBindings(); // 立即执行绑定
 
-        // 处理动态边距（建议通过ConstraintLayout约束条件替代）
+        // 处理动态边距
 //        setupLayoutGravity(holder, message.isUser());
     }
 
@@ -68,15 +77,22 @@ public class CustomMessageAdapter extends RecyclerView.Adapter<CustomMessageAdap
 
     // 布局方向处理（若无法通过XML实现）
     private void setupLayoutGravity(ViewHolder holder, boolean isUser) {
-        // 获取正确的 LayoutParams 类型
-        ViewGroup.MarginLayoutParams params =
-                (ViewGroup.MarginLayoutParams) holder.binding.getRoot().getLayoutParams();
+        // 获取父容器布局参数
+        View rootView = holder.binding.getRoot();
+        ViewGroup.LayoutParams params = rootView.getLayoutParams();
 
-        // 设置边距实现对齐效果
-//        params.leftMargin = isUser ? userMargin : aiMargin;
-//        params.rightMargin = isUser ? aiMargin : userMargin;
-
-        holder.binding.getRoot().setLayoutParams(params);
+        // 适配 RecyclerView 的 LayoutParams
+        if (params instanceof RecyclerView.LayoutParams) {
+            RecyclerView.LayoutParams rvParams = (RecyclerView.LayoutParams) params;
+            // 通过边距实现对齐
+            rvParams.setMargins(
+                    isUser ? 0 : aiMargin,  // left
+                    4,                               // top
+                    isUser ? userMargin : 0,  // right
+                    8                                // bottom
+            );
+            rootView.setLayoutParams(rvParams);
+        }
     }
 
     @Override
@@ -125,4 +141,6 @@ public class CustomMessageAdapter extends RecyclerView.Adapter<CustomMessageAdap
                     && oldItem.isUser() == newItem.isUser();
         }
     }
+
+
 }

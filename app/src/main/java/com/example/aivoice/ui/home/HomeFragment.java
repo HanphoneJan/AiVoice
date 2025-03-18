@@ -91,7 +91,7 @@ public class HomeFragment extends Fragment {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         chatMessageList.setLayoutManager(layoutManager);
-        customMessageAdapter = new CustomMessageAdapter(homeViewModel);
+        customMessageAdapter = new CustomMessageAdapter(homeViewModel,requireContext());
         chatMessageList.setAdapter(customMessageAdapter);  // 必须建立适配器与RecyclerView的关联[6](@ref)
 
         homeViewModel.getResponseInfoList().observe(getViewLifecycleOwner(), responses -> {

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">AiVoice</string>
+    <string name="app_name">言传声教</string>
     <string name="title_home">教学对话</string>
     <string name="title_upload">语音生成</string>
     <string name="title_bluetooth">蓝牙控制</string>
@@ -62,5 +62,7 @@
     <string name="loading">加载中…</string>
     <string name="error_occurred">发生错误</string>
     <string name="setting">对话设置</string>
+    <string name="chat_playAudio">播放语音</string>
+    <string name="chat_copy">复制内容</string>
 
 </resources>

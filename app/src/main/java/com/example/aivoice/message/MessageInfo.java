@@ -18,7 +18,6 @@ public class MessageInfo {
         this.content = content;
         this.audioFileUri = audioFileUri;
         this.isUser = isUser;
-
         // 自动推断消息类型
         this.isText = (content != null && !content.isEmpty());
         this.hasAudio = (audioFileUri != null);
