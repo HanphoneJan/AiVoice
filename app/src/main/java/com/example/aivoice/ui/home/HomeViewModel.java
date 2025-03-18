@@ -102,6 +102,7 @@ public class HomeViewModel extends ViewModel {
     public void updateAudioFileUri(Uri uri) {
         audioFileUri.setValue(uri);
         audioFileName.setValue(getFileName(uri));
+        Toast.makeText(context, "已选择文件"+textFileName, Toast.LENGTH_LONG).show();
     }
     public void updateFileUri(Uri uri) {
         fileUri.setValue(uri);
@@ -134,7 +135,7 @@ public class HomeViewModel extends ViewModel {
         String[] mimeTypes = {"text/plain", "application/vnd.openxmlformats-officedocument.presentationml.presentation"};
         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
         chooseFileLauncher.launch(intent);
-        Toast.makeText(context, "已选择文件"+textFileName, Toast.LENGTH_LONG).show();
+
     }
 
     // 创建录音文件
@@ -350,6 +351,8 @@ public class HomeViewModel extends ViewModel {
                         try (response) {
                             audioFileUri.postValue(null);
                             fileUri.postValue(null);
+                            audioFileName.postValue(null);
+                            textFileName.postValue(null);
                             if (response.isSuccessful()) {
                                 MediaType contentType = response.body().contentType();
                                 if (contentType != null && "multipart".equals(contentType.type())) {
