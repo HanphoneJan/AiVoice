@@ -20,7 +20,7 @@
         android:background="@{item.isUser ? @drawable/user_message_bg : @drawable/ai_message_bg}"
         android:paddingRight="8dp"
         android:paddingLeft="8dp"
-        android:paddingTop="2dp"
+        android:paddingTop="4dp"
         android:paddingBottom="2dp"
         android:orientation="vertical"
         android:minWidth="80dp"
@@ -78,6 +78,7 @@
                 android:src="@{item.isUser  ? @drawable/playaudioright : @drawable/playaudio}"
                 android:visibility="@{item.hasAudio  ? View.VISIBLE : View.GONE}"
                 android:contentDescription="@string/chat_playAudio"
+                android:background="?attr/selectableItemBackgroundBorderless"
                />
 
             <!-- 复制按钮 -->
@@ -88,7 +89,8 @@
                 android:padding="6dp"
                 android:src="@drawable/copy"
                 android:visibility="@{item.isUser ? View.GONE : View.VISIBLE}"
-                android:contentDescription="@string/chat_copy"/>
+                android:contentDescription="@string/chat_copy"
+                android:background="?attr/selectableItemBackgroundBorderless"/>
         </LinearLayout>
     </LinearLayout>
 </FrameLayout>

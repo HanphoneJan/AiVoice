@@ -78,7 +78,11 @@ public class HomeViewModel extends ViewModel {
     // 初始化并启动计时器
     private static long startTime; // 录音开始时间
     private static long elapsedTime = 0; // 已录音的时间
-
+    // 复制事件流
+    private final MutableLiveData<String> copyEvent = new MutableLiveData<>();
+    public LiveData<String> getCopyEvent() {
+        return copyEvent;
+    }
     // 添加一个公共的无参构造函数
     public HomeViewModel() {
 
@@ -381,9 +385,6 @@ public class HomeViewModel extends ViewModel {
                                         String audioContentType = "audio/mpeg"; // 默认类型
                                         Uri audioUri = storeReturnedFile(audioBytes, audioContentType);
                                         addMessageInfo(messageAnswer, null,audioUri,false);
-                                        new Handler(Looper.getMainLooper()).post(() -> {
-                                            Toast.makeText(context, "生成成功", Toast.LENGTH_LONG).show();
-                                        });
                                     }
                                 } else {
                                     handleError("响应格式错误");
@@ -498,6 +499,22 @@ public class HomeViewModel extends ViewModel {
         return false;
     }
 
+    // 语音播放
+    public void onAudioClick(MessageInfo message) {
+        if (message != null && message.hasAudio()) {
+            playAudio(message.getAudioFileUri());
+            Log.i(TAG,"播放成功");
+        }
+    }
+
+    // 复制文本
+    public void onCopyClick(MessageInfo message) {
+        if (message != null && !message.isUser()) {
+            copyEvent.setValue(message.getContent());
+            Toast.makeText(context, "复制成功", Toast.LENGTH_LONG).show();
+            Log.i(TAG,"复制成功");
+        }
+    }
 
     private String getFileExtensionFromMimeType(String mimeType) {
         if (mimeType == null) {

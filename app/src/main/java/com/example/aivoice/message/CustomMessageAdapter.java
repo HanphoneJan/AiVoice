@@ -67,9 +67,11 @@ public class CustomMessageAdapter extends RecyclerView.Adapter<CustomMessageAdap
             super(binding.getRoot());
             this.binding = binding;
 
-            // 初始化点击监听（建议通过DataBinding处理）
+            // 初始化点击监听
             binding.ivAudio.setOnClickListener(v ->
-                    binding.getViewModel().playAudio(binding.getItem().getAudioFileUri()));
+                    binding.getViewModel().onAudioClick(binding.getItem()));
+            binding.ivCopy.setOnClickListener(v ->
+                    binding.getViewModel().onCopyClick(binding.getItem()));
         }
     }
 

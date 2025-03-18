@@ -1,7 +1,11 @@
 package com.example.aivoice.ui.home;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -104,9 +108,15 @@ public class HomeFragment extends Fragment {
             });
         });
 
-
         // 设置事件监听器
         setupListeners();
+        homeViewModel.getCopyEvent().observe(getViewLifecycleOwner(), text -> {
+            if (!TextUtils.isEmpty(text)) {
+                ClipboardManager clipboard = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText("AI Message", text);
+                clipboard.setPrimaryClip(clip);
+            }
+        });
         return view;
     }
 
