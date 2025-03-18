@@ -92,11 +92,16 @@ public class HomeFragment extends Fragment {
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         chatMessageList.setLayoutManager(layoutManager);
         customMessageAdapter = new CustomMessageAdapter(homeViewModel,requireContext());
-        chatMessageList.setAdapter(customMessageAdapter);  // 必须建立适配器与RecyclerView的关联[6](@ref)
+        chatMessageList.setAdapter(customMessageAdapter);
 
         homeViewModel.getResponseInfoList().observe(getViewLifecycleOwner(), responses -> {
             customMessageAdapter.submitList(responses);
-//            chatMessageList.smoothScrollToPosition(responses.size() - 1);
+            chatMessageList.post(() -> {
+                int lastPosition = customMessageAdapter.getItemCount() - 1;
+                if (lastPosition >= 0) {
+                    chatMessageList.smoothScrollToPosition(lastPosition);
+                }
+            });
         });
 
 
@@ -117,10 +122,6 @@ public class HomeFragment extends Fragment {
     }
 
     private void setupListeners() {
-        // 示例：为语音输入按钮设置点击监听器
-        voiceInputButton.setOnClickListener(v -> {
-            // 处理语音输入按钮点击事件
-        });
 
         moreButton.setOnClickListener(v -> homeViewModel.chooseFile(chooseFileLauncher));
 
@@ -131,15 +132,6 @@ public class HomeFragment extends Fragment {
             } else {
                 homeViewModel.startRecording();
                 Toast.makeText(requireContext(), "开始录音", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        // 示例：为发送按钮设置点击监听器
-        sendButton.setOnClickListener(v -> {
-            String message = messageInput.getText().toString();
-            if (!message.isEmpty()) {
-                // 处理发送消息逻辑
-                messageInput.setText("");
             }
         });
 

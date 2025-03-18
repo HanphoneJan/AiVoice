@@ -69,8 +69,7 @@ public class HomeViewModel extends ViewModel {
     private MutableLiveData<List<MessageInfo>> responseList = new MutableLiveData<>(new ArrayList<>());
     private Context context;
 
-
-    private final MutableLiveData<Long> recordingTime = new MutableLiveData<>(0L); // 录音时间，单位：秒
+    private final MutableLiveData<String> recordingTime = new MutableLiveData<>(); // 录音时间，单位：秒
     private static Uri musicUri;
 
     private MediaRecorder mediaRecorder;
@@ -95,29 +94,19 @@ public class HomeViewModel extends ViewModel {
         return isRecording;
     }
 
-    public LiveData<Long> getRecordingTime() {
-        return recordingTime; // 用于更新UI的录音时间
-    }
     // Setters for updating LiveData
     public void updateAudioFileUri(Uri uri) {
         audioFileUri.setValue(uri);
         audioFileName.setValue(getFileName(uri));
     }
     public void updateFileUri(Uri uri) {
-
         fileUri.setValue(uri);
         textFileName.setValue(getFileName(uri));
     }
 
-    public LiveData<String> getAudioFileName(){
-        return audioFileName;
-    }
-    public LiveData<String> getTextFileName(){
-        return textFileName;
-    }
-    public void addMessageInfo(String message, Uri audioUri, boolean isUser) {
+    public void addMessageInfo(String message,String recordTime, Uri audioUri, boolean isUser) {
         List<MessageInfo> currentList = responseList.getValue();
-        Objects.requireNonNull(currentList).add(new MessageInfo(message, audioUri,isUser));
+        Objects.requireNonNull(currentList).add(new MessageInfo(message,recordTime,audioUri,isUser));
         responseList.postValue(currentList);
     }
 
@@ -141,6 +130,7 @@ public class HomeViewModel extends ViewModel {
         String[] mimeTypes = {"text/plain", "application/vnd.openxmlformats-officedocument.presentationml.presentation"};
         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
         chooseFileLauncher.launch(intent);
+        Toast.makeText(context, "已选择文件"+textFileName, Toast.LENGTH_LONG).show();
     }
 
     // 创建录音文件
@@ -230,9 +220,14 @@ public class HomeViewModel extends ViewModel {
                 updateTimeRunnable = new Runnable() {
                     @Override
                     public void run() {
-                        elapsedTime = (System.currentTimeMillis() - startTime) / 10;
-                        recordingTime.setValue(elapsedTime);
-                        handler.postDelayed(this, 10); // 每秒更新一次
+                        elapsedTime = (System.currentTimeMillis() - startTime)/1000 ;
+                        long minutes = elapsedTime / 60;
+                        long seconds = elapsedTime % 60;
+                        String formattedTime = (minutes > 0)
+                                ? String.format("%d'%02d''", minutes, seconds)
+                                : String.format("%d''", seconds);
+                        recordingTime.setValue(formattedTime);
+                        handler.postDelayed(this, 100);
                     }
                 };
                 handler.post(updateTimeRunnable);
@@ -320,11 +315,11 @@ public class HomeViewModel extends ViewModel {
                     requestBodyBuilder.addFormDataPart("audio", regularFileName,
                             RequestBody.create(
                                     getFileContent(audioFileUri.getValue()),MediaType.parse(fileMimeType)));
-                   addMessageInfo(null,audioFileUri.getValue(),true);
+                   addMessageInfo(null,recordingTime.getValue(),audioFileUri.getValue(),true);
                 } else {
                     if(!userInput.isEmpty()){
                         requestBodyBuilder.addFormDataPart("messageInput", userInput);
-                        addMessageInfo(userInput,null,true);
+                        addMessageInfo(userInput,null,null,true);
                     }else{
                         Toast.makeText(context, "请输入语音或文本", Toast.LENGTH_SHORT).show();
                         return;
@@ -347,8 +342,10 @@ public class HomeViewModel extends ViewModel {
                     }
 
                     @Override
-                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                    public void onResponse(@NonNull Call call, @NonNull Response response) {
                         try (response) {
+                            audioFileUri.postValue(null);
+                            fileUri.postValue(null);
                             if (response.isSuccessful()) {
                                 MediaType contentType = response.body().contentType();
                                 if (contentType != null && "multipart".equals(contentType.type())) {
@@ -383,7 +380,7 @@ public class HomeViewModel extends ViewModel {
                                     if (audioBytes != null) {
                                         String audioContentType = "audio/mpeg"; // 默认类型
                                         Uri audioUri = storeReturnedFile(audioBytes, audioContentType);
-                                        addMessageInfo(messageAnswer, audioUri,false);
+                                        addMessageInfo(messageAnswer, null,audioUri,false);
                                         new Handler(Looper.getMainLooper()).post(() -> {
                                             Toast.makeText(context, "生成成功", Toast.LENGTH_LONG).show();
                                         });
@@ -557,9 +554,6 @@ public class HomeViewModel extends ViewModel {
     // 辅助方法：处理错误
     private void handleError(String message) {
         Log.e(TAG, message);
-//        new Handler(Looper.getMainLooper()).post(() -> {
-//            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
-//        });
     }
 
     @Override

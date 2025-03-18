@@ -57,8 +57,6 @@ public class CustomMessageAdapter extends RecyclerView.Adapter<CustomMessageAdap
         holder.binding.setViewModel(homeViewModel); // 绑定ViewModel
         holder.binding.executePendingBindings(); // 立即执行绑定
 
-        // 处理动态边距
-//        setupLayoutGravity(holder, message.isUser());
     }
 
     // ViewHolder重构
@@ -74,6 +72,7 @@ public class CustomMessageAdapter extends RecyclerView.Adapter<CustomMessageAdap
                     binding.getViewModel().playAudio(binding.getItem().getAudioFileUri()));
         }
     }
+
 
     // 布局方向处理（若无法通过XML实现）
     private void setupLayoutGravity(ViewHolder holder, boolean isUser) {
