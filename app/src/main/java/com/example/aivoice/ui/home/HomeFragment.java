@@ -30,8 +30,6 @@ import com.example.aivoice.R;
 import com.example.aivoice.message.CustomMessageAdapter;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
-import java.util.ArrayList;
-
 public class HomeFragment extends Fragment {
 
     private HomeViewModel homeViewModel;
@@ -46,7 +44,6 @@ public class HomeFragment extends Fragment {
     private String model="标准发声";
     private String emotion="自然";
     private String speed="正常";
-    private ActivityResultLauncher<Intent> chooseAudioLauncher;
     private ActivityResultLauncher<Intent> chooseFileLauncher;
     private CustomMessageAdapter customMessageAdapter;
     int[] iconChatMode = {
@@ -74,14 +71,7 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        chooseAudioLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    if (result.getResultCode() == getActivity().RESULT_OK) {
-                        assert result.getData() != null;
-                        homeViewModel.updateAudioFileUri(result.getData().getData());
-                    }
-                });
+
 
         chooseFileLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),

@@ -2,6 +2,7 @@ package com.example.aivoice.ui.home;
 
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -66,15 +67,16 @@ public class HomeViewModel extends ViewModel {
     private final MutableLiveData<Uri> fileUri = new MutableLiveData<>();
     private final MutableLiveData<String> audioFileName = new MutableLiveData<>();
     private final MutableLiveData<String> textFileName = new MutableLiveData<>();
-    private MutableLiveData<List<MessageInfo>> responseList = new MutableLiveData<>(new ArrayList<>());
+    private final MutableLiveData<List<MessageInfo>> responseList = new MutableLiveData<>(new ArrayList<>());
     private Context context;
 
     private final MutableLiveData<String> recordingTime = new MutableLiveData<>(); // 录音时间，单位：秒
     private static Uri musicUri;
 
     private MediaRecorder mediaRecorder;
-    private Handler handler = new Handler(Looper.getMainLooper()); // 用于更新UI
+    private final Handler handler = new Handler(Looper.getMainLooper()); // 用于更新UI
     private Runnable updateTimeRunnable;
+    private static Uri nowPlayAudio; //当前播放的文件
     // 初始化并启动计时器
     private static long startTime; // 录音开始时间
     private static long elapsedTime = 0; // 已录音的时间
@@ -106,7 +108,7 @@ public class HomeViewModel extends ViewModel {
     public void updateFileUri(Uri uri) {
         fileUri.setValue(uri);
         textFileName.setValue(getFileName(uri));
-        Toast.makeText(context, "已选择文件"+textFileName, Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, "已选择文件"+textFileName.getValue(), Toast.LENGTH_SHORT).show();
     }
 
     public void addMessageInfo(String message,String recordTime, Uri audioUri, boolean isUser) {
@@ -118,15 +120,6 @@ public class HomeViewModel extends ViewModel {
     public LiveData<List<MessageInfo>> getResponseInfoList() {
         return responseList;
     }
-    // 选择音频文件
-    public void chooseAudio(ActivityResultLauncher<Intent> chooseAudioLauncher) {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("*/*");  // 允许选择所有文件类型，包括 wav
-        //在我的手机上有bug，被迫改成audio/*
-        intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[] {"audio/*"});  // 限制选择 wav 文件
-        chooseAudioLauncher.launch(intent);
-    }
-
 
     // 选择普通文件
     public void chooseFile(ActivityResultLauncher<Intent> chooseFileLauncher) {
@@ -186,8 +179,8 @@ public class HomeViewModel extends ViewModel {
                             mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
                             mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
                             mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-                            assert pfd != null;
-                            mediaRecorder.setOutputFile(pfd.getFileDescriptor()); // 兼容 SAF 和本地文件
+
+                            mediaRecorder.setOutputFile(Objects.requireNonNull(pfd).getFileDescriptor()); // 兼容 SAF 和本地文件
                             mediaRecorder.prepare();
                             mediaRecorder.start();
                             isRecording.setValue(true);
@@ -227,7 +220,7 @@ public class HomeViewModel extends ViewModel {
                         elapsedTime = (System.currentTimeMillis() - startTime)/1000 ;
                         long minutes = elapsedTime / 60;
                         long seconds = elapsedTime % 60;
-                        String formattedTime = (minutes > 0)
+                        @SuppressLint("DefaultLocale") String formattedTime = (minutes > 0)
                                 ? String.format("%d'%02d''", minutes, seconds)
                                 : String.format("%d''", seconds);
                         recordingTime.setValue(formattedTime);
@@ -306,19 +299,17 @@ public class HomeViewModel extends ViewModel {
                 if (fileUri.getValue() != null) {
                     String fileMimeType = context.getContentResolver().getType(fileUri.getValue());
                     String regularFileName = getFileName(fileUri.getValue());
-                    assert fileMimeType != null;
                     requestBodyBuilder.addFormDataPart("file", regularFileName,
                             RequestBody.create(
-                                    getFileContent(fileUri.getValue()),MediaType.parse(fileMimeType)));
+                                    getFileContent(fileUri.getValue()),MediaType.parse(Objects.requireNonNull(fileMimeType))));
                 }
 
                 if (audioFileUri.getValue()!=null) {
                     String fileMimeType = context.getContentResolver().getType(audioFileUri.getValue());
                     String regularFileName = getFileName(audioFileUri.getValue());
-                    assert fileMimeType != null;
                     requestBodyBuilder.addFormDataPart("audio", regularFileName,
                             RequestBody.create(
-                                    getFileContent(audioFileUri.getValue()),MediaType.parse(fileMimeType)));
+                                    getFileContent(audioFileUri.getValue()),MediaType.parse(Objects.requireNonNull(fileMimeType))));
                    addMessageInfo(null,recordingTime.getValue(),audioFileUri.getValue(),true);
                 } else {
                     if(!userInput.isEmpty()){
@@ -353,7 +344,7 @@ public class HomeViewModel extends ViewModel {
                             audioFileName.postValue(null);
                             textFileName.postValue(null);
                             if (response.isSuccessful()) {
-                                MediaType contentType = response.body().contentType();
+                                MediaType contentType = Objects.requireNonNull(response.body()).contentType();
                                 if (contentType != null && "multipart".equals(contentType.type())) {
                                     String boundary = contentType.parameter("boundary");
                                     if (boundary == null) {
@@ -405,19 +396,10 @@ public class HomeViewModel extends ViewModel {
         }
     }
 
-    private byte[] getAudioFileContent(Uri uri) throws IOException {
-        try (InputStream inputStream = context.getContentResolver().openInputStream(uri)) {
-            Log.i(TAG,"获取本地音频成功");
-            assert inputStream != null;
-            return getBytes(inputStream);
-        }
-    }
-
     private byte[] getFileContent(Uri uri) throws IOException {
         try (InputStream inputStream = context.getContentResolver().openInputStream(uri)) {
             Log.i(TAG,"获取本地文件成功");
-            assert inputStream != null;
-            return getBytes(inputStream);
+            return getBytes(Objects.requireNonNull(inputStream));
         }
     }
 
@@ -471,10 +453,10 @@ public class HomeViewModel extends ViewModel {
         return mimeType != null && mimeType.startsWith("audio/");
     }
 
-    public boolean playAudio(Uri uri) {
+    public void playAudio(Uri uri) {
         if (uri == null) {
             handleError("无效的文件");
-            return false;
+            return;
         }
         if(isAudioFile(uri)){
             if (mediaPlayer == null) {
@@ -485,6 +467,9 @@ public class HomeViewModel extends ViewModel {
                 if (mediaPlayer.isPlaying()) {
                     mediaPlayer.stop();
                     mediaPlayer.reset();  // 重置播放器，准备重新播放
+                    if(uri==nowPlayAudio){
+                        return;
+                    }
                 } else {
                     mediaPlayer.reset(); // 默认进行重置，否则再次播放会出问题
                 }
@@ -492,13 +477,12 @@ public class HomeViewModel extends ViewModel {
                 mediaPlayer.setDataSource(context, uri); // 注意：这里需要传入 Context
                 mediaPlayer.prepare();  // 准备播放
                 mediaPlayer.start();  // 开始播放
+                nowPlayAudio=uri;
                 Log.i(TAG, "开始播放");
-                return true;
             } catch (IOException e) {
                 handleError("播放失败");
             }
         }
-        return false;
     }
 
     // 语音播放
