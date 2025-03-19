@@ -8,10 +8,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -33,9 +30,6 @@ public class MainActivity extends AppCompatActivity {
 
         com.example.aivoice.databinding.ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
-        BottomNavigationView navView = findViewById(R.id.nav_view);
-
 
         //设置顶级导航
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(

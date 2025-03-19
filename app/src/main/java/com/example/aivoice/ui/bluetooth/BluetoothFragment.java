@@ -39,9 +39,9 @@ public class BluetoothFragment extends Fragment {
 
     private BluetoothViewModel bluetoothViewModel;
     private CustomBluetoothDeviceAdapter bluetoothDevicesAdapter; // 蓝牙设备列表适配器
-    private ArrayList<BluetoothDeviceInfo> bluetoothDeviceInfoList = new ArrayList<>();
+    private final ArrayList<BluetoothDeviceInfo> bluetoothDeviceInfoList = new ArrayList<>();
     private ListView lvBluetoothDevices; // 蓝牙设备列表视图
-    private ArrayList<BluetoothDevice> bluetoothDeviceList = new ArrayList<>(); // 蓝牙设备列表
+    private final ArrayList<BluetoothDevice> bluetoothDeviceList = new ArrayList<>(); // 蓝牙设备列表
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_bluetooth, container, false);

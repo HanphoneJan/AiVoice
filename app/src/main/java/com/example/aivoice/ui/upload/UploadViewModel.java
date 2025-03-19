@@ -63,7 +63,7 @@ public class UploadViewModel extends ViewModel {
     private static Uri musicUri;
 
     private MediaRecorder mediaRecorder;
-    private Handler handler = new Handler(Looper.getMainLooper()); // 用于更新UI
+    private final Handler handler = new Handler(Looper.getMainLooper()); // 用于更新UI
     private Runnable updateTimeRunnable;
     // 初始化并启动计时器
     private static long startTime; // 录音开始时间

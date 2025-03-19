@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothDevice;
 
 import android.content.Context;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -13,7 +14,6 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.aivoice.bluetooth.Bluetooth;
-import com.example.aivoice.bluetooth.BluetoothDeviceInfo;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -25,7 +25,6 @@ public class BluetoothViewModel extends ViewModel {
     private static final String TAG = "BluetoothViewModel";
     //    MutableLiveData 和 LiveData 在 UI 和数据层之间传递数据，LiveData只读对外暴露， MutableLiveData则用于修改
     private final MutableLiveData<Set<BluetoothDevice>> pairedDevices = new MutableLiveData<>();
-    private final MutableLiveData<Set<BluetoothDevice>> bluetoothDevicesList = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isConnected = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isReceiverRegistered = new MutableLiveData<>(false);
     private final Bluetooth bluetooth = new Bluetooth();
@@ -48,16 +47,6 @@ public class BluetoothViewModel extends ViewModel {
         return pairedDevices;
     }
 
-    public LiveData<Set<BluetoothDevice>> getBluetoothDevicesList() {
-        return bluetoothDevicesList;
-    }
-    public LiveData<Boolean> getIsConnected() {
-        return isConnected;
-    }
-    public LiveData<String> getConnectedDeviceName() {
-        return connectedDeviceName;
-    }
-
     public void setConnectedDeviceName(String deviceName) {
         connectedDeviceName.postValue(deviceName);  //使用post，而不是set
     }
@@ -68,10 +57,6 @@ public class BluetoothViewModel extends ViewModel {
 
     public LiveData<String> getConnectedDeviceAddresss() {
         return connectedDeviceAddress;
-    }
-
-    public LiveData<Boolean> getIsReceiverRegistered() {
-        return isReceiverRegistered;
     }
 
     //获取已匹配的蓝牙设备
@@ -127,7 +112,7 @@ public class BluetoothViewModel extends ViewModel {
             elapsedTime = 0; // 重置扫描时间
             recordingTime.setValue(elapsedTime);
 
-            Handler handler = new Handler();
+            Handler handler = new Handler(Looper.getMainLooper()); //获取主线程
             Runnable updateTimeRunnable = new Runnable() {
                 @Override
                 public void run() {
