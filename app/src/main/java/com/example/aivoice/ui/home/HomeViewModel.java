@@ -82,6 +82,7 @@ public class HomeViewModel extends ViewModel {
     private static long elapsedTime = 0; // 已录音的时间
     // 复制事件流
     private final MutableLiveData<String> copyEvent = new MutableLiveData<>();
+    private static final String chatUrl="http://7821dc0b.r34.cpolar.top/aivoice/chat";
     public LiveData<String> getCopyEvent() {
         return copyEvent;
     }
@@ -322,9 +323,8 @@ public class HomeViewModel extends ViewModel {
                 }
                 // 构建完整的请求体
                 RequestBody requestBody = requestBodyBuilder.build();
-                String url = "https://www.hanphone.top/aivoice/chat";
                 Request request = new Request.Builder()
-                        .url(url)
+                        .url(chatUrl)
                         .post(requestBody)
                         .build();
 

@@ -68,7 +68,7 @@ public class UploadViewModel extends ViewModel {
     // 初始化并启动计时器
     private static long startTime; // 录音开始时间
     private static long elapsedTime = 0; // 已录音的时间
-
+    private static final String uploadUrl="http://7821dc0b.r34.cpolar.top/aivoice/upload";
     // 添加一个公共的无参构造函数
     public UploadViewModel() {
 
@@ -340,9 +340,8 @@ public class UploadViewModel extends ViewModel {
                 }
                 // 构建完整的请求体
                 RequestBody requestBody = requestBodyBuilder.build();
-                String url = "https://www.hanphone.top/aivoice/upload";
                 Request request = new Request.Builder()
-                        .url(url)
+                        .url(uploadUrl)
                         .post(requestBody)
                         .build();
 
