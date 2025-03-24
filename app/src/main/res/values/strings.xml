@@ -13,6 +13,8 @@
     <string name="setting">对话设置</string>
     <string name="chat_playAudio">播放语音</string>
     <string name="chat_copy">复制内容</string>
+    <string name="personalized">个性学习</string>
+    <string name="subjects">学科</string>
 
 <!--    上传界面-->
     <string name="model">模型</string>

@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 
@@ -68,7 +69,7 @@ public class UploadViewModel extends ViewModel {
     // 初始化并启动计时器
     private static long startTime; // 录音开始时间
     private static long elapsedTime = 0; // 已录音的时间
-    private static final String uploadUrl="http://7821dc0b.r34.cpolar.top/aivoice/upload";
+    private static final String uploadUrl="https://www.hanphone.top/aivoice/upload";
     // 添加一个公共的无参构造函数
     public UploadViewModel() {
 
@@ -252,7 +253,7 @@ public class UploadViewModel extends ViewModel {
             OkHttpClient client = new OkHttpClient.Builder()
                     .connectTimeout(2, TimeUnit.MINUTES) // 连接超时
                     .readTimeout(3, TimeUnit.MINUTES)    // 读取超时
-                    .writeTimeout(3, TimeUnit.MINUTES)   // 写入超时
+                    .writeTimeout(10, TimeUnit.MINUTES)   // 写入超时
                     .build();
 
             // 初始化MultipartBody.Builder并设置类型为FORM
@@ -357,10 +358,11 @@ public class UploadViewModel extends ViewModel {
                     public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                         try (response) {
                             if (response.isSuccessful()) {
-                                assert response.body() != null;
-                                byte[] responseBody = response.body().bytes();
+                                byte[] responseBody = Objects.requireNonNull(response.body()).bytes();
                                 String contentType = response.header("Content-Type");
-                                storeReturnedFile(responseBody, contentType);
+                                // 从 Content-Disposition 获取文件名
+                                String fileName = parseFileNameFromHeaders(response);
+                                storeReturnedFile(responseBody, contentType,fileName);
                                 Log.i(TAG, "生成音频成功");
                                 // 使用runOnUiThread切换到主线程
                                 new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(context, "生成文件成功", Toast.LENGTH_SHORT).show());
@@ -416,10 +418,30 @@ public class UploadViewModel extends ViewModel {
         return fileName != null ? fileName : "未命名文件";
     }
 
+    // 解析响应头中的文件名
+    private String parseFileNameFromHeaders(Response response) {
+        String contentDisposition = response.header("Content-Disposition");
+        if (contentDisposition != null) {
+            String[] parts = contentDisposition.split(";");
+            for (String part : parts) {
+                if (part.trim().startsWith("filename")) {
+                    String fileName = part.substring(part.indexOf('=') + 1).trim();
+                    return fileName.replace("\"", "");
+                }
+            }
+        }
+        return null;
+    }
 
-    private void storeReturnedFile(byte[] data,String contentType) {
-        String fileExtension = getFileExtensionFromMimeType(contentType);
-        String fileName = "生成音频文件_" + System.currentTimeMillis() + "." + fileExtension;
+
+    private void storeReturnedFile(byte[] data,String contentType,String name) {
+        String fileName;
+        if(name!=null){
+            fileName=name;
+        }else{
+            String fileExtension = getFileExtensionFromMimeType(contentType);
+            fileName = "生成文件_" + System.currentTimeMillis() + "." + fileExtension;
+        }
         musicUri = UriManager.getUri(context);
         if (musicUri != null) {
             // 如果 uri 不为空，使用用户选择的目录

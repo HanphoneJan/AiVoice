@@ -44,6 +44,7 @@ public class HomeFragment extends Fragment {
     private String model="标准发声";
     private String emotion="自然";
     private String speed="正常";
+    private String subject="通用";
     private ActivityResultLauncher<Intent> chooseFileLauncher;
     private CustomMessageAdapter customMessageAdapter;
     int[] iconChatMode = {
@@ -70,8 +71,6 @@ public class HomeFragment extends Fragment {
                 sendButton.setEnabled(true);
             }
         });
-
-
 
         chooseFileLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -139,7 +138,7 @@ public class HomeFragment extends Fragment {
         settingButton.setOnClickListener(v -> showBottomSheetDialog());
 
         sendButton.setOnClickListener(v -> homeViewModel.uploadFiles(
-                model, emotion, speed,
+                subject,model, emotion, speed,
                 answerQuestion.isChecked(),
                 internetSearch.isChecked(),
                 messageInput.getText().toString()));
@@ -152,11 +151,20 @@ public class HomeFragment extends Fragment {
         bottomSheetDialog.show();
 
         // 使用 bottomSheetView 查找 Spinner
+        Spinner spinnerSubject = bottomSheetView.findViewById(R.id.spinner_subject_chat);
         Spinner spinnerModel = bottomSheetView.findViewById(R.id.spinner_model_chat);
         Spinner spinnerEmotion = bottomSheetView.findViewById(R.id.spinner_emotion_chat);
         Spinner spinnerSpeed = bottomSheetView.findViewById(R.id.spinner_speed_chat);
 
-        // 创建 ArrayAdapter 并设置到 Spinner 中
+        // 创建 ArrayAdapter 并设置到 Spinner
+        ArrayAdapter<CharSequence> subjectAdapter = ArrayAdapter.createFromResource(
+                requireContext(),
+                R.array.subject_options,
+                android.R.layout.simple_spinner_item
+        );
+        subjectAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerSubject.setAdapter(subjectAdapter);
+
         ArrayAdapter<CharSequence> modelAdapter = ArrayAdapter.createFromResource(
                 requireContext(),
                 R.array.chat_options,
@@ -180,6 +188,19 @@ public class HomeFragment extends Fragment {
         );
         speedAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerSpeed.setAdapter(speedAdapter);
+
+        spinnerSubject.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                subject = parent.getItemAtPosition(position).toString();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // 当没有选中项时，可根据需求处理
+            }
+        });
+
 
         // 为 model Spinner 添加选中事件监听器
         spinnerModel.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {

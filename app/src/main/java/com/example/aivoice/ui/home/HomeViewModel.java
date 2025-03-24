@@ -82,7 +82,7 @@ public class HomeViewModel extends ViewModel {
     private static long elapsedTime = 0; // 已录音的时间
     // 复制事件流
     private final MutableLiveData<String> copyEvent = new MutableLiveData<>();
-    private static final String chatUrl="http://7821dc0b.r34.cpolar.top/aivoice/chat";
+    private static final String chatUrl="https://www.hanphone.top/aivoice/chat";
     public LiveData<String> getCopyEvent() {
         return copyEvent;
     }
@@ -95,17 +95,11 @@ public class HomeViewModel extends ViewModel {
         this.context = context;
     }
 
-
     // LiveData Getters
     public LiveData<Boolean> getIsRecording() {
         return isRecording;
     }
 
-    // Setters for updating LiveData
-    public void updateAudioFileUri(Uri uri) {
-        audioFileUri.setValue(uri);
-        audioFileName.setValue(getFileName(uri));
-    }
     public void updateFileUri(Uri uri) {
         fileUri.setValue(uri);
         textFileName.setValue(getFileName(uri));
@@ -126,8 +120,8 @@ public class HomeViewModel extends ViewModel {
     public void chooseFile(ActivityResultLauncher<Intent> chooseFileLauncher) {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("*/*");
-        String[] mimeTypes = {"text/plain", "application/vnd.openxmlformats-officedocument.presentationml.presentation"};
-        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
+//        String[] mimeTypes = {"text/plain", "application/vnd.openxmlformats-officedocument.presentationml.presentation"};
+//        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
         chooseFileLauncher.launch(intent);
     }
 
@@ -257,13 +251,13 @@ public class HomeViewModel extends ViewModel {
     }
 
     // 上传文件
-    public void uploadFiles(String model, String emotion, String speed,Boolean answerQuestion,Boolean internetSearch,String userInput) {
+    public void uploadFiles(String subject,String model, String emotion, String speed,Boolean answerQuestion,Boolean internetSearch,String userInput) {
         if (model != null && emotion != null && speed != null) {
             // 设置超时时间
             OkHttpClient client = new OkHttpClient.Builder()
                     .connectTimeout(2, TimeUnit.MINUTES) // 连接超时
                     .readTimeout(3, TimeUnit.MINUTES)    // 读取超时
-                    .writeTimeout(3, TimeUnit.MINUTES)   // 写入超时
+                    .writeTimeout(6, TimeUnit.MINUTES)   // 写入超时
                     .build();
 
             // 初始化MultipartBody.Builder并设置类型为FORM
@@ -289,7 +283,7 @@ public class HomeViewModel extends ViewModel {
                         speed = "x0.8";
                         break;
                 }
-
+                requestBodyBuilder.addFormDataPart("subject",subject);
                 requestBodyBuilder.addFormDataPart("model", model);
                 requestBodyBuilder.addFormDataPart("emotion", emotion);
                 requestBodyBuilder.addFormDataPart("speed", speed);
@@ -352,7 +346,7 @@ public class HomeViewModel extends ViewModel {
                                         return;
                                     }
                                     String messageAnswer = null;
-                                    byte[] audioBytes = null;
+                                    byte[] audioBytes;
 
                                     try (MultipartReader reader = new MultipartReader(response.body().source(), boundary)) {
                                         MultipartReader.Part part;
@@ -363,22 +357,25 @@ public class HomeViewModel extends ViewModel {
 
                                             // 解析name参数
                                             String name = extractNameFromContentDisposition(contentDisposition);
-
+                                            // 新增：解析 filename 参数（服务器返回的文件名）
+                                            String serverFileName = extractFilenameFromContentDisposition(contentDisposition);
                                             if ("messageAnswer".equals(name)) {
                                                 messageAnswer = part.body().readUtf8();
                                             } else if ("audioFile".equals(name)) {
                                                 audioBytes = part.body().readByteArray();
+                                                // 优先使用服务器返回的文件名，若没有则生成默认名
+                                                String finalFileName = (serverFileName != null) ? serverFileName :
+                                                        "audio_" + System.currentTimeMillis() + ".mp3";
+                                                String audioContentType = "audio/mpeg"; // 默认类型
+                                                Uri audioUri = storeReturnedFile(audioBytes, audioContentType,finalFileName);
+                                                addMessageInfo(messageAnswer, null,audioUri,false);
                                             }
                                         }
                                     } catch (IOException e) {
                                         handleError("解析响应失败: " + e.getMessage());
                                         return;
                                     }
-                                    if (audioBytes != null) {
-                                        String audioContentType = "audio/mpeg"; // 默认类型
-                                        Uri audioUri = storeReturnedFile(audioBytes, audioContentType);
-                                        addMessageInfo(messageAnswer, null,audioUri,false);
-                                    }
+
                                 } else {
                                     handleError("响应格式错误");
                                 }
@@ -386,6 +383,11 @@ public class HomeViewModel extends ViewModel {
                                 handleError("生成失败，状态码: " + response.code());
                             }
                         }
+                        audioFileUri.postValue(null);
+                        fileUri.postValue(null);
+                        audioFileName.postValue(null);
+                        textFileName.postValue(null);
+                        handleError("服务器无响应");
                     }
                 });
             } catch (IOException e) {
@@ -424,9 +426,15 @@ public class HomeViewModel extends ViewModel {
 
 
     //保存在私有目录里
-    private Uri storeReturnedFile(byte[] data, String contentType) {
-        String fileExtension = getFileExtensionFromMimeType(contentType);
-        String fileName = "对话音频_" + System.currentTimeMillis() + "." + fileExtension;
+    private Uri storeReturnedFile(byte[] data, String contentType,String name) {
+        String fileName;
+        if(name!=null){
+            fileName=name;
+        }else{
+            String fileExtension = getFileExtensionFromMimeType(contentType);
+            fileName = "对话音频_" + System.currentTimeMillis() + "." + fileExtension;
+        }
+
         Uri savedUri = null;
             File musicDir = new File(context.getFilesDir(), "Music");
             if (!musicDir.exists() && !musicDir.mkdirs()) {
@@ -553,6 +561,23 @@ public class HomeViewModel extends ViewModel {
         }
         return null;
     }
+
+    private String extractFilenameFromContentDisposition(String contentDisposition) {
+        String[] parts = contentDisposition.split(";");
+        for (String part : parts) {
+            part = part.trim();
+            if (part.startsWith("filename=")) {
+                String filename = part.substring("filename=".length());
+                // 处理带引号的情况
+                if (filename.startsWith("\"") && filename.endsWith("\"")) {
+                    filename = filename.substring(1, filename.length() - 1);
+                }
+                return filename;
+            }
+        }
+        return null;
+    }
+
 
     // 辅助方法：处理错误
     private void handleError(String message) {
