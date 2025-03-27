@@ -14,6 +14,7 @@
     <string name="chat_playAudio">播放语音</string>
     <string name="chat_copy">复制内容</string>
     <string name="personalized">个性学习</string>
+    <string name="analyse">薄弱分析</string>
     <string name="subjects">学科</string>
 
 <!--    上传界面-->

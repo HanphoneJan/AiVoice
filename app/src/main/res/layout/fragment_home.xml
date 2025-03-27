@@ -102,13 +102,14 @@
                 android:background="@drawable/custom_checkbox_1"
                 android:textColor="@android:color/black"
                 android:padding="6dp"
-                android:layout_marginEnd="18dp"
+                android:layout_marginEnd="8dp"
+                android:checked="true"
                 />
             <CheckBox
                 android:id="@+id/output_option1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/answer_question"
+                android:text="@string/analyse"
                 android:button="@drawable/custom_checkbox_1"
                 android:background="@drawable/custom_checkbox_1"
                 android:textSize="12sp"
@@ -116,7 +117,6 @@
                 android:padding="6dp"
                 android:textColor="@android:color/black"
                 android:layout_marginEnd="8dp"
-                android:visibility="gone"
                 />
         </LinearLayout>
 

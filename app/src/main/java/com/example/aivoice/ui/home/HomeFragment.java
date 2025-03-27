@@ -137,11 +137,15 @@ public class HomeFragment extends Fragment {
         // 为设置按钮设置点击监听器
         settingButton.setOnClickListener(v -> showBottomSheetDialog());
 
-        sendButton.setOnClickListener(v -> homeViewModel.uploadFiles(
-                subject,model, emotion, speed,
-                answerQuestion.isChecked(),
-                internetSearch.isChecked(),
-                messageInput.getText().toString()));
+        sendButton.setOnClickListener(v ->
+        {
+            homeViewModel.uploadFiles(
+                    subject, model, emotion, speed,
+                    answerQuestion.isChecked(),
+                    internetSearch.isChecked(),
+                    messageInput.getText().toString());
+            messageInput.setText("");
+        });
     }
 
     private void showBottomSheetDialog() {

@@ -38,6 +38,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -421,13 +423,58 @@ public class UploadViewModel extends ViewModel {
     // 解析响应头中的文件名
     private String parseFileNameFromHeaders(Response response) {
         String contentDisposition = response.header("Content-Disposition");
-        if (contentDisposition != null) {
-            String[] parts = contentDisposition.split(";");
-            for (String part : parts) {
-                if (part.trim().startsWith("filename")) {
-                    String fileName = part.substring(part.indexOf('=') + 1).trim();
-                    return fileName.replace("\"", "");
+        if (contentDisposition == null) return null;
+
+        String fileName = null;
+        String encodedFileName;
+        String charset = "UTF-8"; // 默认字符集
+
+        // 拆分所有参数
+        String[] parts = contentDisposition.split(";");
+        for (String part : parts) {
+            String trimmed = part.trim();
+
+            // 优先处理 RFC 5987 扩展格式 (filename*)
+            if (trimmed.startsWith("filename*=")) {
+                int eqIndex = trimmed.indexOf('=');
+                String value = trimmed.substring(eqIndex + 1).trim();
+
+                // 解析格式：UTF-8''%E6%96%87%E4%BB%B6.wav
+                if (value.contains("''")) {
+                    String[] meta = value.split("''", 2);
+                    try {
+                        charset = URLDecoder.decode(meta[0], "UTF-8"); // 获取实际编码
+                        encodedFileName = meta[1];
+                    } catch (UnsupportedEncodingException e) {
+                        encodedFileName = meta[1]; // 使用默认UTF-8
+                    }
+
+                } else {
+                    encodedFileName = value;
                 }
+
+                // 移除首尾引号并进行URL解码
+                encodedFileName = encodedFileName.replaceAll("^\"|\"$", "");
+                try {
+                    fileName = URLDecoder.decode(encodedFileName, charset);
+                    break; // 优先使用RFC5987格式
+                } catch (UnsupportedEncodingException e) {
+                    fileName = encodedFileName; // 编码不支持时返回原始值
+                }
+
+            } else if (trimmed.startsWith("filename=")) {
+                int eqIndex = trimmed.indexOf('=');
+                String value = trimmed.substring(eqIndex + 1).trim();
+                fileName = value.replaceAll("^\"|\"$", ""); // 移除首尾引号
+            }
+        }
+
+        // 处理特殊编码情形（如包含%20等）
+        if (fileName != null) {
+            try {
+                return URLDecoder.decode(fileName,  "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                return fileName;
             }
         }
         return null;
@@ -447,8 +494,8 @@ public class UploadViewModel extends ViewModel {
             // 如果 uri 不为空，使用用户选择的目录
             DocumentFile pickedDir = DocumentFile.fromTreeUri(context, musicUri);
             if (pickedDir != null && pickedDir.exists() && pickedDir.isDirectory()) {
-                // SAF 目录下创建文件
-                DocumentFile newFile = pickedDir.createFile(contentType, fileName);
+                // SAF 目录下创建文件,显式指定完整文件名（绕过MIME类型扩展名修正）
+                DocumentFile newFile = pickedDir.createFile("*/*", fileName);
                 if (newFile != null) {
                     try (OutputStream outputStream = context.getContentResolver().openOutputStream(newFile.getUri())) {
                         if (outputStream != null) {

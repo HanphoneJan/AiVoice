@@ -425,7 +425,6 @@ public class HomeViewModel extends ViewModel {
     }
 
 
-    //保存在私有目录里
     private Uri storeReturnedFile(byte[] data, String contentType,String name) {
         String fileName;
         if(name!=null){
@@ -444,7 +443,6 @@ public class HomeViewModel extends ViewModel {
             File file = new File(musicDir, fileName);
             try (FileOutputStream outputStream = new FileOutputStream(file)) {
                 outputStream.write(data);
-                // 使用FileProvider生成安全的content:// URI[1,4](@ref)
                 savedUri = FileProvider.getUriForFile(context,
                         context.getPackageName() + ".fileprovider",
                         file);
