@@ -327,6 +327,10 @@ public class HomeViewModel extends ViewModel {
                     @Override
                     public void onFailure(@NonNull Call call, @NonNull IOException e) {
                         // 使用runOnUiThread切换到主线程
+                        audioFileUri.postValue(null);
+                        fileUri.postValue(null);
+                        audioFileName.postValue(null);
+                        textFileName.postValue(null);
                         new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(context, "发送失败", Toast.LENGTH_SHORT).show());
                     }
 
