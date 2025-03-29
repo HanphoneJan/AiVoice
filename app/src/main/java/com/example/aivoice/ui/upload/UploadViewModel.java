@@ -52,6 +52,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 public class UploadViewModel extends ViewModel {
     private static final String TAG = "UploadViewModel";
@@ -254,8 +255,8 @@ public class UploadViewModel extends ViewModel {
             // 设置超时时间
             OkHttpClient client = new OkHttpClient.Builder()
                     .connectTimeout(2, TimeUnit.MINUTES) // 连接超时
-                    .readTimeout(3, TimeUnit.MINUTES)    // 读取超时
-                    .writeTimeout(10, TimeUnit.MINUTES)   // 写入超时
+                    .readTimeout(10, TimeUnit.MINUTES)    // 读取超时
+                    .writeTimeout(20, TimeUnit.MINUTES)   // 写入超时
                     .build();
 
             // 初始化MultipartBody.Builder并设置类型为FORM
@@ -368,11 +369,19 @@ public class UploadViewModel extends ViewModel {
                             audioFileName.postValue("未选择");
                             textFileName.postValue("未选择");
                             if (response.isSuccessful()) {
-                                byte[] responseBody = Objects.requireNonNull(response.body()).bytes();
+                                ResponseBody responseBody = Objects.requireNonNull(response.body());
                                 String contentType = response.header("Content-Type");
                                 // 从 Content-Disposition 获取文件名
                                 String fileName = parseFileNameFromHeaders(response);
-                                storeReturnedFile(responseBody, contentType,fileName);
+//                               storeReturnedFile(responseBody, contentType,fileName);
+                                if (responseBody != null) {
+                                    InputStream inputStream = responseBody.byteStream();
+                                    try {
+                                        storeReturnedFile(inputStream, contentType, fileName);
+                                    } finally {
+                                        inputStream.close();
+                                    }
+                                }
                                 Log.i(TAG, "生成音频成功");
                                 // 使用runOnUiThread切换到主线程
                                 new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(context, "生成文件成功", Toast.LENGTH_LONG).show());
@@ -561,6 +570,83 @@ public class UploadViewModel extends ViewModel {
             }
         }
     }
+
+    private void storeReturnedFile(InputStream inputStream, String contentType, String name) {
+        String fileName;
+        if (name != null) {
+            fileName = name;
+        } else {
+            String fileExtension = getFileExtensionFromMimeType(contentType);
+            fileName = "生成文件_" + System.currentTimeMillis() + "." + fileExtension;
+        }
+
+        musicUri = UriManager.getUri(context);
+        if (musicUri != null) {
+            // 如果 uri 不为空，使用用户选择的目录
+            DocumentFile pickedDir = DocumentFile.fromTreeUri(context, musicUri);
+            if (pickedDir != null && pickedDir.exists() && pickedDir.isDirectory()) {
+                // 处理文件名冲突
+                String baseName = removeExtension(fileName);
+                String extension = getExtension(fileName);
+                int counter = 1;
+                String uniqueFileName = fileName;
+                while (pickedDir.findFile(uniqueFileName) != null) {
+                    uniqueFileName = baseName + "(" + counter + ")" + extension;
+                    counter++;
+                }
+                // SAF 目录下创建文件,显式指定完整文件名（绕过MIME类型扩展名修正）
+                DocumentFile newFile = pickedDir.createFile("*/*", uniqueFileName);
+                if (newFile != null) {
+                    try (OutputStream outputStream = context.getContentResolver().openOutputStream(newFile.getUri())) {
+                        if (outputStream != null) {
+                            copyStream(inputStream, outputStream);
+                            Log.i(TAG, "保存成功");
+                        }
+                    } catch (IOException e) {
+                        Log.e(TAG, "文件IO错误");
+                    }
+                } else {
+                    // 创建文件失败
+                    Log.i(TAG, "无法保存生成的音频文件");
+                }
+            } else {
+                Log.i(TAG, "无法访问选定的目录");
+            }
+        } else {
+            // 默认目录路径
+            File musicDir = new File(context.getFilesDir(), "Music");
+            if (!musicDir.exists()) {
+                musicDir.mkdirs();
+            }
+
+            // 处理文件名冲突
+            String baseName = removeExtension(fileName);
+            String extension = getExtension(fileName);
+            int counter = 1;
+            String uniqueFileName = fileName;
+            File file = new File(musicDir, uniqueFileName);
+            while (file.exists()) {
+                uniqueFileName = baseName + "(" + counter + ")" + extension;
+                file = new File(musicDir, uniqueFileName);
+                counter++;
+            }
+
+            try (FileOutputStream outputStream = new FileOutputStream(file)) {
+                copyStream(inputStream, outputStream);
+            } catch (IOException e) {
+                Log.i(TAG, "IO错误");
+            }
+        }
+    }
+
+    private void copyStream(InputStream input, OutputStream output) throws IOException {
+        byte[] buffer = new byte[4096];
+        int bytesRead;
+        while ((bytesRead = input.read(buffer)) != -1) {
+            output.write(buffer, 0, bytesRead);
+        }
+    }
+
 
     private String removeExtension(String fileName) {
         int lastIndex = fileName.lastIndexOf('.');
